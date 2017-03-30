@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="/wangEditor/jquery-1.10.2.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/wangEditor/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/wangEditor/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/wangEditor/common.css">
+    <link rel="stylesheet" type="text/css" href="/wangEditor/index.css">
+    <link rel="stylesheet" type="text/css" href="/wangEditor/wangEditor.min.css">
+    <link rel="stylesheet" href="/css/common.css"/>
+</head>
+<body>
+<div class="sidebar">
+    <div class="create_dir">新建文件夹</div><br>
+    <div class="create_art">新建笔记</div><br>
+    <div class="dirlist">
+
+    </div>
+</div>
+
+<div id="itemlist" class="itemlist">
+
+</div>
+
+<div id="article" class="article">
+    <div class="title-wrapper">
+        <input id="article_id" type="hidden" />
+        <h2 contenteditable="true" class="title"></h2>
+        <button class="save btn btn-primary">保存</button>
+    </div>
+    <div class="content" id="divDemo" style="height:500px;min-height:100%;">
+
+    </div>
+</div>
+
+</body>
+<script type="text/javascript" src='/wangEditor/bootstrap.min.js'></script>
+<script type="text/javascript" src='/wangEditor/wangEditor.min.js'></script>
+<script type="text/javascript" src="/wangEditor/index.js"></script>
+<script type="text/javascript">
+    $("body").on("click", '.create_dir', function(){
+        var obj = $(this);
+        if($(".li_dir").hasClass("curr")){
+            var parent_id = $('.li_dir.curr').data('id');
+            var class_id = parseInt($('.li_dir.curr').attr('class-id')) + 1;
+        }else{
+            var parent_id = 0;
+            var class_id = 1;
+        }
+
+        $.ajax({
+            url:  '/dir/create_dir',
+            data:{'parent_id':parent_id,'class_id':class_id},
+            type: "POST",
+            dataType:'json',
+            success:function(obj){
+                if(class_id == 1){
+                    $('.dirlist ul').prepend('<li><div class="li_dir" class-id="'+ class_id+'" data-id="'+ obj+'">新建文件夹</div></li>');
+                }else{
+                    if($('.li_dir.curr ~ ul').length > 0){
+                        $('.li_dir.curr').next('ul').append('<li><div class="li_dir new_dir" class-id="'+ class_id+'" data-id="'+ obj+'">新建文件夹</div></li>');
+
+                    }else{
+                        $('.li_dir.curr').after('<ul><li><div class="li_dir new_dir" class-id="'+ class_id+'" data-id="'+ obj+'">新建文件夹</div></li></ul>');
+                    }
+                    $('.li_dir.curr').next('ul').show();
+                    $('.li_dir.curr').removeClass('curr');
+                    $('.li_dir.new_dir').addClass('curr');
+                    $('.li_dir.new_dir').removeClass('new_dir');
+                }
+            },
+            error:function(e){}
+        });
+    })
+
+    $("body").on("click", '.create_art', function(){
+        var obj = $(this);
+        if($(".li_dir").hasClass("curr")){
+            var dir_id = $('.li_dir.curr').data('id');
+        }else{
+            var dir_id = $('.sidebar .li_dir:first-child').data('id');
+        }
+
+        $.ajax({
+            url:  '/dir/article_create',
+            data:{'dir_id':dir_id},
+            type: "POST",
+            dataType:'json',
+            success:function(obj){
+                if($('#itemlist ul li.item_art').length > 0){
+                    $('#itemlist ul li.item_art').eq(0).before('<li class="item item_art new_art" data-id="'+obj+'"><i></i>新建笔记</li>');
+                }else{
+                    $('#itemlist ul').prepend('<li class="item item_art new_art" data-id="'+obj+'"><i></i>新建笔记</li>');
+                }
+                $('.item_art.curr').next('ul').show();
+                $('.item_art.curr').removeClass('curr');
+                $('.item_art.new_art').addClass('curr');
+                $('.item_art.new_art').removeClass('new_art');
+                $('.title').html('新建笔记');
+                $('.content').html('');
+                $('#article_id').val(obj);
+            },
+            error:function(e){}
+        });
+    })
+
+    $("body").on("click", '.li_dir', function(){
+        $('.li_dir.curr').removeClass('curr');
+        var dir_id = $(this).data('id');
+        $(".li_dir[data-id="+dir_id+"]").addClass('curr');
+        $(".li_dir[data-id="+dir_id+"]").parents('ul').show();
+        item_list();
+    })
+
+
+    $("body").on("click", '.item_art', function(){
+        $('.item_art.curr').removeClass('curr');
+        var dir_id = $(this).data('id');
+        $(".item_art[data-id="+dir_id+"]").addClass('curr');
+        $(".item_art[data-id="+dir_id+"]").parents('ul').show();
+        show_article(dir_id);
+    })
+
+    $("body").on("click", '.li_dir span:first-child', function(){
+        if($(this).parent().next('ul').is(":hidden")){
+            $(this).parent().next('ul').show();
+            $(this).html('-');
+        }else{
+            $(this).parent().next('ul').hide();
+            $(this).html('+');
+        }
+        return false;
+    })
+
+    dir_list();
+    function dir_list(){
+        $.ajax({
+            url:  '/dir/dir_list',
+            data:{},
+            type: "POST",
+            dataType:'json',
+            success:function(obj){
+                var html = creat_list(obj);
+                $('.dirlist').append(html);
+                item_list();
+            },
+            error:function(e){}
+        });
+    }
+
+    function creat_list(obj){
+        var html = '<ul>';
+        $.each(obj, function(key, v){
+            if(v.child){
+                html += '<li><div  class="li_dir" class-id="'+ v.class_id+'" data-id="'+ v.dir_id+'"><span>+</span><i></i>'+ v.dir_name+'</div>';
+                html += creat_list(v.child);
+                html += '</li>';
+            }else{
+                html += '<li><div  class="li_dir" class-id="'+ v.class_id+'" data-id="'+ v.dir_id+'"><i></i>'+ v.dir_name+'</div></li>';
+            }
+        })
+        return html += '</ul>';
+    }
+
+    function item_list(){
+        var id = $('.li_dir.curr').data('id');
+        if(id == undefined) id = $('.sidebar .li_dir:first-child').data('id');
+        $.ajax({
+            url:  '/dir/item_list',
+            data:{'dir_id':id},
+            type: "POST",
+            dataType:'json',
+            success:function(obj){
+                var html = '<ul>';
+                var rec_id = 0;
+                $.each(obj.dir, function(key, v){
+                    html += '<li class="item item_dir li_dir" data-id="'+ v.dir_id+'"><i></i>'+ v.dir_name+'</li>';
+                })
+                $.each(obj.art, function(key, v){
+                    if(key == 0) rec_id= v.rec_id;
+                    html += '<li class="item item_art" data-id="'+ v.rec_id+'"><i></i>'+ v.title+'</li>';
+                })
+                html += '</ul>';
+                $('.itemlist').html(html);
+                if(rec_id != 0){
+                    show_article(rec_id);
+                    $(".item_art[data-id="+rec_id+"]").addClass('curr');
+                }else{
+                    $('.article .title').html('');
+                    $('.article .content').html('');
+                }
+            },
+            error:function(e){}
+        });
+    }
+
+    function show_article(rec_id){
+        $.ajax({
+            url:  '/dir/article',
+            data:{'rec_id':rec_id},
+            type: "POST",
+            dataType:'json',
+            success:function(obj){
+                $('.article .title').html(obj.title);
+                $('#article_id').val(obj.rec_id);
+                $('.article .content').html(obj.content);
+            },
+            error:function(e){}
+        });
+    }
+
+    $("body").on("click", '.save', function(){
+        var title = $('.title').text();
+        var rec_id = $('#article_id').val();
+        var content = $('#divDemo').html();
+        $.ajax({
+            url:  '/dir/article_update',
+            data:{'title':title,'content':content,'rec_id':rec_id},
+            type: "POST",
+            dataType:'json',
+            success:function(obj){
+                $(".item_art[data-id="+rec_id+"]").html('<i></i>'+title);
+                alert('success');
+            },
+            error:function(e){}
+        });
+    })
+
+</script>
+
+</body>
+</html>
