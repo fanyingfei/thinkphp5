@@ -1,28 +1,30 @@
+
 $("body").on("dragstart", '.li-dir', function(e){
     var rec_id = $(this).data('id');
     e.originalEvent.dataTransfer.setData("obj_add",rec_id);
 });
-
+//拖拽元素在目标元素上移动的时候触发的事件，此事件作用在目标元素上
 $("body").on("dragover", '.li-dir', function(e){
-    $('.cur_drap').removeClass('cur-drap');
-    $(this).addClass('cur-drap');
     e.originalEvent.preventDefault();
+    var id = e.originalEvent.dataTransfer.getData("obj_add");
+    if($(this).data('id') == id) return false;
+    $('.cur-drap').removeClass('cur-drap');
+    $(this).addClass('cur-drap');
 });
-
-//放下事件
+//当拖拽完成后触发的事件，此事件作用在被拖曳元素上
 $("body").on("drop", '.li-dir', function(e){
+    e.originalEvent.preventDefault;
     var id = e.originalEvent.dataTransfer.getData("obj_add");
     $('.cur-drap').removeClass('cur-drap');
     if($(this).data('id') == id) return false;
     var parent_id = $(".dirlist .li-dir[data-id="+id+"]").parent('li').parent('ul').prev('.li-dir').data('id');
     if($(this).data('id') == parent_id) return false;
 
-    if($(".dirlist .li-dir[data-id="+parent_id+"]").next('ul').length == 1){
+    if($(".dirlist .li-dir[data-id="+parent_id+"]").next('ul').children('li').length == 1){
         $(".dirlist .li-dir[data-id="+parent_id+"]").children('.drop-down').text('');
     }
-    e.originalEvent.preventDefault;
     $('.cur-drap').removeClass('cur-drap');
-    var html = $(".li-dir[data-id="+id+"]").parent().prop("outerHTML");
+    var html = $(".dirlist .li-dir[data-id="+id+"]").parent().prop("outerHTML");
     $(".li-dir[data-id="+id+"]").parent().remove();
     if($(this).next('ul').length > 0){
         $(this).next('ul').append(html);
@@ -48,7 +50,9 @@ $("body").on("drop", '.li-dir', function(e){
 
 function update_dir_list(obj,parent_id){
     var parent = obj.parent('li').parent('ul').parent('li').children('.li-dir');
-    var cur_item = [obj.data('id'),parseInt(parent.attr('class-id'))+1,parent.data('id'),obj.text()];
+    var class_id = parseInt(parent.attr('class-id'))+1;
+    obj.attr('class-id',class_id);
+    var cur_item = [obj.data('id'),class_id,parent.data('id'),obj.text()];
     var list = get_dir_attr(obj);
     list.push(cur_item);
     $.ajax({
