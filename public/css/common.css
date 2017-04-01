@@ -23,12 +23,12 @@ ul{
     background-color: #f5f5f5;
     float:left;
 }
-.create_dir,.create_art{
+.create-dir,.create-art{
     padding-left:20px;
     padding-right:10px;
     cursor: pointer;
 }
-.dirlist ul >li .li_dir{
+.dirlist ul >li .li-dir{
     padding-left:20px;
 }
 .itemlist {
@@ -47,19 +47,19 @@ ul{
 .rightbtn{
     position: relative;
 }
-.dirlist .li_dir{
+.dirlist .li-dir{
     cursor:pointer;
     clear:both;
     padding:4px 10px 4px 5px;
 }
-.dirlist .li_dir:hover{
+.dirlist .li-dir:hover{
     background-color: #e4edf8;
 }
-.cur_drap{
+.cur-drap{
     background-color: #e0e1e5;
     border:1px dashed #eaf0fb;
 }
-.dirlist .li_dir.curr{
+.dirlist .li-dir.curr{
     background-color: #398dee;
     color: #fff;
 }
@@ -70,17 +70,17 @@ ul{
     overflow: auto;
     border-bottom: 1px solid #e0e1e5;
 }
-.li_article{
+.li-article{
     position: relative;
 }
 #itemlist li > div:hover{
     background-color:#f6f7f9 ;
 }
-.li_article .icon{
+.li-article .icon{
     float:left;
     display: block;
 }
-.li_article .name{
+.li-article .name{
     float:left;
     padding-left:5px;
     max-width:180px;
@@ -88,32 +88,32 @@ ul{
     text-overflow:ellipsis;
     overflow:hidden;
 }
-.li_article .art_time{
+.li-article .art-time{
     float:right;
     color:#c2c2c2;
     font-size:12px;
     margin-top: 4px
 }
-.li_article.curr{
+.li-article.curr{
     background-color: #eaf0fb !important;
 }
-.li_dir .icon,.li_dir span{
+.li-dir .icon,.li-dir span{
     display: block;
     float: left;
 }
-.li_dir span:first-child{
+.li-dir .drop-down{
     margin-left:-10px;
     width: 12px;
     height: 12px;
 }
-.li_dir .name{
+.li-dir .name{
     padding-left:5px;
     white-space:nowrap;
     text-overflow:ellipsis;
     overflow:hidden;
     width:auto;
 }
-.right_menu{
+.right-menu{
     display: none;
     position: absolute;
     right:5px;
@@ -122,45 +122,45 @@ ul{
     background: url("/img/sprite.svg") no-repeat;
     background-position: 60.7% 37%;
 }
-.itemlist .right_menu{
+.itemlist .right-menu{
     top:15px;
     right:20px;
 }
-.li_dir:hover .right_menu,
-.li_article:hover .right_menu{
+.li-dir:hover .right-menu,
+.li-article:hover .right-menu{
     display: block;
 }
-.li_article:hover .art_time{
+.li-article:hover .art-time{
     display: none;
 }
-.li_dir.curr:hover .right_menu,
-.li_article.curr:hover .right_menu{
+.li-dir.curr:hover .right-menu,
+.li-article.curr:hover .right-menu{
     background-position: 60.7% 28.6%;
 }
-.li_dir:hover > div {
+.li-dir:hover > div {
     padding-right:26px;
 }
-.li_dir ~ ul{
+.li-dir ~ ul{
     display: none;
 }
-.dirlist ul ul .li_dir{
+.dirlist ul ul .li-dir{
     padding-left:40px;
 }
-.dirlist ul ul ul .li_dir{
+.dirlist ul ul ul .li-dir{
     padding-left:60px;
 }
-.dirlist ul ul ul ul .li_dir{
+.dirlist ul ul ul ul .li-dir{
     padding-left:80px;
 }
-.dirlist ul ul ul ul ul .li_dir{
+.dirlist ul ul ul ul ul .li-dir{
     padding-left:100px;
 }
-.li_dir .icon{
+.li-dir .icon{
     background: url("/img/sprite.svg") no-repeat;
     background-position: 60.92307692307692% 57.53846153846154%;
     padding:12px 12px;
 }
-.li_article .icon{
+.li-article .icon{
     background: url("/img/sprite.svg") no-repeat;
     background-position: 79% 90%;
     padding:12px;

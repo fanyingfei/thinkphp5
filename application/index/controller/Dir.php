@@ -11,26 +11,8 @@ class Dir extends Controller
     public function dir_list()
     {
         $user_id = 1;
-        $res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0])->order('rank asc')->order('c_time asc')->field('dir_id,dir_name,class_id,parent_id')->select();
-        $max_class = 1;
-        $list = array();
-        foreach($res as $item){
-            if($item['class_id'] > $max_class) $max_class = $item['class_id'];
-            $list[$item['dir_id']] = $item;
-        }
-
-        for($i=$max_class ; $i>1 ; $i--){
-            foreach($list as $key=>$row){
-                if($row['class_id'] != $i) continue;
-                if(!empty($list[$row['parent_id']])) $list[$row['parent_id']]['child'][] = $row;
-                unset($list[$key]);
-            }
-        }
-
-        $data = array();
-        foreach($list as $one){
-            $data[] = $one;
-        }
+        $res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0])->order('rank desc')->order('c_time asc')->field('dir_id,dir_name,class_id,parent_id')->select();
+        $data = $this->nesting($res);
         return JSON($data);
      //   print_r($list);exit;
     //    $this->assign('list',$list);
@@ -41,13 +23,13 @@ class Dir extends Controller
         $user_id = 1;
         $request = Request::instance();
         $dir_id = $request->param('dir_id');
-        $dir_res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0,'parent_id'=>$dir_id])->order('rank asc')->order('c_time asc')->field('dir_id,dir_name,class_id,parent_id')->select();
-        $art_res = Db::table('articles')->where(['uid'=>$user_id,'is_delete'=>0,'dir_id'=>$dir_id])->order('rank asc')->order('c_time asc')->field('rec_id,title,c_time')->select();
+        $dir_res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0,'parent_id'=>$dir_id])->order('rank desc')->order('c_time asc')->field('dir_id,dir_name,class_id,parent_id')->select();
+        $art_res = Db::table('articles')->where(['uid'=>$user_id,'is_delete'=>0,'dir_id'=>$dir_id])->order('rank desc')->order('c_time asc')->field('rec_id,title,c_time')->select();
         foreach($art_res as &$item){
             $item['time'] = date('Y-m-d',$item['c_time']);
         }
         $data = array('dir'=>empty($dir_res) ? array() : $dir_res,'art'=>empty($art_res) ? array() : $art_res);
-        return JSON(array('dir'=>$dir_res,'art'=>$art_res));
+        return json(array('dir'=>$dir_res,'art'=>$art_res));
     }
 
     public function create_dir(){
@@ -58,7 +40,7 @@ class Dir extends Controller
         $name = '新建文件夹';
         $class_id = $request->param('class_id');
         $parent_id = $request->param('parent_id');
-        $data = ['rank'=>9999,'dir_name' => $name, 'uid'=>$user_id,'class_id'=>$class_id,'parent_id'=>$parent_id,'u_time'=>$time,'c_time'=>$time];
+        $data = ['dir_name' => $name, 'uid'=>$user_id,'class_id'=>$class_id,'parent_id'=>$parent_id,'u_time'=>$time,'c_time'=>$time];
         $res = Db::name('dir')->insertGetId($data);
         return json($res);
     }
@@ -69,10 +51,12 @@ class Dir extends Controller
         //   $user_id = $request->session('uid');
         $user_id = 1;
         $list = $request->param('list/a');
+        $parent_id = $request->param('parent_id');
         foreach($list as $item){
             $data = ['class_id' => $item[1] ,'parent_id'=>$item[2],'u_time'=>time()];
-            $res = Db::table('dir')->where('dir_id', $item[0])->update($data);
+            Db::table('dir')->where('dir_id', $item[0])->update($data);
         }
+        $res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0,'parent_id'=>$parent_id])->order('rank desc')->order('c_time asc')->column('dir_id');
         return json($res);
     }
 
@@ -175,5 +159,28 @@ class Dir extends Controller
         $data = ['dir_id' => $dir_id, 'uid'=>$user_id,'title'=>$title,'content'=>$content,'u_time'=>$time,'c_time'=>$time];
         $inser_id = Db::name('articles')->insertGetId($data);
         return json(array('id'=>$inser_id,'time'=>date('Y-m-d',$time)));
+    }
+
+    public function nesting($res){
+        $max_class = 1;
+        $list = array();
+        foreach($res as $item){
+            if($item['class_id'] > $max_class) $max_class = $item['class_id'];
+            $list[$item['dir_id']] = $item;
+        }
+
+        for($i=$max_class ; $i>1 ; $i--){
+            foreach($list as $key=>$row){
+                if($row['class_id'] != $i) continue;
+                if(!empty($list[$row['parent_id']])) $list[$row['parent_id']]['child'][] = $row;
+                unset($list[$key]);
+            }
+        }
+
+        $data = array();
+        foreach($list as $one){
+            $data[] = $one;
+        }
+        return $data;
     }
 }

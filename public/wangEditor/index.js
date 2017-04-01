@@ -1,6 +1,8 @@
 $(function (){
+    var height = $('#article').height() - $('.title-wrapper').height() - $('.wangEditor-menu-container').height();
+    $('#wangDemo').height(height);
 
-    var editor = new wangEditor('divDemo');
+    var editor = new wangEditor('wangDemo');
 
     editor.config.uploadImgUrl = '/upload.php';
 
