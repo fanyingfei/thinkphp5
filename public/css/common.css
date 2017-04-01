@@ -13,7 +13,7 @@ ul{
     margin:0;
 }
 .none{
-    display: none;
+    display: none !important;
 }
 .sidebar {
     height: 100%;
@@ -23,9 +23,13 @@ ul{
     background-color: #f5f5f5;
     float:left;
 }
-.create_dir,.create_art,.dirlist ul >li .li_dir{
+.create_dir,.create_art{
     padding-left:20px;
+    padding-right:10px;
     cursor: pointer;
+}
+.dirlist ul >li .li_dir{
+    padding-left:20px;
 }
 .itemlist {
     position: relative;
@@ -35,42 +39,131 @@ ul{
     background-color: #fff;
     float:left;
 }
-.li_dir.curr{
-    background-color: #398dee;
-}
-.item_art.curr{
-    background-color: #eaf0fb;
-}
 .article{
     margin-left:560px;
     height: 100%;
     overflow: auto;
 }
-.li_dir{
+.rightbtn{
+    position: relative;
+}
+.dirlist .li_dir{
     cursor:pointer;
+    clear:both;
+    padding:4px 10px 4px 5px;
+}
+.dirlist .li_dir:hover{
+    background-color: #e4edf8;
+}
+.cur_drap{
+    background-color: #e0e1e5;
+    border:1px dashed #eaf0fb;
+}
+.dirlist .li_dir.curr{
+    background-color: #398dee;
+    color: #fff;
+}
+#itemlist li > div{
+    padding: 15px;
+    cursor: pointer;
+    clear: both;
+    overflow: auto;
+    border-bottom: 1px solid #e0e1e5;
+}
+.li_article{
+    position: relative;
+}
+#itemlist li > div:hover{
+    background-color:#f6f7f9 ;
+}
+.li_article .icon{
+    float:left;
+    display: block;
+}
+.li_article .name{
+    float:left;
     padding-left:5px;
+    max-width:180px;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    overflow:hidden;
+}
+.li_article .art_time{
+    float:right;
+    color:#c2c2c2;
+    font-size:12px;
+    margin-top: 4px
+}
+.li_article.curr{
+    background-color: #eaf0fb !important;
+}
+.li_dir .icon,.li_dir span{
+    display: block;
+    float: left;
 }
 .li_dir span:first-child{
     margin-left:-10px;
+    width: 12px;
+    height: 12px;
+}
+.li_dir .name{
+    padding-left:5px;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    overflow:hidden;
+    width:auto;
+}
+.right_menu{
+    display: none;
+    position: absolute;
+    right:5px;
+    top:4px;
+    padding: 14px;
+    background: url("/img/sprite.svg") no-repeat;
+    background-position: 60.7% 37%;
+}
+.itemlist .right_menu{
+    top:15px;
+    right:20px;
+}
+.li_dir:hover .right_menu,
+.li_article:hover .right_menu{
+    display: block;
+}
+.li_article:hover .art_time{
+    display: none;
+}
+.li_dir.curr:hover .right_menu,
+.li_article.curr:hover .right_menu{
+    background-position: 60.7% 28.6%;
+}
+.li_dir:hover > div {
+    padding-right:26px;
 }
 .li_dir ~ ul{
     display: none;
-    padding-left:20px;
 }
-.li_dir i{
+.dirlist ul ul .li_dir{
+    padding-left:40px;
+}
+.dirlist ul ul ul .li_dir{
+    padding-left:60px;
+}
+.dirlist ul ul ul ul .li_dir{
+    padding-left:80px;
+}
+.dirlist ul ul ul ul ul .li_dir{
+    padding-left:100px;
+}
+.li_dir .icon{
     background: url("/img/sprite.svg") no-repeat;
     background-position: 60.92307692307692% 57.53846153846154%;
-    padding:2px 12px;
+    padding:12px 12px;
 }
-.itemlist ul li{
-    padding:5px;
-    padding-left:10px;
-    cursor: pointer;
-}
-.item_art i{
+.li_article .icon{
     background: url("/img/sprite.svg") no-repeat;
     background-position: 79% 90%;
-    padding:4px 8px;
+    padding:12px;
 }
 .wangEditor-container{
     border:0;
@@ -89,4 +182,44 @@ ul{
 }
 .save{
     float:right;
+}
+.dir-right-menu{
+    border:0;
+    border-radius:2px;
+    box-shadow: 0px 1px 16px 0 rgba(90, 109, 122, 0.41);
+    min-width: auto;
+    padding:0;
+}
+.dir-right-menu li{
+    padding:8px 20px;
+    color:#999;
+    font-size:12px;
+    width:100px;
+    cursor: pointer;
+}
+.dir-right-menu .li-divider{
+    border-bottom:1px solid #EBF3FD;
+}
+.dir-right-menu li:hover{
+    background-color: #f4f9ff;
+    color:#76b0f3;
+}
+.rename-input{
+    height:22px;
+    line-height: 22px;
+    width:90%;
+    border:1px solid #79ace7;
+    border-radius:2px;
+    color:#333;
+    padding-left:5px;
+}
+.item-rename{
+    max-width:265px !important;
+    width:265px;
+}
+.item-rename .rename-input{
+    width:100%;
+}
+.dir-rename{
+   padding-right:0 !important;
 }

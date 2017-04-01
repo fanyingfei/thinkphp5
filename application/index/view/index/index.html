@@ -14,14 +14,10 @@
 <div class="sidebar">
     <div class="create_dir">新建文件夹</div><br>
     <div class="create_art">新建笔记</div><br>
-    <div class="dirlist">
-
-    </div>
+    <div class="dirlist"></div>
 </div>
 
-<div id="itemlist" class="itemlist">
-
-</div>
+<div id="itemlist" class="itemlist"></div>
 
 <div id="article" class="article">
     <div class="title-wrapper">
@@ -33,7 +29,14 @@
 
     </div>
 </div>
-
+<ul class="dropdown-menu dir-right-menu" role="menu">
+    <li class="move-up">上移</li>
+    <li class="move-down">下移</li>
+    <li class="delete">删除</li>
+    <li class="li-divider rename">重命名</li>
+    <li class="create_art">新建笔记</li>
+    <li class="create_dir">新建文件夹</li>
+</ul>
 </body>
 <script type="text/javascript" src='/wangEditor/bootstrap.min.js'></script>
 <script type="text/javascript" src='/wangEditor/wangEditor.min.js'></script>
@@ -55,24 +58,35 @@
             type: "POST",
             dataType:'json',
             success:function(obj){
+                var html = '<li>'+create_dir_html(class_id,obj,'新建文件夹',0)+'</li>';
                 if(class_id == 1){
-                    $('.dirlist ul').prepend('<li><div class="li_dir" class-id="'+ class_id+'" data-id="'+ obj+'">新建文件夹</div></li>');
+                    $('.dirlist ul').prepend(html);
                 }else{
                     if($('.li_dir.curr ~ ul').length > 0){
-                        $('.li_dir.curr').next('ul').append('<li><div class="li_dir new_dir" class-id="'+ class_id+'" data-id="'+ obj+'">新建文件夹</div></li>');
-
+                        $('.li_dir.curr').next('ul').append(html);
                     }else{
-                        $('.li_dir.curr').after('<ul><li><div class="li_dir new_dir" class-id="'+ class_id+'" data-id="'+ obj+'">新建文件夹</div></li></ul>');
+                        $('.li_dir.curr').after('<ul>'+html+'</ul>');
                     }
                     $('.li_dir.curr').next('ul').show();
                     $('.li_dir.curr').removeClass('curr');
-                    $('.li_dir.new_dir').addClass('curr');
-                    $('.li_dir.new_dir').removeClass('new_dir');
+                    $(".li_dir[data-id="+obj+"]").addClass('curr');
+                    create_update_name(obj);
                 }
             },
             error:function(e){}
         });
     })
+
+    function create_dir_html(class_id,dir_id,dir_name,is_parent){
+        var html = '<div draggable="true" class="li_dir rightbtn" class-id="'+ class_id+'" data-id="'+ dir_id+'">';
+        if(is_parent == 1) html += '<span>+</span>';
+        html += '<i class="icon"></i><div class="name">'+dir_name+'</div><i class="right_menu"></i></div>';
+        return html;
+    }
+
+    function create_article_html(id,name,time){
+        return '<li><div class="li_article rightbtn" data-id="'+id+'"><i class="icon"></i><div class="name">'+name+'</div><div class="art_time">'+time+'</div><i class="right_menu"></i></div></li>';
+    }
 
     $("body").on("click", '.create_art', function(){
         var obj = $(this);
@@ -88,18 +102,18 @@
             type: "POST",
             dataType:'json',
             success:function(obj){
-                if($('#itemlist ul li.item_art').length > 0){
-                    $('#itemlist ul li.item_art').eq(0).before('<li class="item item_art new_art" data-id="'+obj+'"><i></i>新建笔记</li>');
+                var id = obj.id;
+                if($('#itemlist .item-article li').length > 0){
+                    $('#itemlist .item-article li').eq(0).before(create_article_html(id,'新建笔记',obj.time));
                 }else{
-                    $('#itemlist ul').prepend('<li class="item item_art new_art" data-id="'+obj+'"><i></i>新建笔记</li>');
+                    $('#itemlist .item-article').prepend(create_article_html(id,'新建笔记',obj.time));
                 }
-                $('.item_art.curr').next('ul').show();
-                $('.item_art.curr').removeClass('curr');
-                $('.item_art.new_art').addClass('curr');
-                $('.item_art.new_art').removeClass('new_art');
+                $('.li_article.curr').next('ul').show();
+                $('.li_article.curr').removeClass('curr');
+                $(".li_article[data-id="+id+"]").addClass('curr');
                 $('.title').html('新建笔记');
                 $('.content').html('');
-                $('#article_id').val(obj);
+                $('#article_id').val(id);
             },
             error:function(e){}
         });
@@ -142,7 +156,7 @@
             dataType:'json',
             success:function(obj){
                 var html = creat_list(obj);
-                $('.dirlist').append(html);
+                $('.dirlist').html(html);
                 item_list();
             },
             error:function(e){}
@@ -153,11 +167,11 @@
         var html = '<ul>';
         $.each(obj, function(key, v){
             if(v.child){
-                html += '<li><div  class="li_dir" class-id="'+ v.class_id+'" data-id="'+ v.dir_id+'"><span>+</span><i></i>'+ v.dir_name+'</div>';
+                html += '<li>'+create_dir_html(v.class_id, v.dir_id,v.dir_name,1);
                 html += creat_list(v.child);
                 html += '</li>';
             }else{
-                html += '<li><div  class="li_dir" class-id="'+ v.class_id+'" data-id="'+ v.dir_id+'"><i></i>'+ v.dir_name+'</div></li>';
+                html += '<li>'+create_dir_html(v.class_id, v.dir_id,v.dir_name,0)+'</li>';
             }
         })
         return html += '</ul>';
@@ -165,27 +179,31 @@
 
     function item_list(){
         var id = $('.li_dir.curr').data('id');
-        if(id == undefined) id = $('.sidebar .li_dir:first-child').data('id');
+        if(id == undefined){
+            id = $('.sidebar .li_dir:first-child').data('id');
+            $(".sidebar .li_dir[data-id="+id+"]").addClass('curr');
+        }
         $.ajax({
             url:  '/dir/item_list',
             data:{'dir_id':id},
             type: "POST",
             dataType:'json',
             success:function(obj){
-                var html = '<ul>';
+                var html = '<ul class="item-dir">';
                 var rec_id = 0;
                 $.each(obj.dir, function(key, v){
-                    html += '<li class="item item_dir li_dir" data-id="'+ v.dir_id+'"><i></i>'+ v.dir_name+'</li>';
+                    html += '<li>'+create_dir_html(v.class_id, v.dir_id, v.dir_name,0)+'</li>';
                 })
+                html += '</ul><ul class="item-article">';
                 $.each(obj.art, function(key, v){
                     if(key == 0) rec_id= v.rec_id;
-                    html += '<li class="item item_art" data-id="'+ v.rec_id+'"><i></i>'+ v.title+'</li>';
+                    html += create_article_html(v.rec_id, v.title, v.time);
                 })
                 html += '</ul>';
                 $('.itemlist').html(html);
                 if(rec_id != 0){
                     show_article(rec_id);
-                    $(".item_art[data-id="+rec_id+"]").addClass('curr');
+                    $(".li_article[data-id="+rec_id+"]").addClass('curr');
                 }else{
                     $('.article .title').html('');
                     $('.article .content').html('');
@@ -220,13 +238,239 @@
             type: "POST",
             dataType:'json',
             success:function(obj){
-                $(".item_art[data-id="+rec_id+"]").html('<i></i>'+title);
+                $(".li_article[data-id="+rec_id+"] .name").html(title);
                 alert('success');
             },
             error:function(e){}
         });
     })
 
+    $("body").on("dragstart", '.li_dir', function(e){
+        var rec_id = $(this).data('id');
+        e.originalEvent.dataTransfer.setData("obj_add",rec_id);
+    });
+
+    $("body").on("dragover", '.li_dir', function(e){
+        $('.cur_drap').removeClass('cur_drap');
+        $(this).addClass('cur_drap');
+        e.originalEvent.preventDefault();
+    });
+
+    //放下事件
+    $("body").on("drop", '.li_dir', function(e){
+        var id = e.originalEvent.dataTransfer.getData("obj_add");
+        $('.cur_drap').removeClass('cur_drap');
+        if($(this).data('id') == id) return false;
+
+        e.originalEvent.preventDefault;
+        $('.cur_drap').removeClass('cur_drap');
+        var html = $(".li_dir[data-id="+id+"]").parent().prop("outerHTML");
+        $(".li_dir[data-id="+id+"]").parent().remove();
+        if($(this).next('ul').length > 0){
+            $(this).next('ul').append(html);
+        }else{
+            $(this).after('<ul>'+html+'</ul>');
+            $(this).prepend('<span>+</span>');
+        }
+        update_dir_list($(".li_dir[data-id="+id+"]"));
+    })
+
+    function update_dir_list(obj){
+        var parent = obj.parent('li').parent('ul').parent('li').children('.li_dir');
+        var cur_item = [obj.data('id'),parseInt(parent.attr('class-id'))+1,parent.data('id'),obj.text()];
+        var list = get_dir_attr(obj);
+        list.push(cur_item);
+        $.ajax({
+            url:  '/dir/update_dir',
+            data:{'list':list},
+            type: "POST",
+            dataType:'json',
+            success:function(obj){
+
+                alert('success');
+            },
+            error:function(e){}
+        });
+    }
+
+    function get_dir_attr(obj){
+        var item = new Array();
+        var parent_id = obj.data('id');
+        var class_id = parseInt(obj.attr('class-id'))+1;
+        $(obj).next('ul').children('li').each(function(){
+            item.push([$(this).children('.li_dir').data('id'),class_id,parent_id,$(this).children('.li_dir').text()]);
+            if($(this).children('.li_dir').next('ul').length > 0){
+                var item_list = get_dir_attr($(this).children('.li_dir'));
+                for(var i=0;i<item_list.length;i++){
+                    item.push(item_list[i]);
+                }
+            }
+        });
+        return item;
+    }
+
+    var RightObj ;
+    var RightDirId ;
+    var RightType;
+    $("body").on("contextmenu", '.rightbtn', function(e){
+        RightObj = $(this);
+        RightDirId = $(this).data('id');
+        if($(this).hasClass('li_article')) RightType = 'item';
+        else if($(this).hasClass('li_dir')) RightType = 'dir';
+        $(".dir-right-menu").css({"left":e.pageX,"top":e.pageY}).show();
+        return false;
+    })
+
+    $("body").on("click", '.right_menu', function(e){
+        RightObj = $(this).parents('.rightbtn');
+        RightDirId = RightObj.data('id');
+        if(RightObj.hasClass('li_article')) RightType = 'item';
+        else if(RightObj.hasClass('li_dir')) RightType = 'dir';
+        $(".dir-right-menu").css({"left":e.pageX,"top":e.pageY}).show();
+        return false;
+    })
+
+    $('body').click(function(){
+        $(".dir-right-menu").hide();
+    })
+    $(".dir-right-menu").on("click", function(e){
+        e.stopPropagation();
+    });
+    $(".dir-right-menu li").on("click", function(e){
+        $(".dir-right-menu").hide();
+    });
+
+    $(".move-up").on("click", function(e){
+        if(RightType == 'dir'){
+            var url = '/dir/update_dir_sort';
+            var obj = $(".dirlist .li_dir[data-id="+RightDirId+"]");
+            var itemobj = $(".itemlist .li_dir[data-id="+RightDirId+"]");
+            if(obj.parent('li').prev('li').length == 0) return false;
+            obj.parent('li').insertBefore(obj.parent('li').prev('li'));
+            itemobj.parent('li').insertBefore(itemobj.parent('li').prev('li'));
+        }else{
+            var url = '/dir/update_article_sort';
+            var obj = $(".li_article[data-id="+RightDirId+"]");
+            if(obj.parent('li').prev('li').length == 0) return false;
+            obj.parent('li').insertBefore(obj.parent('li').prev('li'));
+        }
+        update_sort(obj,url);
+    });
+
+    $(".move-down").on("click", function(e){
+        if(RightType == 'dir'){
+            var obj = $(".dirlist .li_dir[data-id="+RightDirId+"]");
+            var url = '/dir/update_dir_sort';
+            var itemobj = $(".itemlist .li_dir[data-id="+RightDirId+"]");
+            if(obj.parent('li').next('li').length == 0) return false;
+            obj.parent('li').next('li').insertBefore(obj.parent('li'));
+            itemobj.parent('li').next('li').insertBefore(itemobj.parent('li'));
+        }else if(RightType == 'item'){
+            var url = '/dir/update_article_sort'
+            var obj = $(".li_article[data-id="+RightDirId+"]");
+            if(obj.parent('li').next('li').length == 0) return false;
+            obj.parent('li').next('li').insertBefore(obj.parent('li'));
+        }
+        update_sort(obj,url);
+    });
+
+    function update_sort(obj,url){
+        var parent_ul = obj.parent('li').parent('ul');
+        var list = new Array();
+        parent_ul.children('li').each(function(v){
+            list.push([$(this).children('.rightbtn').data('id'),v+1]);
+        });
+        $.ajax({
+            url:  url,
+            data:{'list':list},
+            type: "POST",
+            dataType:'json',
+            success:function(obj){
+
+            },
+            error:function(e){}
+        });
+    }
+
+    $(".delete").on("click", function(e){
+        var id = RightDirId;
+        if(RightType == 'dir'){
+            var url = '/dir/delete_dir';
+            var resObj = $(".li_dir[data-id="+id+"]").parent('li');
+        }else if(RightType == 'item'){
+            var url = '/dir/delete_article';
+            var resObj = $(".li_article[data-id="+id+"]").parent('li');
+        }
+        $.ajax({
+            url:  url,
+            data:{'id':id},
+            type: "POST",
+            dataType:'json',
+            success:function(obj){
+                resObj.remove();
+            },
+            error:function(e){}
+        });
+    });
+
+    $(".rename").on("click", function(e){
+        create_update_name(RightDirId);
+    });
+
+    function create_update_name(id){
+        var text = RightObj.find('.name').text();
+        RightObj.find('.name').html('<input prevalue="'+text+'" class="rename-input" value="'+text+'" />');
+        RightObj.attr('draggable','false');
+        $(".rename-input").focus();
+        if(RightType == 'item'){
+            RightObj.find('.art_time').hide();
+            RightObj.find('.name').addClass('item-rename');
+        }else if(RightType == 'dir'){
+            RightObj.children('div').addClass('dir-rename');
+        }
+        RightObj.find('.right_menu').addClass('none');
+    }
+
+    $("body").on("click", '.rename-input', function(e){
+        return false;
+    })
+
+    $("body").on("blur", '.rename-input', function(e){
+        var obj = $('.rename-input');
+        var name = obj.val();
+        var itemObj = obj.parents('.rightbtn');
+        var id = itemObj.data('id');
+        if(RightType == 'item'){
+            var url = '/dir/update_article_name';
+            var resObj = $(".li_article[data-id="+id+"] .name");
+        }else if(RightType == 'dir'){
+            var url = '/dir/update_name';
+            var resObj = $(".li_dir[data-id="+id+"] .name");
+        }
+        itemObj.attr('draggable','true');
+        if(obj.attr('prevalue') == name){
+            obj.parent('.name').html(name);
+            rename_regain();
+            return false;
+        }
+        $.ajax({
+            url:  url,
+            data:{'name':name,'id':id},
+            type: "POST",
+            dataType:'json',
+            success:function(obj){
+                resObj.html(name);
+                rename_regain();
+            },
+            error:function(e){}
+        });
+    })
+
+    function rename_regain(){
+        $('.item-rename').removeClass('item-rename');
+        $('.dir-rename').removeClass('dir-rename');
+        $('.right_menu').removeClass('none');
+    }
 </script>
 
 </body>
