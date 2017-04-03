@@ -1,36 +1,50 @@
+var drapId  = 0;
 
 $("body").on("dragstart", '.li-dir', function(e){
     var rec_id = $(this).data('id');
-    e.originalEvent.dataTransfer.setData("obj_add",rec_id);
+    drapId = $(this).data('id');
+    drapObj = e.originalEvent.dataTransfer;
+    drapObj.setData("text",rec_id);
+ //   drapObj.dropEffect="move";
+ //   drapObj.effectAllowed="all";
+    var dragIcon = document.createElement("img");
+    dragIcon.src = $('#drop-dir').attr('src');
+    drapObj.setDragImage(dragIcon, -10, -2);
 });
-//拖拽元素在目标元素上移动的时候触发的事件，此事件作用在目标元素上
-$("body").on("dragover", '.li-dir', function(e){
-    e.originalEvent.preventDefault();
-    var id = e.originalEvent.dataTransfer.getData("obj_add");
-    if($(this).data('id') == id) return false;
+$("body").on("dragend", '.li-dir', function(e){
+    drapId  = 0;
     $('.cur-drap').removeClass('cur-drap');
+});
+$("body").on("dragenter", '.li-dir', function(e){
+    e.originalEvent.preventDefault();
+    $('.cur-drap').removeClass('cur-drap');
+    if($(this).data('id') == drapId) return false;
     $(this).addClass('cur-drap');
 });
 //当拖拽完成后触发的事件，此事件作用在被拖曳元素上
 $("body").on("drop", '.li-dir', function(e){
     e.originalEvent.preventDefault;
-    var id = e.originalEvent.dataTransfer.getData("obj_add");
+    var id = e.originalEvent.dataTransfer.getData("text");
     $('.cur-drap').removeClass('cur-drap');
     if($(this).data('id') == id) return false;
     var parent_id = $(".dirlist .li-dir[data-id="+id+"]").parent('li').parent('ul').prev('.li-dir').data('id');
     if($(this).data('id') == parent_id) return false;
+    var cur_id = $(this).data('id');
+    var curObj = $(".dirlist .li-dir[data-id="+cur_id+"]");
 
     if($(".dirlist .li-dir[data-id="+parent_id+"]").next('ul').children('li').length == 1){
         $(".dirlist .li-dir[data-id="+parent_id+"]").children('.drop-down').text('');
     }
-    $('.cur-drap').removeClass('cur-drap');
+
     var html = $(".dirlist .li-dir[data-id="+id+"]").parent().prop("outerHTML");
+    //删除被移动文件
     $(".li-dir[data-id="+id+"]").parent().remove();
-    if($(this).next('ul').length > 0){
-        $(this).next('ul').append(html);
+    //拖放到文件夹
+    if(curObj.next('ul').length > 0){
+        curObj.next('ul').append(html);
     }else{
-        $(this).after('<ul>'+html+'</ul>');
-        $(this).children('.drop-down').text('+');
+        curObj.after('<ul>'+html+'</ul>');
+        curObj.children('.drop-down').text('+');
     }
     //UL下没有li的清除掉
     if($(".dirlist .li-dir[data-id="+parent_id+"]").next('ul').children('li').length == 0){
@@ -41,7 +55,7 @@ $("body").on("drop", '.li-dir', function(e){
         //拖放右侧消失
         $(".item-dir .li-dir[data-id="+id+"]").parent('li').remove();
     }
-    if($(this).hasClass('curr')){
+    if(curObj.hasClass('curr')){
         //拖放右侧增加
         $(".item-dir").append(html);
     }
@@ -61,19 +75,23 @@ function update_dir_list(obj,parent_id){
         type: "POST",
         dataType:'json',
         success:function(result){
-            var parentObj = $(".dirlist .li-dir[data-id="+parent_id+"]");
-            if(result.length <= 1) return false;
-            $.each(result, function(k, v){
-                if(v == obj.data('id')){
-                    if(k == result.length-1) return false;
-                    parentObj.next('ul').children('li').eq(k-1).after(obj.parent('li'));
-                    if($(".dirlist .li-dir[data-id="+parent_id+"]").hasClass('curr')){
-                        $(".item-dir li").eq(k-1).after($(".item-dir .li-dir[data-id="+v+"]").parent('li'));
-                    }
-                }
-            });
+            drap_dir_sort(obj,parent_id,result);
         },
         error:function(e){}
+    });
+}
+
+function drap_dir_sort(obj,parent_id,result){
+    var parentObj = $(".dirlist .li-dir[data-id="+parent_id+"]");
+    if(result.length <= 1) return false;
+    $.each(result, function(k, v){
+        if(v == obj.data('id')){
+            if(k == result.length-1) return false;
+            parentObj.next('ul').children('li').eq(k-1).after(obj.parent('li'));
+            if($(".dirlist .li-dir[data-id="+parent_id+"]").hasClass('curr')){
+                $(".item-dir li").eq(k-1).after($(".item-dir .li-dir[data-id="+v+"]").parent('li'));
+            }
+        }
     });
 }
 

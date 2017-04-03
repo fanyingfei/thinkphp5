@@ -57,7 +57,14 @@ ul{
 }
 .cur-drap{
     background-color: #e0e1e5;
-    border:1px dashed #eaf0fb;
+}
+.dirlist .cur-drap{
+    border-top:1px dashed #398dee;
+    border-bottom:1px dashed #398dee;
+}
+.dirlist .li-dir.cur-drap{
+    padding-top:3px;
+    padding-bottom:3px;
 }
 .dirlist .li-dir.curr{
     background-color: #398dee;
@@ -222,4 +229,11 @@ ul{
 }
 .dir-rename{
    padding-right:0 !important;
+}
+.parallel-drap{
+    height:33px;
+    border:1px dashed #e0e1e5;
+}
+.item-dir .drop-down{
+    display: none !important;
 }
