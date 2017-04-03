@@ -2,6 +2,7 @@ $(function (){
     var height = $('#article').height() - $('.title-wrapper').height() - $('.wangEditor-menu-container').height();
     $('#wangDemo').height(height);
 
+   // wangEditor.config.mapAk = 'TVhjYjq1ICT2qqL5LdS8mwas';
     var editor = new wangEditor('wangDemo');
 
     editor.config.uploadImgUrl = '/upload.php';
@@ -10,7 +11,7 @@ $(function (){
     editor.config.emotions = {
         'default': {
             title: '默认',
-            data: 'http://www.wangeditor.com/wangEditor/test/emotions.data'
+            data: '/wangEditor/emotions.data'
         },
         'weibo': {
             title: '微博表情',
@@ -81,7 +82,7 @@ $(function (){
              }
              return item;
          });
-
+   // editor.config.mapAk = 'TVhjYjq1ICT2qqL5LdS8mwas';
     editor.create();
 	
 });

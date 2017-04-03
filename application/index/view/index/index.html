@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="/wangEditor/index.css">
     <link rel="stylesheet" type="text/css" href="/wangEditor/wangEditor.min.css">
     <link rel="stylesheet" href="/css/common.css"/>
+    <title>私人笔记本</title>
 </head>
 <body>
 <div class="sidebar">
@@ -45,6 +46,7 @@
 <script type="text/javascript" src="/wangEditor/index.js"></script>
 <script type="text/javascript" src="/js/rightmenu.js"></script>
 <script type="text/javascript" src="/js/drag.js"></script>
+<script type="text/javascript" src="/js/paste.js"></script>
 <script type="text/javascript">
 
     $("body").on("click", '.create-dir', function(){
@@ -148,7 +150,7 @@
         show_article(rec_id);
     })
 
-    $("body").on("click", '.li-dir span:first-child', function(){
+    $("body").on("click", '.li-dir .drop-down', function(){
         if($(this).parent().next('ul').is(":hidden")){
             $(this).parent().next('ul').show();
             $(this).html('-');
@@ -244,7 +246,7 @@
     $("body").on("click", '.save', function(){
         var title = $('.title').text();
         var rec_id = $('#article-id').val();
-        var content = $('#divDemo').html();
+        var content = $('#wangDemo').html();
         $.ajax({
             url:  '/dir/article_update',
             data:{'title':title,'content':content,'rec_id':rec_id},

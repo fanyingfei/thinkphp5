@@ -29,9 +29,6 @@ $('body').click(function(){
 $(".dir-right-menu").on("click", function(e){
     e.stopPropagation();
 });
-$(".dir-right-menu li").on("click", function(e){
-    $(".dir-right-menu").hide();
-});
 
 $(".move-up").on("click", function(e){
     if(RightType == 'dir'){
@@ -95,7 +92,7 @@ $(".delete").on("click", function(e){
         var url = '/dir/delete_article';
         var resObj = $(".li-article[data-id="+id+"]").parent('li');
     }
-
+    $(".dir-right-menu").hide();
     $.ajax({
         url:  url,
         data:{'id':id},
@@ -112,6 +109,7 @@ $(".delete").on("click", function(e){
 });
 
 $(".rename").on("click", function(e){
+    $(".dir-right-menu").hide();
     create_update_name(RightObj);
 });
 

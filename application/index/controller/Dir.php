@@ -98,7 +98,7 @@ class Dir extends Controller
         $user_id = 1;
         $request = Request::instance();
         $rec_id = $request->param('rec_id');
-        $res = Db::table('articles')->where(['rec_id'=>$rec_id,'uid'=>$user_id])->find();
+        $res = Db::table('articles')->where(['rec_id'=>$rec_id,'uid'=>$user_id])->order('rank desc')->order('c_time asc')->find();
         return json($res);
     }
 
