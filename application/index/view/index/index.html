@@ -2,7 +2,6 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <script type="text/javascript" src="/wangEditor/jquery-1.10.2.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/wangEditor/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/wangEditor/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="/wangEditor/common.css">
@@ -18,7 +17,10 @@
     <div class="dirlist"></div>
 </div>
 
-<div id="itemlist" class="itemlist"></div>
+<div id="itemlist" class="itemlist">
+    <ul class="item-dir"></ul>
+    <ul class="item-article"></ul>
+</div>
 
 <div id="article" class="article">
     <div class="title-wrapper">
@@ -41,18 +43,19 @@
     <img id="drop-article" src="/img/drap.png" />
 </div>
 </body>
+<script type="text/javascript" src="/wangEditor/jquery-1.10.2.min.js"></script>
 <script type="text/javascript" src='/wangEditor/bootstrap.min.js'></script>
 <script type="text/javascript" src='/wangEditor/wangEditor.min.js'></script>
 <script type="text/javascript" src="/wangEditor/index.js"></script>
+<script type="text/javascript" src="/js/jquery.cookie.js"></script>
 <script type="text/javascript" src="/js/rightmenu.js"></script>
 <script type="text/javascript" src="/js/drag.js"></script>
-<script type="text/javascript" src="/js/paste.js"></script>
 <script type="text/javascript">
 
     $("body").on("click", '.create-dir', function(){
         if($(".dirlist .curr").length > 0){
-            var parent_id = $('.dirlist li .curr').data('id');
-            var class_id = parseInt($('.dirlist li .curr').attr('class-id')) + 1;
+            var parent_id = $('.dirlist .li-dir.curr').data('id');
+            var class_id = parseInt($('.dirlist .li-dir.curr').attr('class-id')) + 1;
         }else{
             var parent_id = 0;
             var class_id = 1;
@@ -69,22 +72,13 @@
             dataType:'json',
             success:function(id){
                 var html = '<li>'+create_dir_html(class_id,id,'新建文件夹',0)+'</li>';
-                if(class_id == 1){
-                    $('.dirlist > ul').append(html);
-                }else{
-                    var obj = $(".dirlist .li-dir[data-id="+parent_id+"]");
-                    if(obj.next('ul').length > 0){
-                        obj.next('ul').append(html);
-                    }else{
-                        obj.after('<ul>'+html+'</ul>');
-                    }
-                    obj.children('.drop-down').text('-');
-                    obj.next('ul').show();
+                var obj = $(".dirlist .li-dir[data-id="+parent_id+"]");
+                if(obj.next('ul').length > 0) obj.next('ul').append(html);
+                else obj.after('<ul>'+html+'</ul>');
 
-                    if(parent_id == $('.itemlist').attr('parent-id')){
-                        $('.item-dir').append(html);
-                    }
-                }
+                obj.children('.down-btn').addClass('drop-down pack-up');
+                obj.next('ul').show();
+                if(parent_id == $('.itemlist').attr('parent-id')) $('.item-dir').append(html);
                 create_update_name($(".dirlist .li-dir[data-id="+id+"]"));
             },
             error:function(e){}
@@ -93,8 +87,8 @@
 
     function create_dir_html(class_id,dir_id,dir_name,is_parent){
         var html = '<div draggable="true" class="li-dir rightbtn" class-id="'+ class_id+'" data-id="'+ dir_id+'" >';
-        if(is_parent == 1) html += '<span class="drop-down">+</span>';
-        else html += '<span class="drop-down"></span>';
+        if(is_parent == 1) html += '<span class="down-btn drop-down"></span>';
+        else html += '<span class="down-btn"></span>';
         html += '<i class="icon"></i><div class="name">'+dir_name+'</div><i class="right-menu"></i></div>';
         return html;
     }
@@ -104,13 +98,15 @@
     }
 
     $("body").on("click", '.create-art', function(){
-        var obj = $(this);
         if($(".li-dir").hasClass("curr")){
             var dir_id = $('.li-dir.curr').data('id');
         }else{
             var dir_id = $('.sidebar .li-dir:first-child').data('id');
         }
+        create_article(dir_id);
+    })
 
+    function create_article(dir_id){
         $.ajax({
             url:  '/dir/article_create',
             data:{'dir_id':dir_id},
@@ -118,6 +114,18 @@
             dataType:'json',
             success:function(obj){
                 var id = obj.id;
+                //不是当前选中的文件夹创建笔记时，要把这个文件夹选中
+                if(dir_id != $('.dirlist .li-dir.curr').data('id')){
+                    $('.dirlist .li-dir.curr').removeClass('curr');
+                    $('.dirlist .li-dir[data-id='+dir_id+']').addClass('curr');
+                    $('.li-article.curr').next('ul').show();
+                    $('.li-article.curr').removeClass('curr');
+                    item_list();
+                    $('.item-article .li-article[data-id='+id+']').addClass('curr');
+                    show_article();
+                    return false;
+                }
+
                 if($('#itemlist .item-article li').length > 0){
                     $('#itemlist .item-article li').eq(0).before(create_article_html(id,'新建笔记',obj.time));
                 }else{
@@ -132,32 +140,43 @@
             },
             error:function(e){}
         });
-    })
+    }
 
     $("body").on("click", '.li-dir', function(){
         $('.li-dir.curr').removeClass('curr');
         var dir_id = $(this).data('id');
         $(".li-dir[data-id="+dir_id+"]").addClass('curr');
         $(".li-dir[data-id="+dir_id+"]").parents('ul').show();
-        item_list();
-    })
 
+        item_list();
+        show_article();
+    })
+    window.onbeforeunload = function(){
+        if($('.dirlist .li-dir.curr').length > 0) var dir_id = $('.dirlist .li-dir.curr').data('id');
+        else var dir_id = 0;
+        $.cookie('currDir', dir_id , { path : '/' });
+
+        if($('.item-article .li-article.curr').length > 0) var rec_id = $('.item-article .li-article.curr').data('id');
+        else var rec_id = 0;
+        $.cookie('currArticle', rec_id , { path : '/' });
+    }
 
     $("body").on("click", '.li-article', function(){
         $('.li-article.curr').removeClass('curr');
         var rec_id = $(this).data('id');
         $(".li-article[data-id="+rec_id+"]").addClass('curr');
-        show_article(rec_id);
+        show_article();
     })
 
     $("body").on("click", '.li-dir .drop-down', function(){
         if($(this).parent().next('ul').is(":hidden")){
             $(this).parent().next('ul').show();
-            $(this).html('-');
+            $(this).addClass('pack-up');
         }else{
-            $(this).parent().next('ul').hide();
-            $(this).html('+');
+            $(this).parent().parent().find('ul').hide();
+            $(this).parent().parent().find('ul').prev('.li-dir').children('.down-btn').removeClass('pack-up');
         }
+        $(".dir-right-menu").hide();
         return false;
     })
 
@@ -169,9 +188,19 @@
             type: "POST",
             dataType:'json',
             success:function(obj){
-                var html = creat_list(obj);
+                var html = '<div class="li-dir my-dir-list" class-id="0" data-id="0">';
+                if(obj.length > 0) html+= '<span class="down-btn drop-down pack-up"></span>';
+                html += '<i class="icon"></i>&nbsp;&nbsp;我的文件夹</div>';
+                html += creat_list(obj);
                 $('.dirlist').html(html);
+                if($.cookie('currDir')) var dir_id = $.cookie('currDir');
+                else var dir_id = 0;
+
+                $('.dirlist .li-dir[data-id='+dir_id+']').addClass('curr');
+                $('.itemlist').attr('parent-id',dir_id);
                 item_list();
+                //显示第一个文章
+                show_article();
             },
             error:function(e){}
         });
@@ -197,38 +226,49 @@
             id = $('.sidebar .li-dir:first-child').data('id');
             $(".sidebar .li-dir[data-id="+id+"]").addClass('curr');
         }
+
         $.ajax({
             url:  '/dir/item_list',
             data:{'dir_id':id},
             type: "POST",
+            async:false,
             dataType:'json',
             success:function(obj){
                 $('.itemlist').attr('parent-id',id);
-                var html = '<ul class="item-dir">';
-                var rec_id = 0;
+                var html = '';
                 $.each(obj.dir, function(key, v){
                     html += '<li>'+create_dir_html(v.class_id, v.dir_id, v.dir_name,0)+'</li>';
                 })
-                html += '</ul><ul class="item-article">';
+                $('.item-dir').html(html);
+                html = '';
                 $.each(obj.art, function(key, v){
-                    if(key == 0) rec_id= v.rec_id;
                     html += create_article_html(v.rec_id, v.title, v.time);
                 })
-                html += '</ul>';
-                $('.itemlist').html(html);
-                if(rec_id != 0){
-                    show_article(rec_id);
-                    $(".li-article[data-id="+rec_id+"]").addClass('curr');
-                }else{
-                    $('.article .title').html('');
-                    $('.article .content').html('');
-                }
+                $('.item-article').html(html);
             },
             error:function(e){}
         });
     }
 
-    function show_article(rec_id){
+    function show_article(){
+        //没有任何笔记时
+        if($('.item-article li').length == 0){
+            $('.article .title').html('');
+            $('#article-id').val(0);
+            $('.article .content').html('');
+            return false;
+        }
+        //有笔记时
+        if($('.item-article .li-article.curr').length > 0){
+            var rec_id = $('.item-article .li-article.curr').data('id')
+        }else if($.cookie('currArticle') && $('.item-article .li-article[data-id='+$.cookie('currArticle')+']').parents('.itemlist').length>0
+                && $('.dirlist .li-dir.curr').data('id') == $('.itemlist').attr('parent-id')){
+            var rec_id = $.cookie('currArticle');
+        }else{
+            var rec_id = $('.item-article li:first-child .li-article').data('id');
+        }
+
+        $('.item-article .li-article[data-id='+rec_id+']').addClass('curr');
         $.ajax({
             url:  '/dir/article',
             data:{'rec_id':rec_id},
@@ -243,22 +283,34 @@
         });
     }
 
+    $("body").on("blur", '#wangDemo', function(e){
+        var content = $('#wangDemo').html();
+        if(content == '') return false;
+        save_article();
+    })
+
     $("body").on("click", '.save', function(){
+        var title = $('.title').text();
+        if(title == '') alert('标题不能为空');
+        save_article();
+    })
+
+    function save_article(){
         var title = $('.title').text();
         var rec_id = $('#article-id').val();
         var content = $('#wangDemo').html();
+        if(title == '') return false;
         $.ajax({
             url:  '/dir/article_update',
             data:{'title':title,'content':content,'rec_id':rec_id},
             type: "POST",
             dataType:'json',
             success:function(obj){
-                $(".li-article[data-id="+rec_id+"] .name").html(title);
-                alert('success');
+                if($(".li-article[data-id="+rec_id+"] .name").text() != title) $(".li-article[data-id="+rec_id+"] .name").html(title);
             },
             error:function(e){}
         });
-    })
+    }
 
 
 </script>

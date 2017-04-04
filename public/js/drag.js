@@ -33,7 +33,7 @@ $("body").on("drop", '.li-dir', function(e){
     var curObj = $(".dirlist .li-dir[data-id="+cur_id+"]");
 
     if($(".dirlist .li-dir[data-id="+parent_id+"]").next('ul').children('li').length == 1){
-        $(".dirlist .li-dir[data-id="+parent_id+"]").children('.drop-down').text('');
+        $(".dirlist .li-dir[data-id="+parent_id+"]").children('.down-btn').removeClass('drop-down pack-up');
     }
 
     var html = $(".dirlist .li-dir[data-id="+id+"]").parent().prop("outerHTML");
@@ -44,7 +44,7 @@ $("body").on("drop", '.li-dir', function(e){
         curObj.next('ul').append(html);
     }else{
         curObj.after('<ul>'+html+'</ul>');
-        curObj.children('.drop-down').text('+');
+        curObj.children('.down-btn').addClass('drop-down');
     }
     //UL下没有li的清除掉
     if($(".dirlist .li-dir[data-id="+parent_id+"]").next('ul').children('li').length == 0){
@@ -63,7 +63,7 @@ $("body").on("drop", '.li-dir', function(e){
 })
 
 function update_dir_list(obj,parent_id){
-    var parent = obj.parent('li').parent('ul').parent('li').children('.li-dir');
+    var parent = obj.parent('li').parent('ul').prev('.li-dir');
     var class_id = parseInt(parent.attr('class-id'))+1;
     obj.attr('class-id',class_id);
     var cur_item = [obj.data('id'),class_id,parent.data('id'),obj.text()];

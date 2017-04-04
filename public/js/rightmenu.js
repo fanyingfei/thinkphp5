@@ -4,8 +4,15 @@ var RightType;
 $("body").on("contextmenu", '.rightbtn', function(e){
     RightObj = $(this);
     RightDirId = $(this).data('id');
-    if($(this).hasClass('li-article')) RightType = 'item';
-    else if($(this).hasClass('li-dir')) RightType = 'dir';
+    if($(this).hasClass('li-article')){
+        RightType = 'item';
+        $('.right-create-art').hide();
+        $('.right-create-dir').hide();
+    }else if($(this).hasClass('li-dir')){
+        RightType = 'dir';
+        $('.right-create-art').show();
+        $('.right-create-dir').show();
+    }
     $(".dir-right-menu").css({"left":e.pageX,"top":e.pageY}).show();
     return false;
 })
@@ -21,7 +28,12 @@ $("body").on("click", '.right-menu', function(e){
 $('.right-create-dir').click(function(){
     var parent_id = RightDirId;
     var class_id = parseInt(RightObj.attr('class-id')) + 1;
+    $(".dir-right-menu").hide();
     create_dir(parent_id,class_id);
+})
+$('.right-create-art').click(function(){
+    $(".dir-right-menu").hide();
+    create_article(RightDirId)
 })
 $('body').click(function(){
     $(".dir-right-menu").hide();
@@ -100,7 +112,7 @@ $(".delete").on("click", function(e){
         dataType:'json',
         success:function(obj){
             if($(".dirlist .li-dir[data-id="+id+"]").parent('li').siblings('li').length == 0){
-                $(".dirlist .li-dir[data-id="+id+"]").parent('li').parent('ul').prev('.li-dir').children('.drop-down').text('');
+                $(".dirlist .li-dir[data-id="+id+"]").parent('li').parent('ul').prev('.li-dir').children('.down-btn').removeClass('drop-down pack-up');
             }
             resObj.remove();
         },
@@ -131,8 +143,16 @@ function create_update_name(obj){
 $("body").on("click", '.rename-input', function(e){
     return false;
 })
-
+$(document).keypress(function(e) {
+    // 回车键事件
+    if(e.which == 13) change_name();
+});
 $("body").on("blur", '.rename-input', function(e){
+    change_name();
+})
+
+function change_name(){
+    if($('.rename-input').length == 0) return false;
     var obj = $('.rename-input');
     var name = obj.val();
     var itemObj = obj.parents('.rightbtn');
@@ -163,7 +183,7 @@ $("body").on("blur", '.rename-input', function(e){
         },
         error:function(e){}
     });
-})
+}
 
 function rename_regain(){
     $('.item-rename').removeClass('item-rename');

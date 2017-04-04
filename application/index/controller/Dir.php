@@ -40,7 +40,10 @@ class Dir extends Controller
         $name = '新建文件夹';
         $class_id = $request->param('class_id');
         $parent_id = $request->param('parent_id');
+        if($parent_id == 0) $class_id = 1;
+
         $data = ['dir_name' => $name, 'uid'=>$user_id,'class_id'=>$class_id,'parent_id'=>$parent_id,'u_time'=>$time,'c_time'=>$time];
+
         $res = Db::name('dir')->insertGetId($data);
         return json($res);
     }
@@ -53,7 +56,8 @@ class Dir extends Controller
         $list = $request->param('list/a');
         $parent_id = $request->param('parent_id');
         foreach($list as $item){
-            $data = ['class_id' => $item[1] ,'parent_id'=>$item[2],'u_time'=>time()];
+            $data = ['class_id' => $item[1] ,'parent_id'=>$item[2],'u_time'=>time(),'rank'=>0];
+            if($data['parent_id'] == 0) $data['class_id'] = 1;
             Db::table('dir')->where('dir_id', $item[0])->update($data);
         }
         $res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0,'parent_id'=>$parent_id])->order('rank desc')->order('c_time asc')->column('dir_id');

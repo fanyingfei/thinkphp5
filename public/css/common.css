@@ -28,8 +28,18 @@ ul{
     padding-right:10px;
     cursor: pointer;
 }
+.dirlist .my-dir-list{
+    padding: 10px !important;
+}
+.dirlist .my-dir-list .icon{
+    background-position: 59.07692307692308% 83.38461538461539%;
+    padding-top: 8px;
+}
+.dirlist .my-dir-list.curr .icon{
+    background-position: 36.92307692307692% 83.38461538461539%;
+}
 .dirlist ul >li .li-dir{
-    padding-left:20px;
+    padding-left:30px;
 }
 .itemlist {
     position: relative;
@@ -65,6 +75,10 @@ ul{
 .dirlist .li-dir.cur-drap{
     padding-top:3px;
     padding-bottom:3px;
+}
+.dirlist .my-dir-list.cur-drap{
+    padding-top:9px !important;
+    padding-bottom:9px !important;
 }
 .dirlist .li-dir.curr{
     background-color: #398dee;
@@ -108,10 +122,30 @@ ul{
     display: block;
     float: left;
 }
-.li-dir .drop-down{
-    margin-left:-10px;
+.dirlist .li-dir .down-btn{
+    margin-top: 8px;
     width: 12px;
     height: 12px;
+}
+.dirlist .my-dir-list .down-btn{
+    margin-top:5px;
+    margin-right: 10px;
+}
+.dirlist .li-dir .drop-down{
+    background: url("https://shared-https.ydstatic.com/ynote/ydoc/e1e06b7a.sprite.svg") no-repeat;
+    background-position: 72.83582089552239% 61.492537313432834%;
+}
+.dirlist .li-dir.curr .drop-down{
+    background: url("https://shared-https.ydstatic.com/ynote/ydoc/e1e06b7a.sprite.svg") no-repeat;
+    background-position: 0 100%;
+}
+.dirlist .li-dir .pack-up{
+    background: url("https://shared-https.ydstatic.com/ynote/ydoc/e1e06b7a.sprite.svg") no-repeat;
+    background-position: 12.537313432835822% 100%;
+}
+.dirlist .li-dir.curr .pack-up{
+    background: url("https://shared-https.ydstatic.com/ynote/ydoc/e1e06b7a.sprite.svg") no-repeat;
+    background-position: 8.35820895522388% 100%;
 }
 .li-dir .name{
     padding-left:5px;
@@ -150,17 +184,20 @@ ul{
 .li-dir ~ ul{
     display: none;
 }
+.dirlist > ul{
+    display: block;
+}
 .dirlist ul ul .li-dir{
-    padding-left:40px;
+    padding-left:50px;
 }
 .dirlist ul ul ul .li-dir{
-    padding-left:60px;
+    padding-left:70px;
 }
 .dirlist ul ul ul ul .li-dir{
-    padding-left:80px;
+    padding-left:90px;
 }
 .dirlist ul ul ul ul ul .li-dir{
-    padding-left:100px;
+    padding-left:110px;
 }
 .li-dir .icon{
     background: url("/img/sprite.svg") no-repeat;
@@ -236,4 +273,7 @@ ul{
 }
 .item-dir .drop-down{
     display: none !important;
+}
+.article .title:focus{
+    border:0 !important;
 }
