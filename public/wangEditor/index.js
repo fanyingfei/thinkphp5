@@ -1,6 +1,5 @@
 $(function (){
-    var height = $('#article').height() - $("#wangDemo").offset().top - 10;
-    $('#wangDemo').height(height);
+    get_wangDemo_height();
 
    // wangEditor.config.mapAk = 'TVhjYjq1ICT2qqL5LdS8mwas';
     var editor = new wangEditor('wangDemo');

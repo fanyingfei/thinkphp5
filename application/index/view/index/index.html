@@ -14,34 +14,35 @@
 <div class="main">
     <div class="top-banner"></div>
     <div class="main-container">
-    <div class="sidebar">
-        <div class="dir-hd">
-            <div class="create-dir">新建文件夹</div><br>
-            <div class="create-art">新建笔记</div><br>
+        <div class="sidebar">
+            <div class="dir-hd">
+                <div class="create-dir">新建文件夹</div>
+                <div class="create-note">新建笔记</div>
+            </div>
+            <div class="dir-warp"><div class="dir-list overflow-auto"></div></div>
         </div>
-        <div class="dir-warp"><div class="dir-list overflow-auto"></div></div>
-    </div>
 
-    <div id="item-list" class="item-list">
-        <div class="item-wrap">
-            <div class="item-hd">搜索</div>
-            <div class="widget-scroller">
-                <div class="overflow-auto">
-                    <ul class="item-dir"></ul>
-                    <ul class="item-article"></ul>
+        <div class="item-list">
+            <div class="item-wrap">
+                <div class="item-hd">搜索</div>
+                <div class="widget-scroller">
+                    <div class="overflow-auto">
+                        <ul class="item-dir"></ul>
+                        <ul class="item-note"></ul>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="detail-container">
-        <div id="article" class="article">
-            <div class="title-wrap">
-                <input id="article-id" type="hidden" />
-                <input type="text" class="title" />
-                <button class="save btn btn-primary">保存</button>
+        <div class="detail-container">
+            <div class="note-detail">
+                <div class="title-wrap">
+                    <input id="note-id" type="hidden" />
+                    <input type="text" class="title" />
+                    <button class="save btn btn-primary">保存</button>
+                </div>
+                <div class="content overflow-auto" id="wangDemo"></div>
             </div>
-            <div class="content overflow-auto" id="wangDemo"></div>
         </div>
     </div>
 </div>
@@ -50,12 +51,12 @@
     <li class="move-down">下移</li>
     <li class="delete">删除</li>
     <li class="li-divider rename">重命名</li>
-    <li class="right-create-art">新建笔记</li>
+    <li class="right-create-note">新建笔记</li>
     <li class="right-create-dir">新建文件夹</li>
 </ul>
 <div class="none">
-    <img id="drop-dir" src="/img/drap.png" />
-    <img id="drop-article" src="/img/drap.png" />
+    <img id="drop-dir" src="/img/drap_dir.png" />
+    <img id="drop-note" src="/img/drap_note.png" />
 </div>
 </body>
 <script type="text/javascript" src="/wangEditor/jquery-1.10.2.min.js"></script>
@@ -111,73 +112,70 @@
         return html;
     }
 
-    function create_article_html(id,name,time){
-        return '<li><div class="li-article rightbtn" data-id="'+id+'"><i class="icon"></i><div class="name">'+name+'</div><div class="item-time">'+time+'</div><i class="right-menu"></i></div></li>';
+    function create_note_html(obj){
+        return '<li><div draggable="true" class="li-note rightbtn" data-id="'+ obj.rec_id+'"><i class="icon"></i><div class="name">'+ obj.title+'</div><div class="item-time">'+ obj.time+'</div><i class="right-menu"></i></div></li>';
     }
 
-    $("body").on("click", '.create-art', function(){
+    $("body").on("click", '.create-note', function(){
         if($(".li-dir").hasClass("curr")){
             var dir_id = $('.li-dir.curr').data('id');
         }else{
             var dir_id = $('.sidebar .li-dir:first-child').data('id');
         }
-        create_article(dir_id);
+        create_note(dir_id);
     })
 
-    function create_article(dir_id){
+    function create_note(dir_id){
         if($('.item-list .no-item').length > 0) $('.item-list .no-item').remove();
         $.ajax({
-            url:  '/dir/article_create',
+            url:  '/dir/note_create',
             data:{'dir_id':dir_id},
             type: "POST",
             dataType:'json',
             success:function(obj){
-                var id = obj.id;
                 //不是当前选中的文件夹创建笔记时，要把这个文件夹选中
                 if(dir_id != $('.dir-list .li-dir.curr').data('id')){
                     $('.dir-list .li-dir.curr').removeClass('curr');
                     $('.dir-list .li-dir[data-id='+dir_id+']').addClass('curr');
-                    $('.li-article.curr').next('ul').show();
-                    $('.li-article.curr').removeClass('curr');
+                    //得到item列表后把新建的笔记设置选中
                     item_list();
-                    $('.item-article .li-article[data-id='+id+']').addClass('curr');
-                    show_article();
-                    return false;
-                }
-
-                if($('#item-list .item-article li').length > 0){
-                    $('#item-list .item-article li').eq(0).before(create_article_html(id,'新建笔记',obj.time));
                 }else{
-                    $('#item-list .item-article').prepend(create_article_html(id,'新建笔记',obj.time));
+                    if($('.item-note li').length > 0){
+                        $('.item-note li:first-child').before(create_note_html(obj));
+                    }else{
+                        $('.item-note').prepend(create_note_html(obj));
+                    }
                 }
-                $('.li-article.curr').next('ul').show();
-                $('.li-article.curr').removeClass('curr');
-                $(".li-article[data-id="+id+"]").addClass('curr');
-                $('.title').val('新建笔记');
-                $('.content').html('');
-                $('#article-id').val(id);
+                $('.li-note.curr').removeClass('curr');
+                $('.li-note[data-id='+obj.rec_id+']').addClass('curr');
+                show_note();
             },
             error:function(e){}
         });
     }
 
+    function get_wangDemo_height(){
+        var height = $('.note-detail').height() - $("#wangDemo").offset().top + 30;
+        $('#wangDemo').height(height);
+    }
 
+    window.onresize = get_wangDemo_height;
 
     window.onbeforeunload = function(){
         if($('.dir-list .li-dir.curr').length > 0) var dir_id = $('.dir-list .li-dir.curr').data('id');
         else var dir_id = 0;
         $.cookie('currDir', dir_id , { path : '/' });
 
-        if($('.item-article .li-article.curr').length > 0) var rec_id = $('.item-article .li-article.curr').data('id');
+        if($('.item-note .li-note.curr').length > 0) var rec_id = $('.item-note .li-note.curr').data('id');
         else var rec_id = 0;
-        $.cookie('currArticle', rec_id , { path : '/' });
+        $.cookie('currNote', rec_id , { path : '/' });
     }
 
-    $("body").on("click", '.li-article', function(){
-        $('.li-article.curr').removeClass('curr');
+    $("body").on("click", '.li-note', function(){
+        $('.li-note.curr').removeClass('curr');
         var rec_id = $(this).data('id');
-        $(".li-article[data-id="+rec_id+"]").addClass('curr');
-        show_article();
+        $(".li-note[data-id="+rec_id+"]").addClass('curr');
+        show_note();
     })
 
     $("body").on("click", '.li-dir', function(){
@@ -189,7 +187,7 @@
         obj.parents('ul').show();
         if(!downBtn.hasClass('pack-up')) downBtn.addClass('pack-up');
         item_list();
-        show_article();
+        show_note();
     })
 
     $("body").on("click", '.li-dir .drop-down', function(){
@@ -237,7 +235,7 @@
                 $('.dir-list .li-dir[data-id='+dir_id+']').addClass('curr');
                 $('.item-list').attr('parent-id',dir_id);
                 item_list();
-                show_article();
+                show_note();
             },
             error:function(e){}
         });
@@ -258,7 +256,15 @@
     }
 
     function no_item_html(){
-        return '<div class="no-item"><p>没有找到文件</p><button class="btn create-art">新建笔记</button></div>';
+        return '<div class="no-item"><p>没有找到文件</p><button class="btn create-note">新建笔记</button></div>';
+    }
+
+    function empty_note(){
+        $('.note-detail').addClass('empty');
+        $('.note-detail').children().hide();
+        $('.note-detail').append('<div class="empty-img"></div>');
+        $('.title-wrap input').val('');
+        $('.note-detail .content').html('');
     }
 
     function item_list(){
@@ -282,54 +288,54 @@
                 })
                 $('.item-dir').html(html);
                 html = '';
-                $.each(obj.art, function(key, v){
-                    html += create_article_html(v.rec_id, v.title, v.time);
+                $.each(obj.note, function(key, v){
+                    html += create_note_html(v);
                 })
-                if(obj.dir.length == 0 && obj.art.length == 0){
-                    html = no_item_html();
-                    $('.item-article').html(html);
+                if(obj.dir.length == 0 && obj.note.length == 0){
+                    empty_note();
+                    $('.item-note').html(no_item_html());
                 }
-                $('.item-article').html(html);
+                $('.item-note').html(html);
             },
             error:function(e){}
         });
     }
 
-    function show_article(){
+    function show_note(){
         //没有任何笔记时
-        if($('.item-article li').length == 0){
-            $('#article').addClass('empty');
-            $('#article').children().hide();
-            $('#article').append('<div class="empty-img"></div>');
+        if($('.item-note li').length == 0){
+            $('.note-detail').addClass('empty');
+            $('.note-detail').children().hide();
+            $('.note-detail').append('<div class="empty-img"></div>');
             $('.title-wrap input').val('');
-            $('.article .content').html('');
+            $('.note-detail .content').html('');
             return false;
         }
-        if($('#article').hasClass('empty')){
-            $('#article .empty-img').remove();
-            $('#article').removeClass('empty');
-            $('#article').children().show();
+        if($('.note-detail').hasClass('empty')){
+            $('.note-detail .empty-img').remove();
+            $('.note-detail').removeClass('empty');
+            $('.note-detail').children().show();
         }
         //有笔记时
-        if($('.item-article .li-article.curr').length > 0){
-            var rec_id = $('.item-article .li-article.curr').data('id')
-        }else if($.cookie('currArticle') && $('.item-article .li-article[data-id='+$.cookie('currArticle')+']').parents('.item-list').length>0
+        if($('.item-note .li-note.curr').length > 0){
+            var rec_id = $('.item-note .li-note.curr').data('id')
+        }else if($.cookie('currNote') && $('.item-note .li-note[data-id='+$.cookie('currNote')+']').parents('.item-list').length>0
                 && $('.dir-list .li-dir.curr').data('id') == $('.item-list').attr('parent-id')){
-            var rec_id = $.cookie('currArticle');
+            var rec_id = $.cookie('currNote');
         }else{
-            var rec_id = $('.item-article li:first-child .li-article').data('id');
+            var rec_id = $('.item-note li:first-child .li-note').data('id');
         }
 
-        $('.item-article .li-article[data-id='+rec_id+']').addClass('curr');
+        $('.item-note .li-note[data-id='+rec_id+']').addClass('curr');
         $.ajax({
-            url:  '/dir/article',
+            url:  '/dir/note_item',
             data:{'rec_id':rec_id},
             type: "POST",
             dataType:'json',
             success:function(obj){
-                $('.article .title').val(obj.title);
-                $('#article-id').val(obj.rec_id);
-                $('.article .content').html(obj.content);
+                $('.note-detail .title').val(obj.title);
+                $('#note-id').val(obj.rec_id);
+                $('.note-detail .content').html(obj.content);
             },
             error:function(e){}
         });
@@ -338,27 +344,31 @@
     $("body").on("blur", '#wangDemo', function(e){
         var content = $('#wangDemo').html();
         if(content == '') return false;
-        save_article();
+        save_note();
     })
 
     $("body").on("click", '.save', function(){
         var title = $('.title').val();
         if(title == '') alert('标题不能为空');
-        save_article();
+        save_note();
     })
 
-    function save_article(){
+    $('.title').bind('input propertychange', function() {
+        $('.li-note.curr .name').text($(this).val());
+    });
+
+    function save_note(){
         var title = $('.title').val();
-        var rec_id = $('#article-id').val();
+        var rec_id = $('#note-id').val();
         var content = $('#wangDemo').html();
         if(title == '') return false;
         $.ajax({
-            url:  '/dir/article_update',
+            url:  '/dir/note_update',
             data:{'title':title,'content':content,'rec_id':rec_id},
             type: "POST",
             dataType:'json',
             success:function(obj){
-                if($(".li-article[data-id="+rec_id+"] .name").text() != title) $(".li-article[data-id="+rec_id+"] .name").html(title);
+                if($(".li-note[data-id="+rec_id+"] .name").text() != title) $(".li-note[data-id="+rec_id+"] .name").html(title);
             },
             error:function(e){}
         });
@@ -366,6 +376,4 @@
 
 
 </script>
-
-</body>
 </html>

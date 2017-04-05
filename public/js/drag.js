@@ -1,16 +1,27 @@
 var drapId  = 0;
 
+$("body").on("dragstart", '.li-note', function(e){
+    var rec_id = $(this).data('id');
+    drapId = $(this).data('id');
+    drapObj = e.originalEvent.dataTransfer;
+    drapObj.setData("rec-id",rec_id);
+    var dragIcon = document.createElement("img");
+    dragIcon.src = $('#drop-note').attr('src');
+    drapObj.setDragImage(dragIcon, -10, -10);
+});
+
 $("body").on("dragstart", '.li-dir', function(e){
     var rec_id = $(this).data('id');
     drapId = $(this).data('id');
     drapObj = e.originalEvent.dataTransfer;
-    drapObj.setData("text",rec_id);
+    drapObj.setData("dir-id",rec_id);
  //   drapObj.dropEffect="move";
  //   drapObj.effectAllowed="all";
     var dragIcon = document.createElement("img");
     dragIcon.src = $('#drop-dir').attr('src');
     drapObj.setDragImage(dragIcon, -10, -2);
 });
+
 $("body").on("dragend", '.li-dir', function(e){
     drapId  = 0;
     $('.cur-drap').removeClass('cur-drap');
@@ -23,13 +34,44 @@ $("body").on("dragenter", '.li-dir', function(e){
 });
 //当拖拽完成后触发的事件，此事件作用在被拖曳元素上
 $("body").on("drop", '.li-dir', function(e){
-    e.originalEvent.preventDefault;
-    var id = e.originalEvent.dataTransfer.getData("text");
+    e.originalEvent.preventDefault();
+    var drapObj = e.originalEvent.dataTransfer;
+    drapObj.preventDefault;
     $('.cur-drap').removeClass('cur-drap');
-    if($(this).data('id') == id) return false;
+    if(drapObj.getData("rec-id")){
+        var id  = drapObj.getData("rec-id");
+        drapObj.clearData("rec-id");
+        drap_note($(this),id);
+    }else if(drapObj.getData("dir-id")){
+        var id  = drapObj.getData("dir-id");
+        drapObj.clearData("dir-id");
+        drap_dir($(this),id);
+    }
+})
+
+function drap_note(curObj,id){
+    var parent_id = $('.item-list').attr('parent-id');
+    var curr_dir_id = curObj.data('id');
+    if(curr_dir_id == parent_id) return false;
+    $('.li-note[data-id='+id+']').parent().remove();
+    empty_note();
+    if($('.widget-scroller .rightbtn').length == 0) $('.item-note').html(no_item_html());
+    $.ajax({
+        url:  '/dir/update_drap_note',
+        data:{'rec_id':id , 'dir_id':curr_dir_id},
+        type: "POST",
+        dataType:'json',
+        success:function(result){
+        },
+        error:function(e){}
+    });
+}
+
+function drap_dir(curObj,id){
+    var cur_id = curObj.data('id');
+    if(cur_id == id) return false;
     var parent_id = $(".dir-list .li-dir[data-id="+id+"]").parent('li').parent('ul').prev('.li-dir').data('id');
-    if($(this).data('id') == parent_id) return false;
-    var cur_id = $(this).data('id');
+    if(cur_id == parent_id) return false;
     var curObj = $(".dir-list .li-dir[data-id="+cur_id+"]");
 
     if($(".dir-list .li-dir[data-id="+parent_id+"]").next('ul').children('li').length == 1){
@@ -59,8 +101,8 @@ $("body").on("drop", '.li-dir', function(e){
         //拖放右侧增加
         $(".item-dir").append(html);
     }
-    update_dir_list($(".dir-list .li-dir[data-id="+id+"]"),$(this).data('id'));
-})
+    update_dir_list($(".dir-list .li-dir[data-id="+id+"]"),cur_id);
+}
 
 function update_dir_list(obj,parent_id){
     var parent = obj.parent('li').parent('ul').prev('.li-dir');
@@ -70,7 +112,7 @@ function update_dir_list(obj,parent_id){
     var list = get_dir_attr(obj);
     list.push(cur_item);
     $.ajax({
-        url:  '/dir/update_dir',
+        url:  '/dir/update_drap_dir',
         data:{'list':list,'parent_id':parent_id},
         type: "POST",
         dataType:'json',

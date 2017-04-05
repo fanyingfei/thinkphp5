@@ -24,15 +24,15 @@ class Dir extends Controller
         $request = Request::instance();
         $dir_id = $request->param('dir_id');
         $dir_res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0,'parent_id'=>$dir_id])->order('rank desc')->order('c_time asc')->field('dir_id,dir_name,class_id,parent_id,c_time')->select();
-        $art_res = Db::table('articles')->where(['uid'=>$user_id,'is_delete'=>0,'dir_id'=>$dir_id])->order('rank desc')->order('c_time asc')->field('rec_id,title,c_time')->select();
+        $note_res = Db::table('note')->where(['uid'=>$user_id,'is_delete'=>0,'dir_id'=>$dir_id])->order('rank desc')->order('c_time asc')->field('rec_id,title,c_time')->select();
         foreach($dir_res as &$dir){
             $dir['time'] = date('Y-m-d',$dir['c_time']);
         }
-        foreach($art_res as &$item){
+        foreach($note_res as &$item){
             $item['time'] = date('Y-m-d',$item['c_time']);
         }
-        $data = array('dir'=>empty($dir_res) ? array() : $dir_res,'art'=>empty($art_res) ? array() : $art_res);
-        return json(array('dir'=>$dir_res,'art'=>$art_res));
+        $data = array('dir'=>empty($dir_res) ? array() : $dir_res,'note'=>empty($note_res) ? array() : $note_res);
+        return json(array('dir'=>$dir_res,'note'=>$note_res));
     }
 
     public function create_dir(){
@@ -51,7 +51,7 @@ class Dir extends Controller
         return json($res);
     }
 
-    public function update_dir(){
+    public function update_drap_dir(){
         $time = time();
         $request = Request::instance();
         //   $user_id = $request->session('uid');
@@ -101,26 +101,26 @@ class Dir extends Controller
         return json($res);
     }
 
-    public function article(){
+    public function note_item(){
         $user_id = 1;
         $request = Request::instance();
         $rec_id = $request->param('rec_id');
-        $res = Db::table('articles')->where(['rec_id'=>$rec_id,'uid'=>$user_id])->order('rank desc')->order('c_time asc')->find();
+        $res = Db::table('note')->where(['rec_id'=>$rec_id,'uid'=>$user_id])->order('rank desc')->order('c_time asc')->find();
         return json($res);
     }
 
-    public function delete_article(){
+    public function delete_note(){
         $time = time();
         $request = Request::instance();
         //   $user_id = $request->session('uid');
         $user_id = 1;
         $id = $request->param('id');
         $data = ['is_delete' => 1 , 'u_time'=>time()];
-        $res = Db::table('articles')->where('rec_id', $id)->update($data);
+        $res = Db::table('note')->where('rec_id', $id)->update($data);
         return json($res);
     }
 
-    public function article_update(){
+    public function note_update(){
         $time = time();
         $request = Request::instance();
         $rec_id = $request->param('rec_id');
@@ -129,20 +129,32 @@ class Dir extends Controller
         //   $user_id = $request->session('uid');
         $user_id = 1;
         $data = ['uid'=>$user_id,'title'=>$title,'content'=>$content,'u_time'=>$time,'c_time'=>$time];
-        $res = Db::table('articles')->where('rec_id', $rec_id)->update($data);
+        $res = Db::table('note')->where('rec_id', $rec_id)->update($data);
         return json($res);
     }
 
-    public function update_article_name(){
+    public function update_drap_note(){
+        $time = time();
+        $request = Request::instance();
+        //   $user_id = $request->session('uid');
+        $user_id = 1;
+        $rec_id = $request->param('rec_id');
+        $dir_id = $request->param('dir_id');
+        $data = ['dir_id'=>$dir_id,'u_time'=>$time];
+        $res = Db::table('note')->where('rec_id', $rec_id)->update($data);
+        return json($res);
+    }
+
+    public function update_note_name(){
         $request = Request::instance();
         $rec_id = $request->param('id');
         $title = $request->param('name');
         $data = ['title' => $title ,'u_time'=>time()];
-        $res = Db::table('articles')->where('rec_id', $rec_id)->update($data);
+        $res = Db::table('note')->where('rec_id', $rec_id)->update($data);
         return json($res);
     }
 
-    public function update_article_sort(){
+    public function update_note_sort(){
         $time = time();
         $request = Request::instance();
         //   $user_id = $request->session('uid');
@@ -150,12 +162,12 @@ class Dir extends Controller
         $list = $request->param('list/a');
         foreach($list as $item){
             $data = ['rank' => $item[1] , 'u_time'=>time()];
-            $res = Db::table('articles')->where('rec_id', $item[0])->update($data);
+            $res = Db::table('note')->where('rec_id', $item[0])->update($data);
         }
         return json($res);
     }
 
-    public function article_create(){
+    public function note_create(){
         $time = time();
         $request = Request::instance();
         $title = '新建笔记';
@@ -164,8 +176,8 @@ class Dir extends Controller
         //   $user_id = $request->session('uid');
         $user_id = 1;
         $data = ['dir_id' => $dir_id, 'uid'=>$user_id,'title'=>$title,'content'=>$content,'u_time'=>$time,'c_time'=>$time];
-        $inser_id = Db::name('articles')->insertGetId($data);
-        return json(array('id'=>$inser_id,'time'=>date('Y-m-d',$time)));
+        $inser_id = Db::name('note')->insertGetId($data);
+        return json(array('rec_id'=>$inser_id,'time'=>date('Y-m-d',$time),'title'=>$title));
     }
 
     public function nesting($res){
