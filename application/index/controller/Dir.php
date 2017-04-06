@@ -14,9 +14,6 @@ class Dir extends Controller
         $res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0])->order('rank desc')->order('c_time asc')->field('dir_id,dir_name,class_id,parent_id')->select();
         $data = $this->nesting($res);
         return JSON($data);
-     //   print_r($list);exit;
-    //    $this->assign('list',$list);
-    //    return $this->fetch('index');
     }
 
     public function item_list(){
@@ -201,5 +198,11 @@ class Dir extends Controller
             $data[] = $one;
         }
         return $data;
+    }
+
+    public function get_children_dir($parent_id){
+        $user_id = 1;
+        $sql = 'select dir_id,dir_name,parent_id,class_id from dir where dir_id = 0 union all ';
+        $sql .= 'select tr.dir_id,tr.dir_name,tr.parent_id,tr.class_id + 1 from dir td inner join dir tr on td.dir_id = tr.dir_id';
     }
 }

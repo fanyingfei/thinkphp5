@@ -19,16 +19,31 @@
                 <div class="create-dir">新建文件夹</div>
                 <div class="create-note">新建笔记</div>
             </div>
-            <div class="dir-warp"><div class="dir-list overflow-auto"></div></div>
+            <div class="dir-warp">
+                <div class="widget-scroller-wrap">
+                    <div class="scroller-container">
+                        <div class="dir-list"></div>
+                    </div>
+                    <div class="widget-scroller-bar"></div>
+                </div>
+            </div>
         </div>
 
         <div class="item-list">
             <div class="item-wrap">
-                <div class="item-hd">搜索</div>
+                <div class="item-hd">
+                    <div class="search-wrap">
+                        <i class="search-icon"></i>
+                        <input class="search-input" placeholder="搜索" >
+                    </div>
+                </div>
                 <div class="widget-scroller">
-                    <div class="overflow-auto">
-                        <ul class="item-dir"></ul>
-                        <ul class="item-note"></ul>
+                    <div class="widget-scroller-wrap">
+                        <div class="scroller-container">
+                            <ul class="item-dir"></ul>
+                            <ul class="item-note"></ul>
+                        </div>
+                        <div class="widget-scroller-bar"></div>
                     </div>
                 </div>
             </div>
@@ -38,10 +53,10 @@
             <div class="note-detail">
                 <div class="title-wrap">
                     <input id="note-id" type="hidden" />
-                    <input type="text" class="title" />
+                    <input type="text" title="" class="title" />
                     <button class="save btn btn-primary">保存</button>
                 </div>
-                <div class="content overflow-auto" id="wangDemo"></div>
+                <div class="note-scroller-wrap note-view" id="wangDemo"></div>
             </div>
         </div>
     </div>
@@ -64,6 +79,7 @@
 <script type="text/javascript" src='/wangEditor/wangEditor.min.js'></script>
 <script type="text/javascript" src="/wangEditor/index.js"></script>
 <script type="text/javascript" src="/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="/js/mousewheel.js"></script>
 <script type="text/javascript" src="/js/rightmenu.js"></script>
 <script type="text/javascript" src="/js/drag.js"></script>
 <script type="text/javascript">
@@ -264,7 +280,7 @@
         $('.note-detail').children().hide();
         $('.note-detail').append('<div class="empty-img"></div>');
         $('.title-wrap input').val('');
-        $('.note-detail .content').html('');
+        $('.note-detail .note-view').html('');
     }
 
     function item_list(){
@@ -273,6 +289,8 @@
             id = $('.sidebar .li-dir:first-child').data('id');
             $(".sidebar .li-dir[data-id="+id+"]").addClass('curr');
         }
+        //去除滚动条的影响
+        $('.item-list .scroller-container').css("margin-top", 0);
 
         $.ajax({
             url:  '/dir/item_list',
@@ -308,7 +326,7 @@
             $('.note-detail').children().hide();
             $('.note-detail').append('<div class="empty-img"></div>');
             $('.title-wrap input').val('');
-            $('.note-detail .content').html('');
+            $('.note-detail .note-view').html('');
             return false;
         }
         if($('.note-detail').hasClass('empty')){
@@ -333,17 +351,19 @@
             type: "POST",
             dataType:'json',
             success:function(obj){
-                $('.note-detail .title').val(obj.title);
                 $('#note-id').val(obj.rec_id);
-                $('.note-detail .content').html(obj.content);
+                $('.note-detail .title').val(obj.title).attr('title',obj.title);
+                $('.note-detail .note-view').html(obj.content);
             },
             error:function(e){}
         });
     }
 
-    $("body").on("blur", '#wangDemo', function(e){
+    $("body").on("blur", '.note-detail', function(e){
+        var title = $('.title').val();
+        var pri_title = $('.title').attr('title');
         var content = $('#wangDemo').html();
-        if(content == '') return false;
+        if(title == pri_title && content == '') return false;
         save_note();
     })
 
@@ -373,7 +393,6 @@
             error:function(e){}
         });
     }
-
 
 </script>
 </html>

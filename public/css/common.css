@@ -15,25 +15,25 @@ ul{
 .none{
     display: none !important;
 }
-.overflow-auto{
+.widget-scroller-wrap,
+.note-scroller-wrap{
     overflow: hidden;
     height: 100%;
     width: 100%;
     outline: none;
-    overflow-y: scroll;
 }
 .dir-warp{
     position: absolute;
     top: 61px;
     width:100%;
-    bottom: 60px;
+    bottom: 20px;
 }
 .widget-scroller{
     position: absolute;
     top: 61px;
-    bottom: 0;
-    left: 0px;
-    right: 0px;
+    bottom: 10px;
+    left: 0;
+    right: 0;
 }
 .dir-hd{
     position: relative;
@@ -56,7 +56,7 @@ ul{
     left: 0;
     right: 0;
     bottom: 0;
-    min-width:1000px;
+    overflow: hidden;
 }
 .sidebar {
     height: 100%;
@@ -129,6 +129,7 @@ ul{
 .note-detail{
     height: 100%;
     position: relative;
+    min-width:600px;
 }
 .note-detail.empty{
     text-align: center;
@@ -191,6 +192,32 @@ ul{
     line-height: 61px;
     border-bottom: 1px solid #e0e1e5;
     position: relative;
+}
+.search-wrap{
+    position: relative;
+    display: block;
+    margin: 0px 60px 0 50px;
+}
+.search-icon{
+    background: url("https://shared-https.ydstatic.com/ynote/ydoc/e1e06b7a.sprite.svg") no-repeat;
+    background-position: 51.69230769230769% 76%;
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    display: block;
+    top:19px;
+    left:5px;
+    cursor: pointer;
+}
+.search-input{
+    border: 1px solid rgba(148, 157, 166, 0.36);
+    border-radius: 20px;
+    line-height: 24px;
+    padding: 2px 4px 2px 36px;
+    outline: none;
+}
+.search-input:focus{
+    border-color: #A6C8FF;
 }
 .li-note{
     position: relative;
@@ -327,13 +354,13 @@ ul{
 .title-wrap{
     padding:9px;
     clear:both;
-    overflow: auto;
+    overflow: hidden;
 }
 .title{
     float:left;
     font-size: 30px;
     border:0;
-    width:998px;
+    width:80%;
 }
 .title:focus{
     outline:0;
@@ -388,22 +415,15 @@ ul{
 .item-dir .drop-down{
     display: none !important;
 }
-.scrollbar::-webkit-scrollbar{
-    width: 16px;
-    height: 16px;
-    background-color: #f5f5f5;
-}
-/*定义滚动条的轨道，内阴影及圆角*/
-.scrollbar::-webkit-scrollbar-track{
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-    border-radius: 10px;
-    background-color: #f5f5f5;
-}
-/*定义滑块，内阴影及圆角*/
-.scrollbar::-webkit-scrollbar-thumb{
-    /*width: 10px;*/
-    height: 20px;
-    border-radius: 10px;
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-    background-color: #555;
+.widget-scroller-bar {
+    position: absolute;
+    display: none;
+    right: 0;
+    top:0;
+    z-index: 10;
+    width: 10px;
+    background: #76B0F3;
+    border-radius: 0;
+    -webkit-opacity: 0.3;
+    opacity: 0.3;
 }
