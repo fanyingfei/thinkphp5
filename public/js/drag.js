@@ -1,5 +1,5 @@
 var drapId  = 0;
-
+//笔记开始拖放时
 $("body").on("dragstart", '.li-note', function(e){
     var rec_id = $(this).data('id');
     drapId = $(this).data('id');
@@ -9,7 +9,7 @@ $("body").on("dragstart", '.li-note', function(e){
     dragIcon.src = $('#drop-note').attr('src');
     drapObj.setDragImage(dragIcon, -10, -10);
 });
-
+//目录开始拖放时
 $("body").on("dragstart", '.li-dir', function(e){
     var rec_id = $(this).data('id');
     drapId = $(this).data('id');
@@ -21,11 +21,12 @@ $("body").on("dragstart", '.li-dir', function(e){
     dragIcon.src = $('#drop-dir').attr('src');
     drapObj.setDragImage(dragIcon, -10, -2);
 });
-
+//目录或者笔记播放结束时
 $("body").on("dragend", 'li .rightbtn', function(e){
     drapId  = 0;
     $('.cur-drap').removeClass('cur-drap');
 });
+//拖放元素进入目标元素时
 $("body").on("dragenter", '.li-dir', function(e){
     e.originalEvent.preventDefault();
     $('.cur-drap').removeClass('cur-drap');
@@ -48,9 +49,7 @@ $("body").on("drop", '.li-dir', function(e){
         drap_dir($(this),id);
     }
 })
-
-
-
+//拖放目录
 function drap_dir(curObj,id){
     var cur_id = curObj.data('id');
     if(cur_id == id) return false;
@@ -88,7 +87,7 @@ function drap_dir(curObj,id){
     update_dir_list($(".dir-list .li-dir[data-id="+id+"]"),cur_id);
 }
 
-
+//拖放结束后排序
 function drap_dir_sort(obj,parent_id,result){
     var parentObj = $(".dir-list .li-dir[data-id="+parent_id+"]");
     if(result.length <= 1) return false;

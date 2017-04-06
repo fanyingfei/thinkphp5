@@ -84,8 +84,11 @@
 <script type="text/javascript" src="/js/drag.js"></script>
 <script type="text/javascript" src="/js/ajax.request.js"></script>
 <script type="text/javascript">
-    var time = null;
 
+    //初始得到目录列表
+    dir_list();
+
+    //监听创建目录
     $("body").on("click", '.create-dir', function(){
         if($(".dir-list .curr").length > 0){
             var parent_id = $('.dir-list .li-dir.curr').data('id');
@@ -98,8 +101,7 @@
         create_dir(parent_id,class_id);
     })
 
-
-
+    //创建目录的HTML
     function create_dir_html(obj,is_parent){
         var html = '<div draggable="true" class="li-dir rightbtn" class-id="'+ obj.class_id+'" data-id="'+ obj.dir_id+'" >';
         if(is_parent == 1) html += '<span class="down-btn drop-down"></span>';
@@ -109,10 +111,12 @@
         return html;
     }
 
+    //创建笔记的HTML
     function create_note_html(obj){
         return '<li><div draggable="true" class="li-note rightbtn" data-id="'+ obj.rec_id+'"><i class="icon"></i><div class="name">'+ obj.title+'</div><div class="item-time">'+ obj.time+'</div><i class="right-menu"></i></div></li>';
     }
 
+    //监听创建笔记
     $("body").on("click", '.create-note', function(){
         if($(".li-dir").hasClass("curr")){
             var dir_id = $('.li-dir.curr').data('id');
@@ -122,13 +126,25 @@
         create_note(dir_id);
     })
 
+    //得到富文本编辑器的高度
     function get_wangDemo_height(){
         var height = $('.note-detail').height() - $("#wangDemo").offset().top + 30;
         $('#wangDemo').height(height);
     }
 
-    window.onresize = get_wangDemo_height;
+    //浏览器大小改变的同时改变编辑器的高度
+    window.onresize = function(){
+        get_wangDemo_height();
+        change_scroller_height($('.dir-warp .scroller-container'));
+        change_scroller_height($('.item-wrap .scroller-container'));
+    }
 
+    function change_scroller_height(obj){
+        if(obj.offset().top >= obj.parent().offset().top) return false;
+        obj.css("margin-top", 0);
+    }
+
+    //关闭或者刷新浏览器时触发
     window.onbeforeunload = function(){
         if($('.dir-list .li-dir.curr').length > 0) var dir_id = $('.dir-list .li-dir.curr').data('id');
         else var dir_id = 0;
@@ -139,6 +155,7 @@
         $.cookie('currNote', rec_id , { path : '/' });
     }
 
+    //监听打开笔记
     $("body").on("click", '.li-note', function(){
         $('.li-note.curr').removeClass('curr');
         var rec_id = $(this).data('id');
@@ -146,6 +163,7 @@
         show_note();
     })
 
+    //监听打开目录
     $("body").on("click", '.li-dir', function(){
         $('.dir-list .li-dir.curr').removeClass('curr');
         var dir_id = $(this).data('id');
@@ -158,14 +176,17 @@
         show_note();
     })
 
+    //监听目录下拉事件
     $("body").on("click", '.li-dir .drop-down', function(){
         open_dir($(this));
     })
 
+    //双击目录同样触发下单事件
     $("body").on("dblclick", '.dir-list .li-dir', function(){
         open_dir($(this).children('.down-btn'));
     })
 
+    //打开下拉目录的方法
     function open_dir(obj){
         var parent = obj.parent();
         if(parent.next('ul').is(":hidden")){
@@ -179,9 +200,7 @@
         return false;
     }
 
-    dir_list();
-
-
+    //创建目录列表的HTML，循环嵌套
     function creat_list(obj){
         var html = '<ul>';
         $.each(obj, function(key, v){
@@ -196,10 +215,12 @@
         return html += '</ul>';
     }
 
+    //没有任何目录和笔记时调用此方法
     function no_item_html(){
         return '<div class="no-item"><p>没有找到文件</p><button class="btn create-note">新建笔记</button></div>';
     }
 
+    //没有笔记时view的显示
     function empty_note(){
         $('.note-detail').addClass('empty');
         $('.note-detail').children().hide();
@@ -208,6 +229,7 @@
         $('.note-detail .note-view').html('');
     }
 
+    //焦点离开笔记时触发，调用保存方法
     $("body").on("blur", '.note-detail', function(e){
         var title = $('.title').val();
         var pri_title = $('.title').attr('title');
@@ -216,16 +238,19 @@
         save_note();
     })
 
+    //保存笔记，调用保存方法
     $("body").on("click", '.save', function(){
         var title = $('.title').val();
         if(title == '') alert('标题不能为空');
         save_note();
     })
 
+    //笔记标题改变时同步中间的笔记名
     $('.title').bind('input propertychange', function() {
         $('.li-note.curr .name').text($(this).val());
     });
 
+    //展示笔记
     function show_note(){
         //没有任何笔记时
         if($('.item-note li').length == 0){
@@ -254,6 +279,16 @@
         $('.item-note .li-note[data-id='+rec_id+']').addClass('curr');
         ajax_show_note(rec_id);
     }
+
+    //点击搜索图标
+    $("body").on("click", '.search-icon', function(){
+        search_note();
+    })
+    //回车搜索
+    $("body").on("keydown", '.search-input', function(e){
+        if(e.which == 13) search_note();
+    });
+
 
 </script>
 </html>

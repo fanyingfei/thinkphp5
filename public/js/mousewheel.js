@@ -201,15 +201,20 @@
 
     //下面是自己写的
     $(".widget-scroller-wrap").mouseover(function(){
+        $('.widget-scroller-bar').hide();
         var box_height = $(this).height();
         var content_height = $(this).children('.scroller-container').height();
         if(content_height <= box_height) return false;
         var barObj = $(this).children('.widget-scroller-bar');
         barObj.height(box_height*box_height/content_height).show();
+        return false;
     });
 
     $(".widget-scroller-wrap").mouseleave(function(){
-        if(!$(this).children('.widget-scroller-bar').is(":hidden")) $(this).children('.widget-scroller-bar').hide();
+        if(!$(this).children('.widget-scroller-bar').is(":hidden")){
+            $(this).children('.widget-scroller-bar').hide();
+        }
+        return false;
     });
 
     $(".widget-scroller-wrap").bind('mousewheel', function(event, delta) {
@@ -228,6 +233,7 @@
     var start_top = 0;
     $(".widget-scroller-bar").mousedown(function(e){
         remove_bar_end($(this),e.pageY);
+        //需要return false，阻止拖放事件
         return false;
     });
 
@@ -238,7 +244,7 @@
 
     $(".widget-scroller-bar").mouseleave(function(e){
         remove_bar_end($(this),0);
-        return false;
+        //不要return false 否则会阻止widget-scroller-wrap的离开事件
     });
 
     function remove_bar_end(o,h){
@@ -249,7 +255,7 @@
 
     $(".widget-scroller-bar").mousemove(function(e){
         if(start_height == 0) return false;
-
+        if($(this).is(":hidden")) return false;
         var obj = $(this).parent(), contObj = $(this).prev('.scroller-container'), barObj = $(this);
         var box_height = obj.outerHeight(), cont_height = contObj.outerHeight(), bar_height = barObj.outerHeight();
         if(cont_height <= box_height) return false;

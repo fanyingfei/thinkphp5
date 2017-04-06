@@ -192,8 +192,20 @@ class Dir extends Controller
         $user_id = 1;
         $data = ['dir_id' => $dir_id, 'uid'=>$user_id,'title'=>$title,'content'=>$content,'u_time'=>$time,'c_time'=>$time];
         $rec_id = Db::name('note')->insertGetId($data);
+
         if($rec_id) splash('succ','新建笔记成功',['rec_id'=>$rec_id,'title'=>$title,'time'=>date('Y-m-d',$time)]);
         else splash('error','新建笔记失败，请刷新重试');
+    }
+
+    public function note_search(){
+        $user_id = 1;
+        $request = Request::instance();
+        $search = trim($request->param('search'));
+        $list = Db::table('note')->where(['uid'=>$user_id,'is_delete'=>0])->where('title','like','%'.$search.'%')->order('rec_id desc')->field('rec_id,title,c_time')->select();
+        foreach($list as &$item){
+            $item['time'] = date('Y-m-d',$item['c_time']);
+        }
+        splash('succ','搜索结果',$list);
     }
 
     public function nesting($res){

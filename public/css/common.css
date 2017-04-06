@@ -326,16 +326,16 @@ ul{
     display: block;
 }
 .dir-list ul ul .li-dir{
-    padding-left:50px;
+    padding-left:45px;
 }
 .dir-list ul ul ul .li-dir{
-    padding-left:70px;
+    padding-left:60px;
 }
 .dir-list ul ul ul ul .li-dir{
-    padding-left:90px;
+    padding-left:75px;
 }
 .dir-list ul ul ul ul ul .li-dir{
-    padding-left:110px;
+    padding-left:90px;
 }
 .li-dir .icon{
     background: url("/img/sprite.svg") no-repeat;

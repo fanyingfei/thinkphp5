@@ -1,3 +1,4 @@
+//创建目录
 function create_dir(parent_id,class_id){
     $.ajax({
         url:  '/dir/create_dir',
@@ -22,7 +23,7 @@ function create_dir(parent_id,class_id){
         error:function(e){}
     });
 }
-
+//创建笔记
 function create_note(dir_id){
     if($('.item-list .no-item').length > 0) $('.item-list .no-item').remove();
     $.ajax({
@@ -56,7 +57,7 @@ function create_note(dir_id){
         error:function(e){}
     });
 }
-
+//目录列表
 function dir_list(){
     $.ajax({
         url:  '/dir/dir_list',
@@ -86,7 +87,7 @@ function dir_list(){
         error:function(e){}
     });
 }
-
+//中间的目录和笔记列表
 function item_list(){
     var id = $('.li-dir.curr').data('id');
     if(id == undefined){
@@ -116,7 +117,7 @@ function item_list(){
             })
             if(obj.dir.length == 0 && obj.note.length == 0){
                 empty_note();
-                $('.item-note').html(no_item_html());
+                html = no_item_html();
             }
             $('.item-note').html(html);
         },
@@ -124,6 +125,7 @@ function item_list(){
     });
 }
 
+//展示笔记
 function ajax_show_note(rec_id){
     $.ajax({
         url:  '/dir/note_item',
@@ -140,7 +142,7 @@ function ajax_show_note(rec_id){
         error:function(e){}
     });
 }
-
+//保存笔记
 function save_note(){
     var title = $('.title').val();
     var rec_id = $('#note-id').val();
@@ -161,7 +163,7 @@ function save_note(){
         error:function(e){}
     });
 }
-
+//拖放笔记
 function drap_note(curObj,id){
     var parent_id = $('.item-list').attr('parent-id');
     var curr_dir_id = curObj.data('id');
@@ -183,7 +185,7 @@ function drap_note(curObj,id){
         error:function(e){}
     });
 }
-
+//目录排序
 function update_dir_list(obj,parent_id){
     var parent = obj.parent('li').parent('ul').prev('.li-dir');
     var class_id = parseInt(parent.attr('class-id'))+1;
@@ -206,7 +208,7 @@ function update_dir_list(obj,parent_id){
         error:function(e){}
     });
 }
-
+//删除目录或者笔记
 function ajax_delete_btn(url,id){
     $.ajax({
         url:  url,
@@ -222,7 +224,7 @@ function ajax_delete_btn(url,id){
         error:function(e){}
     });
 }
-
+//排序
 function ajax_update_sort(url,list){
     $.ajax({
         url:  url,
@@ -234,6 +236,50 @@ function ajax_update_sort(url,list){
                 alert(res.msg);
                 return false;
             }
+        },
+        error:function(e){}
+    });
+}
+//目录或者笔记改名字
+function ajax_update_name(url,name,id){
+    $.ajax({
+        url:  url,
+        data:{'name':name,'id':id},
+        type: "POST",
+        dataType:'json',
+        success:function(res){
+            if(res.status == 'error'){
+                alert(res.msg);
+                return false;
+            }
+        },
+        error:function(e){}
+    });
+}
+//搜索文章方法
+function search_note(){
+    var search = $('.search-input').val();
+    if($.trim(search) == ''){
+        item_list();
+        return false;
+    }
+    $.ajax({
+        url:  '/dir/note_search',
+        data:{'search':search},
+        type: "POST",
+        dataType:'json',
+        success:function(obj){
+            var html = '';
+            $('.item-dir').html('');
+            if(obj.result.length == 0){
+                html += '<div class="no-item">搜索结果为空</div>';
+            }else{
+                $.each(obj.result, function(key, v){
+                    html += create_note_html(v);
+                })
+            }
+            $('.item-note').html(html);
+            show_note();
         },
         error:function(e){}
     });
