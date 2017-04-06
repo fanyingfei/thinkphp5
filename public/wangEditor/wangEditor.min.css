@@ -328,12 +328,21 @@
 .txt-toolbar .color-item,.wangEditor-drop-panel .color-item {
     display:block;
     float:left;
-    width:25px;
-    height:25px;
+    width:16px;
+    height:16px;
     text-align:center;
-    padding:2px;
-    border-radius:2px;
-    text-decoration:underline
+    margin:5px 2px;
+    border: 1px solid rgba(0,0,0,0.1);
+    text-decoration:underline;
+    cursor:pointer;
+}
+.wangEditor-drop-panel .color-item:hover{
+    box-shadow: 0 0 5px 1px #19A4E5;
+}
+.color-label-standard{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 2px;
 }
 .txt-toolbar .list-menu-item,.wangEditor-drop-panel .list-menu-item {
     display:block;
