@@ -22,7 +22,7 @@ $("body").on("dragstart", '.li-dir', function(e){
     drapObj.setDragImage(dragIcon, -10, -2);
 });
 
-$("body").on("dragend", '.li-dir', function(e){
+$("body").on("dragend", 'li .rightbtn', function(e){
     drapId  = 0;
     $('.cur-drap').removeClass('cur-drap');
 });
@@ -49,23 +49,7 @@ $("body").on("drop", '.li-dir', function(e){
     }
 })
 
-function drap_note(curObj,id){
-    var parent_id = $('.item-list').attr('parent-id');
-    var curr_dir_id = curObj.data('id');
-    if(curr_dir_id == parent_id) return false;
-    $('.li-note[data-id='+id+']').parent().remove();
-    empty_note();
-    if($('.widget-scroller .rightbtn').length == 0) $('.item-note').html(no_item_html());
-    $.ajax({
-        url:  '/dir/update_drap_note',
-        data:{'rec_id':id , 'dir_id':curr_dir_id},
-        type: "POST",
-        dataType:'json',
-        success:function(result){
-        },
-        error:function(e){}
-    });
-}
+
 
 function drap_dir(curObj,id){
     var cur_id = curObj.data('id');
@@ -104,24 +88,6 @@ function drap_dir(curObj,id){
     update_dir_list($(".dir-list .li-dir[data-id="+id+"]"),cur_id);
 }
 
-function update_dir_list(obj,parent_id){
-    var parent = obj.parent('li').parent('ul').prev('.li-dir');
-    var class_id = parseInt(parent.attr('class-id'))+1;
-    obj.attr('class-id',class_id);
-    var cur_item = [obj.data('id'),class_id,parent.data('id'),obj.text()];
-    var list = get_dir_attr(obj);
-    list.push(cur_item);
-    $.ajax({
-        url:  '/dir/update_drap_dir',
-        data:{'list':list,'parent_id':parent_id},
-        type: "POST",
-        dataType:'json',
-        success:function(result){
-            drap_dir_sort(obj,parent_id,result);
-        },
-        error:function(e){}
-    });
-}
 
 function drap_dir_sort(obj,parent_id,result){
     var parentObj = $(".dir-list .li-dir[data-id="+parent_id+"]");

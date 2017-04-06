@@ -13,7 +13,7 @@ class Dir extends Controller
         $user_id = 1;
         $res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0])->order('rank desc')->order('c_time asc')->field('dir_id,dir_name,class_id,parent_id')->select();
         $data = $this->nesting($res);
-        return JSON($data);
+        splash('succ','',$data);
     }
 
     public function item_list(){
@@ -28,8 +28,8 @@ class Dir extends Controller
         foreach($note_res as &$item){
             $item['time'] = date('Y-m-d',$item['c_time']);
         }
-        $data = array('dir'=>empty($dir_res) ? array() : $dir_res,'note'=>empty($note_res) ? array() : $note_res);
-        return json(array('dir'=>$dir_res,'note'=>$note_res));
+        $data = ['dir'=>empty($dir_res) ? [] : $dir_res,'note'=>empty($note_res) ? [] : $note_res];
+        splash('succ','',['dir'=>$dir_res,'note'=>$note_res]);
     }
 
     public function create_dir(){
@@ -37,15 +37,18 @@ class Dir extends Controller
         $request = Request::instance();
      //   $user_id = $request->session('uid');
         $user_id = 1;
-        $name = '新建文件夹';
+        $name = '新建目录';
         $class_id = $request->param('class_id');
         $parent_id = $request->param('parent_id');
         if($parent_id == 0) $class_id = 1;
 
+        if($class_id > 5) splash('error','最多创建五层目录');
+
         $data = ['dir_name' => $name, 'uid'=>$user_id,'class_id'=>$class_id,'parent_id'=>$parent_id,'u_time'=>$time,'c_time'=>$time];
 
-        $res = Db::name('dir')->insertGetId($data);
-        return json($res);
+        $dir_id = Db::name('dir')->insertGetId($data);
+        if($dir_id) splash('succ','新建目录成功',['dir_id'=>$dir_id,'dir_name'=>$name,'class_id'=>$class_id,'time'=>date('Y-m-d',$time)]);
+        else splash('error','新建目录失败，请刷新重试');
     }
 
     public function update_drap_dir(){
@@ -55,13 +58,20 @@ class Dir extends Controller
         $user_id = 1;
         $list = $request->param('list/a');
         $parent_id = $request->param('parent_id');
-        foreach($list as $item){
+
+        foreach($list as $key=>$item){
             $data = ['class_id' => $item[1] ,'parent_id'=>$item[2],'u_time'=>time(),'rank'=>0];
             if($data['parent_id'] == 0) $data['class_id'] = 1;
-            Db::table('dir')->where('dir_id', $item[0])->update($data);
+            if($data['class_id'] > 5) splash('error','最多创建五层目录');
+            $list[$key] = $data;
+        }
+
+        foreach($list as $row){
+            Db::table('dir')->where('dir_id', $item[0])->update($row);
         }
         $res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0,'parent_id'=>$parent_id])->order('rank desc')->order('c_time asc')->column('dir_id');
-        return json($res);
+        if($res) splash('succ','拖放目录成功',$res);
+        else splash('error','拖放目录失败，请刷新重试');
     }
 
     public function update_dir_sort(){
@@ -74,7 +84,8 @@ class Dir extends Controller
             $data = ['rank' => $item[1] , 'u_time'=>time()];
             $res = Db::table('dir')->where('dir_id', $item[0])->update($data);
         }
-        return json($res);
+        if($res) splash('succ','排序成功');
+        else splash('error','排序失败，请刷新重试');
     }
 
     public function delete_dir(){
@@ -85,7 +96,8 @@ class Dir extends Controller
         $id = $request->param('id');
         $data = ['is_delete' => 1 , 'u_time'=>time()];
         $res = Db::table('dir')->where('dir_id', $id)->update($data);
-        return json($res);
+        if($res) splash('succ','删除目录成功');
+        else splash('error','删除目录失败，请刷新重试');
     }
 
 
@@ -95,7 +107,8 @@ class Dir extends Controller
         $name = $request->param('name');
         $data = ['dir_name' => $name ,'u_time'=>time()];
         $res = Db::table('dir')->where('dir_id', $dir_id)->update($data);
-        return json($res);
+        if($res) splash('succ','重命名成功');
+        else splash('error','重命名失败，请刷新重试');
     }
 
     public function note_item(){
@@ -103,7 +116,7 @@ class Dir extends Controller
         $request = Request::instance();
         $rec_id = $request->param('rec_id');
         $res = Db::table('note')->where(['rec_id'=>$rec_id,'uid'=>$user_id])->order('rank desc')->order('c_time asc')->find();
-        return json($res);
+        splash('succ','',$res);
     }
 
     public function delete_note(){
@@ -114,7 +127,8 @@ class Dir extends Controller
         $id = $request->param('id');
         $data = ['is_delete' => 1 , 'u_time'=>time()];
         $res = Db::table('note')->where('rec_id', $id)->update($data);
-        return json($res);
+        if($res) splash('succ','删除笔记成功');
+        else splash('error','删除笔记失败，请刷新重试');
     }
 
     public function note_update(){
@@ -127,7 +141,8 @@ class Dir extends Controller
         $user_id = 1;
         $data = ['uid'=>$user_id,'title'=>$title,'content'=>$content,'u_time'=>$time,'c_time'=>$time];
         $res = Db::table('note')->where('rec_id', $rec_id)->update($data);
-        return json($res);
+        if($res) splash('succ','编辑成功');
+        else splash('error','编辑失败，请刷新重试');
     }
 
     public function update_drap_note(){
@@ -139,7 +154,8 @@ class Dir extends Controller
         $dir_id = $request->param('dir_id');
         $data = ['dir_id'=>$dir_id,'u_time'=>$time];
         $res = Db::table('note')->where('rec_id', $rec_id)->update($data);
-        return json($res);
+        if($res) splash('succ','拖放笔记成功');
+        else splash('error','拖放笔记失败，请刷新重试');
     }
 
     public function update_note_name(){
@@ -148,7 +164,8 @@ class Dir extends Controller
         $title = $request->param('name');
         $data = ['title' => $title ,'u_time'=>time()];
         $res = Db::table('note')->where('rec_id', $rec_id)->update($data);
-        return json($res);
+        if($res) splash('succ','重命名成功');
+        else splash('error','重命名失败，请刷新重试');
     }
 
     public function update_note_sort(){
@@ -161,7 +178,8 @@ class Dir extends Controller
             $data = ['rank' => $item[1] , 'u_time'=>time()];
             $res = Db::table('note')->where('rec_id', $item[0])->update($data);
         }
-        return json($res);
+        if($res) splash('succ','排序成功');
+        else splash('error','排序失败，请刷新重试');
     }
 
     public function note_create(){
@@ -173,8 +191,9 @@ class Dir extends Controller
         //   $user_id = $request->session('uid');
         $user_id = 1;
         $data = ['dir_id' => $dir_id, 'uid'=>$user_id,'title'=>$title,'content'=>$content,'u_time'=>$time,'c_time'=>$time];
-        $inser_id = Db::name('note')->insertGetId($data);
-        return json(array('rec_id'=>$inser_id,'time'=>date('Y-m-d',$time),'title'=>$title));
+        $rec_id = Db::name('note')->insertGetId($data);
+        if($rec_id) splash('succ','新建笔记成功',['rec_id'=>$rec_id,'title'=>$title,'time'=>date('Y-m-d',$time)]);
+        else splash('error','新建笔记失败，请刷新重试');
     }
 
     public function nesting($res){
@@ -198,11 +217,5 @@ class Dir extends Controller
             $data[] = $one;
         }
         return $data;
-    }
-
-    public function get_children_dir($parent_id){
-        $user_id = 1;
-        $sql = 'select dir_id,dir_name,parent_id,class_id from dir where dir_id = 0 union all ';
-        $sql .= 'select tr.dir_id,tr.dir_name,tr.parent_id,tr.class_id + 1 from dir td inner join dir tr on td.dir_id = tr.dir_id';
     }
 }

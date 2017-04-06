@@ -16,7 +16,7 @@
     <div class="main-container">
         <div class="sidebar">
             <div class="dir-hd">
-                <div class="create-dir">新建文件夹</div>
+                <div class="create-dir">新建目录</div>
                 <div class="create-note">新建笔记</div>
             </div>
             <div class="dir-warp">
@@ -82,6 +82,7 @@
 <script type="text/javascript" src="/js/mousewheel.js"></script>
 <script type="text/javascript" src="/js/rightmenu.js"></script>
 <script type="text/javascript" src="/js/drag.js"></script>
+<script type="text/javascript" src="/js/ajax.request.js"></script>
 <script type="text/javascript">
     var time = null;
 
@@ -97,34 +98,14 @@
         create_dir(parent_id,class_id);
     })
 
-    function create_dir(parent_id,class_id){
-        $.ajax({
-            url:  '/dir/create_dir',
-            data:{'parent_id':parent_id,'class_id':class_id},
-            type: "POST",
-            dataType:'json',
-            success:function(id){
-                var html = '<li>'+create_dir_html(class_id,id,'新建文件夹',0)+'</li>';
-                var obj = $(".dir-list .li-dir[data-id="+parent_id+"]");
-                if(obj.next('ul').length > 0) obj.next('ul').append(html);
-                else obj.after('<ul>'+html+'</ul>');
 
-                obj.children('.down-btn').addClass('drop-down pack-up');
-                obj.next('ul').show();
-                if(parent_id == $('.item-list').attr('parent-id')) $('.item-dir').append(html);
-                create_update_name($(".dir-list .li-dir[data-id="+id+"]"));
-            },
-            error:function(e){}
-        });
-    }
 
-    function create_dir_html(class_id,dir_id,dir_name,is_parent,time){
-        var html = '<div draggable="true" class="li-dir rightbtn" class-id="'+ class_id+'" data-id="'+ dir_id+'" >';
+    function create_dir_html(obj,is_parent){
+        var html = '<div draggable="true" class="li-dir rightbtn" class-id="'+ obj.class_id+'" data-id="'+ obj.dir_id+'" >';
         if(is_parent == 1) html += '<span class="down-btn drop-down"></span>';
         else html += '<span class="down-btn"></span>';
-        html += '<i class="icon"></i><div class="name">'+dir_name+'</div>';
-        if(time != undefined) html += '<div class="item-time">'+time+'</div>';
-        html += '<i class="right-menu"></i></div>';
+        html += '<i class="icon"></i><div class="name">'+obj.dir_name+'</div>';
+        html += '<div class="item-time">'+obj.time+'</div><i class="right-menu"></i></div>';
         return html;
     }
 
@@ -140,35 +121,6 @@
         }
         create_note(dir_id);
     })
-
-    function create_note(dir_id){
-        if($('.item-list .no-item').length > 0) $('.item-list .no-item').remove();
-        $.ajax({
-            url:  '/dir/note_create',
-            data:{'dir_id':dir_id},
-            type: "POST",
-            dataType:'json',
-            success:function(obj){
-                //不是当前选中的文件夹创建笔记时，要把这个文件夹选中
-                if(dir_id != $('.dir-list .li-dir.curr').data('id')){
-                    $('.dir-list .li-dir.curr').removeClass('curr');
-                    $('.dir-list .li-dir[data-id='+dir_id+']').addClass('curr');
-                    //得到item列表后把新建的笔记设置选中
-                    item_list();
-                }else{
-                    if($('.item-note li').length > 0){
-                        $('.item-note li:first-child').before(create_note_html(obj));
-                    }else{
-                        $('.item-note').prepend(create_note_html(obj));
-                    }
-                }
-                $('.li-note.curr').removeClass('curr');
-                $('.li-note[data-id='+obj.rec_id+']').addClass('curr');
-                show_note();
-            },
-            error:function(e){}
-        });
-    }
 
     function get_wangDemo_height(){
         var height = $('.note-detail').height() - $("#wangDemo").offset().top + 30;
@@ -228,44 +180,17 @@
     }
 
     dir_list();
-    function dir_list(){
-        $.ajax({
-            url:  '/dir/dir_list',
-            data:{},
-            type: "POST",
-            dataType:'json',
-            success:function(obj){
-                var html = '<div class="li-dir my-dir-list" class-id="0" data-id="0">';
-                if(obj.length > 0) html+= '<span class="down-btn drop-down pack-up"></span>';
-                html += '<i class="icon"></i>&nbsp;&nbsp;我的文件夹</div>';
-                html += creat_list(obj);
-                $('.dir-list').html(html);
-                if($.cookie('currDir')){
-                    var dir_id = $.cookie('currDir');
-                    $('.dir-list .li-dir[data-id='+dir_id+']').parents('ul').show();
-                    $('.dir-list .li-dir[data-id='+dir_id+']').parents('ul').prev('.li-dir').children('.down-btn').addClass('pack-up');
-                }else{
-                    var dir_id = 0;
-                }
 
-                $('.dir-list .li-dir[data-id='+dir_id+']').addClass('curr');
-                $('.item-list').attr('parent-id',dir_id);
-                item_list();
-                show_note();
-            },
-            error:function(e){}
-        });
-    }
 
     function creat_list(obj){
         var html = '<ul>';
         $.each(obj, function(key, v){
             if(v.child){
-                html += '<li>'+create_dir_html(v.class_id, v.dir_id,v.dir_name,1);
+                html += '<li>'+create_dir_html(v,1);
                 html += creat_list(v.child);
                 html += '</li>';
             }else{
-                html += '<li>'+create_dir_html(v.class_id, v.dir_id,v.dir_name,0)+'</li>';
+                html += '<li>'+create_dir_html(v,0)+'</li>';
             }
         })
         return html += '</ul>';
@@ -283,41 +208,23 @@
         $('.note-detail .note-view').html('');
     }
 
-    function item_list(){
-        var id = $('.li-dir.curr').data('id');
-        if(id == undefined){
-            id = $('.sidebar .li-dir:first-child').data('id');
-            $(".sidebar .li-dir[data-id="+id+"]").addClass('curr');
-        }
-        //去除滚动条的影响
-        $('.item-list .scroller-container').css("margin-top", 0);
+    $("body").on("blur", '.note-detail', function(e){
+        var title = $('.title').val();
+        var pri_title = $('.title').attr('title');
+        var content = $('#wangDemo').html();
+        if(title == pri_title && content == '') return false;
+        save_note();
+    })
 
-        $.ajax({
-            url:  '/dir/item_list',
-            data:{'dir_id':id},
-            type: "POST",
-            async:false,
-            dataType:'json',
-            success:function(obj){
-                $('.item-list').attr('parent-id',id);
-                var html = '';
-                $.each(obj.dir, function(key, v){
-                    html += '<li>'+create_dir_html(v.class_id, v.dir_id, v.dir_name,0, v.time)+'</li>';
-                })
-                $('.item-dir').html(html);
-                html = '';
-                $.each(obj.note, function(key, v){
-                    html += create_note_html(v);
-                })
-                if(obj.dir.length == 0 && obj.note.length == 0){
-                    empty_note();
-                    $('.item-note').html(no_item_html());
-                }
-                $('.item-note').html(html);
-            },
-            error:function(e){}
-        });
-    }
+    $("body").on("click", '.save', function(){
+        var title = $('.title').val();
+        if(title == '') alert('标题不能为空');
+        save_note();
+    })
+
+    $('.title').bind('input propertychange', function() {
+        $('.li-note.curr .name').text($(this).val());
+    });
 
     function show_note(){
         //没有任何笔记时
@@ -345,53 +252,7 @@
         }
 
         $('.item-note .li-note[data-id='+rec_id+']').addClass('curr');
-        $.ajax({
-            url:  '/dir/note_item',
-            data:{'rec_id':rec_id},
-            type: "POST",
-            dataType:'json',
-            success:function(obj){
-                $('#note-id').val(obj.rec_id);
-                $('.note-detail .title').val(obj.title).attr('title',obj.title);
-                $('.note-detail .note-view').html(obj.content);
-            },
-            error:function(e){}
-        });
-    }
-
-    $("body").on("blur", '.note-detail', function(e){
-        var title = $('.title').val();
-        var pri_title = $('.title').attr('title');
-        var content = $('#wangDemo').html();
-        if(title == pri_title && content == '') return false;
-        save_note();
-    })
-
-    $("body").on("click", '.save', function(){
-        var title = $('.title').val();
-        if(title == '') alert('标题不能为空');
-        save_note();
-    })
-
-    $('.title').bind('input propertychange', function() {
-        $('.li-note.curr .name').text($(this).val());
-    });
-
-    function save_note(){
-        var title = $('.title').val();
-        var rec_id = $('#note-id').val();
-        var content = $('#wangDemo').html();
-        if(title == '') return false;
-        $.ajax({
-            url:  '/dir/note_update',
-            data:{'title':title,'content':content,'rec_id':rec_id},
-            type: "POST",
-            dataType:'json',
-            success:function(obj){
-                if($(".li-note[data-id="+rec_id+"] .name").text() != title) $(".li-note[data-id="+rec_id+"] .name").html(title);
-            },
-            error:function(e){}
-        });
+        ajax_show_note(rec_id);
     }
 
 </script>

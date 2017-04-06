@@ -22,11 +22,14 @@ ul{
     width: 100%;
     outline: none;
 }
+.dir-list .item-time{
+    display: none !important;
+}
 .dir-warp{
     position: absolute;
     top: 61px;
     width:100%;
-    bottom: 20px;
+    bottom: 60px;
 }
 .widget-scroller{
     position: absolute;

@@ -87,16 +87,7 @@ function update_sort(obj,url){
     parent_ul.children('li').each(function(v){
         list.push([$(this).children('.rightbtn').data('id'),length-v]);
     });
-    $.ajax({
-        url:  url,
-        data:{'list':list},
-        type: "POST",
-        dataType:'json',
-        success:function(obj){
-
-        },
-        error:function(e){}
-    });
+    ajax_update_sort(url,list);
 }
 
 $(".delete").on("click", function(e){
@@ -115,16 +106,7 @@ $(".delete").on("click", function(e){
     }
     resObj.remove();
     if($('.widget-scroller .rightbtn').length == 0) $('.item-note').html(no_item_html());
-    $.ajax({
-        url:  url,
-        data:{'id':id},
-        type: "POST",
-        dataType:'json',
-        success:function(obj){
-
-        },
-        error:function(e){}
-    });
+    ajax_delete_btn(url,id);
 });
 
 $(".rename").on("click", function(e){
@@ -185,8 +167,11 @@ function change_name(){
         data:{'name':name,'id':id},
         type: "POST",
         dataType:'json',
-        success:function(obj){
-
+        success:function(res){
+            if(res.status == 'error'){
+                alert(res.msg);
+                return false;
+            }
         },
         error:function(e){}
     });
