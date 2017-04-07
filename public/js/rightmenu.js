@@ -3,6 +3,7 @@ var RightDirId ;
 var RightType;
 //监听鼠标右键点击
 $("body").on("contextmenu", '.rightbtn', function(e){
+    hide_dropdown_menu();
     RightObj = $(this);
     RightDirId = $(this).data('id');
     if($(this).hasClass('li-note')){
@@ -14,11 +15,14 @@ $("body").on("contextmenu", '.rightbtn', function(e){
         $('.right-create-note').show();
         $('.right-create-dir').show();
     }
-    $(".dir-right-menu").css({"left":e.pageX,"top":e.pageY}).show();
+    var height = e.pageY;
+    if(height > $(document).height()/2) height = e.pageY - $(".dir-right-menu").height()-5;
+    $(".dir-right-menu").css({"left":e.pageX,"top": height}).show();
     return false;
 })
 //监听右键按钮点击
 $("body").on("click", '.right-menu', function(e){
+    hide_dropdown_menu();
     RightObj = $(this).parents('.rightbtn');
     RightDirId = RightObj.data('id');
     if(RightObj.hasClass('li-note')) RightType = 'item';
@@ -34,17 +38,20 @@ $("body").on("dblclick", '.right-menu', function(e){
 $('.right-create-dir').click(function(){
     var parent_id = RightDirId;
     var class_id = parseInt(RightObj.attr('class-id')) + 1;
-    $(".dir-right-menu").hide();
+    hide_dropdown_menu();
     create_dir(parent_id,class_id);
 })
 //右键的创建笔记
 $('.right-create-note').click(function(){
-    $(".dir-right-menu").hide();
+    hide_dropdown_menu();
     create_note(RightDirId)
 })
 //点击其他隐藏右键菜单
 $('body').click(function(){
-    $(".dir-right-menu").hide();
+    hide_dropdown_menu();
+})
+$('body').contextmenu(function(){
+    hide_dropdown_menu();
 })
 //阻击冒泡事件
 $(".dir-right-menu").on("click", function(e){
@@ -96,6 +103,7 @@ function update_sort(obj,url){
 }
 //右键的删除
 $(".delete").on("click", function(e){
+    hide_dropdown_menu();
     var id = RightDirId;
     if(RightType == 'dir'){
         var url = '/dir/delete_dir';
@@ -105,7 +113,7 @@ $(".delete").on("click", function(e){
         var resObj = $(".li-note[data-id="+id+"]").parent('li');
         empty_note();
     }
-    $(".dir-right-menu").hide();
+
     if($(".dir-list .li-dir[data-id="+id+"]").parent('li').siblings('li').length == 0){
         $(".dir-list .li-dir[data-id="+id+"]").parent('li').parent('ul').prev('.li-dir').children('.down-btn').removeClass('drop-down pack-up');
     }
@@ -115,7 +123,7 @@ $(".delete").on("click", function(e){
 });
 //重命名
 $(".rename").on("click", function(e){
-    $(".dir-right-menu").hide();
+    hide_dropdown_menu();
     create_update_name(RightObj);
 });
 //创建重命名的input
@@ -174,4 +182,8 @@ function rename_regain(){
     $('.item-rename').removeClass('item-rename');
     $('.dir-rename').removeClass('dir-rename');
     $('.right-menu').removeClass('none');
+}
+
+function hide_dropdown_menu(){
+    $(".dropdown-menu").hide();
 }

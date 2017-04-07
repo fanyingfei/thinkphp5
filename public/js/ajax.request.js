@@ -96,10 +96,14 @@ function item_list(){
     }
     //去除滚动条的影响
     $('.item-list .scroller-container').css("margin-top", 0);
+    //得到选择的排序
+    var col = $('.setting-sort.selected').data('col');
+    var sort = 'desc';
+    if($('.setting-sort.selected').hasClass('asc')) sort = 'asc';
 
     $.ajax({
         url:  '/dir/item_list',
-        data:{'dir_id':id},
+        data:{'dir_id':id,'col':col,'sort':sort},
         type: "POST",
         async:false,
         dataType:'json',
@@ -111,6 +115,9 @@ function item_list(){
                 html += '<li>'+create_dir_html(v,0)+'</li>';
             })
             $('.item-dir').html(html);
+            if($('.setting-sel.selected').data('value') == 'note') $('.item-dir').hide();
+            else if($('.setting-sel.selected').data('value') == 'all') $('.item-dir').show();
+
             html = '';
             $.each(obj.note, function(key, v){
                 html += create_note_html(v);
@@ -119,6 +126,8 @@ function item_list(){
                 empty_note();
                 html = no_item_html();
             }
+            if(id != 0) $('.item-back').removeClass('disabled');
+            else $('.item-back').addClass('disabled');
             $('.item-note').html(html);
         },
         error:function(e){}

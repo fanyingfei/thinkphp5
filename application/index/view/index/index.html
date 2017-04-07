@@ -34,9 +34,21 @@
         <div class="item-list">
             <div class="item-wrap">
                 <div class="item-hd">
+                    <div class="item-back"></div>
                     <div class="search-wrap">
                         <i class="search-icon"></i>
                         <input class="search-input" placeholder="搜索" >
+                    </div>
+                    <div class="item-setting">
+                        <i class="setting-icon"></i>
+                        <ul class="dropdown-menu setting-menu">
+                            <li class="setting-sel selected" data-value="all">全部<i></i></li>
+                            <li class="li-divider setting-sel" data-value="note">文章<i></i></li>
+                            <li class="setting-sort selected desc" data-col="rank">默认排序<i></i></li>
+                            <li class="setting-sort" data-col="create">创建时间<i></i></li>
+                            <li class="setting-sort" data-col="update">修改时间<i></i></li>
+                            <li class="setting-sort" data-col="title">文件名称<i></i></li>
+                        </ul>
                     </div>
                 </div>
                 <div class="widget-scroller">
@@ -86,10 +98,23 @@
 <script type="text/javascript" src="/js/drag.js"></script>
 <script type="text/javascript" src="/js/ajax.request.js"></script>
 <script type="text/javascript">
+    start_init();
 
-    //初始得到目录列表
-    dir_list();
-
+    function start_init(){
+        //初始得到目录列表
+        var sel_col = $.cookie('setting_col');
+        var sel_sort = $.cookie('setting_sort');
+        var sel_value = $.cookie('setting_value');
+        if(sel_value !== undefined){
+            $('.setting-sel').removeClass('selected');
+            $('.setting-sel[data-value='+sel_value+']').addClass('selected');
+        }
+        if(sel_col !== undefined && sel_sort !== undefined){
+            $('.setting-sort').removeClass('selected desc asc');
+            $('.setting-sort[data-col='+sel_col+']').addClass(sel_sort+' selected');
+        }
+        dir_list();
+    }
     //监听创建目录
     $("body").on("click", '.create-dir', function(){
         if($(".dir-list .curr").length > 0){
@@ -182,11 +207,13 @@
     //监听目录下拉事件
     $("body").on("click", '.li-dir .drop-down', function(){
         open_dir($(this));
+        return false;
     })
 
     //双击目录同样触发下单事件
     $("body").on("dblclick", '.dir-list .li-dir', function(){
         open_dir($(this).children('.down-btn'));
+        return false;
     })
 
     //打开下拉目录的方法
@@ -200,7 +227,6 @@
             parent.parent().find('ul').prev('.li-dir').children('.down-btn').removeClass('pack-up');
         }
         $(".dir-right-menu").hide();
-        return false;
     }
 
     //创建目录列表的HTML，循环嵌套
@@ -292,6 +318,49 @@
         if(e.which == 13) search_note();
     });
 
+    //回到上一级
+    $("body").on("click", '.item-back', function(){
+        var dir_id = $('.item-list').attr('parent-id');
+        if(dir_id == 0) return false;
+        $('.dir-list .li-dir.curr').removeClass('curr');
+        var obj = $('.dir-list .li-dir[data-id='+dir_id+']').parent().parent().prev('.li-dir');
+        if(obj.data('id') == 0) $('.item-back').addClass('disabled');
+        obj.addClass('curr').parents('ul').show().prev('.li-dir').children('.down-btn').addClass('pack-up');
+        item_list();
+    })
 
+    //item设置
+    $("body").on("click", '.setting-icon', function(){
+        hide_dropdown_menu();
+        $('.setting-menu').show();
+        return false;
+    })
+
+    $("body").on("click", '.setting-sel', function(){
+        $('.setting-sel').removeClass('selected');
+        $(this).addClass('selected');
+        if($(this).data('value') == 'all') $('.item-dir').show();
+        else if($(this).data('value') == 'note') $('.item-dir').hide();
+        $.cookie('setting_value',$(this).data('value'));
+    })
+
+    $("body").on("click", '.setting-sort', function(){
+        if($(this).hasClass('desc')){
+            var order_by = 'asc';
+            $('.setting-sort').removeClass('selected desc asc');
+            $(this).addClass(order_by+' selected');
+        }else if($(this).hasClass('asc')){
+            var order_by = 'desc';
+            $('.setting-sort').removeClass('selected desc asc');
+            $(this).addClass(order_by+' selected');
+        }else{
+            var order_by = 'desc';
+            $('.setting-sort').removeClass('selected desc asc');
+            $(this).addClass(order_by+' selected');
+        }
+        $.cookie('setting_col',$(this).data('col'));
+        $.cookie('setting_sort',order_by);
+        item_list();
+    })
 </script>
 </html>

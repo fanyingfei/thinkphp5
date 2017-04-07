@@ -17,11 +17,17 @@ class Dir extends Controller
     }
 
     public function item_list(){
+        $col_list = ['rank'=>'rank','create'=>'c_time','update'=>'u_time','title'=>'convert(title USING gbk) COLLATE gbk_chinese_ci'];
+        $sort_list = ['desc','asc'];
         $user_id = 1;
         $request = Request::instance();
+        $col = $request->param('col');
+        $col = empty($col_list[$col]) ? 'rank' : $col_list[$col];
+        $sort = $request->param('sort');
+        $sort = in_array($sort,$sort_list) ? $sort : 'desc';
         $dir_id = $request->param('dir_id');
-        $dir_res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0,'parent_id'=>$dir_id])->order('rank desc')->order('c_time asc')->field('dir_id,dir_name,class_id,parent_id,c_time')->select();
-        $note_res = Db::table('note')->where(['uid'=>$user_id,'is_delete'=>0,'dir_id'=>$dir_id])->order('rank desc')->order('c_time asc')->field('rec_id,title,c_time')->select();
+        $dir_res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0,'parent_id'=>$dir_id])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,parent_id,c_time')->select();
+        $note_res = Db::table('note')->where(['uid'=>$user_id,'is_delete'=>0,'dir_id'=>$dir_id])->order($col.' '.$sort)->order('rec_id asc')->field('rec_id,title,c_time')->select();
         foreach($dir_res as &$dir){
             $dir['time'] = date('Y-m-d',$dir['c_time']);
         }

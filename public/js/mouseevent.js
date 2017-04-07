@@ -280,32 +280,6 @@
         contObj.css("margin-top", -scroll_distance)
     }
 
- /*   var x_move = 0;
-    $(".sidebar .drag-line").mousedown(function(e){
-        x_move = $('.sidebar').outerWidth();
-        return false;
-    });
-
-    $(".sidebar .drag-line").mousemove(function(e){
-        if(x_move == 0) return false;
-        var move_distance = e.clientX;console.log(move_distance);
-        if(move_distance <=240 ) return false;
-        $('.sidebar').css('width',e.clientX+'px');
-        $('.item-list').css('left',e.clientX+'px');
-        side_width = e.clientX;
-        return false;
-    });
-
-    $(".sidebar .drag-line").mouseup(function(e){
-            x_move = 0;
-            return false;
-    });
-
-    $(".sidebar .drag-line").mouseleave(function(e){
-        x_move = 0;
-        return false;
-    });*/
-
     //最左侧缩放的宽度，拉伸宽度的时候还会用
     var side_width = $('.sidebar').outerWidth();
     $("body").on("click", '.list-toggle', function(){
@@ -321,52 +295,7 @@
             });
         }
     })
-/*
-    //初始化参数
-    $(".sidebar .drag-line").mousedown(function (e){
-        //按下元素后，计算当前鼠标与对象计算后的坐标
-        x = $(this).outerWidth();
-        //在支持 setCapture 做些东东
-        $(this).setCapture ? (
-            //捕捉焦点
-            $(this).setCapture(),
-                //设置事件
-                $(this).onmousemove = function (ev)
-                {
-                    mouseMove(ev || event);
-                },
-                $(this).onmouseup = mouseUp
-        ) : (
-            //绑定事件
-            $(document).bind("mousemove", mouseMove).bind("mouseup", mouseUp)
-        );
-        //防止默认事件发生
-        e.preventDefault();
-    });
-    //移动事件
-    function mouseMove(e)
-    {
-        //运算中...
-        if(e.clientX < 240) return false;
-        $('.sidebar').css('width',e.clientX+'px');
-        $('.item-list').css('left',e.clientX+'px');
-        side_width = e.clientX;
-    }
-    //停止事件
-    function mouseUp()
-    {
-        //在支持 releaseCapture 做些东东
-        $(".sidebar .drag-line").releaseCapture ? (
-            //释放焦点
-            $(".sidebar .drag-line").releaseCapture(),
-                //移除事件
-                $(".sidebar .drag-line").onmousemove = el.onmouseup = null
-        ) : (
-            //卸载事件
-            $(document).unbind("mousemove", mouseMove).unbind("mouseup", mouseUp)
-        );
-    }
-*/
+
 
     drap_line();
     //拖动边界线改变宽度
@@ -375,6 +304,7 @@
         var obj = null;
         el.mousedown(function (e){
             obj =  $(this);
+            $('.widget-scroller-bar').hide();
             //支持 setCapture
             el.setCapture ? (
                 //捕捉焦点
@@ -396,14 +326,17 @@
             //运算中...
             if(obj.parent().hasClass('sidebar')){
                 if(e.clientX <= 240) return false;
+                if(e.clientX >= $(document).width()*0.6) return false;
                 $('.sidebar').css('width',e.clientX+'px');
                 $('.item-list').css('left',e.clientX+'px');
                 side_width = e.clientX; //重定义宽度
             }else if(obj.parent().hasClass('item-wrap')){
                 var move_x = e.clientX - $('.sidebar').outerWidth();
                 if(move_x <= 320) return false;
+                if(move_x >= $('.item-list').outerWidth()*0.6) return false;
                 $('.item-wrap').css('width',move_x+'px');
                 $('.detail-container').css('left',move_x+'px');
+                return false;
             }
         }
         //停止事件

@@ -34,7 +34,7 @@ ul{
 .widget-scroller{
     position: absolute;
     top: 61px;
-    bottom: 40px;
+    bottom: 30px;
     left: 0;
     right: 0;
 }
@@ -99,7 +99,7 @@ ul{
     left: 1px;
     top: 2px;
     display: inline-block;
-    background: url("https://shared-https.ydstatic.com/ynote/ydoc/e1e06b7a.sprite.svg") no-repeat;
+    background: url("/img/sprite.svg") no-repeat;
     background-position: 72.83582089552239% 61.492537313432834%;
     width: 14px;
     height: 14px;
@@ -116,6 +116,10 @@ ul{
     text-align: center;
     width:100px;
     margin-left:15px;
+}
+.create-dir:hover,
+.create-note:hover{
+    color:#398dee;
 }
 .no-item p{
     color:#868686;
@@ -148,6 +152,62 @@ ul{
 }
 .dir-list ul >li .li-dir{
     padding-left:30px;
+}
+.item-setting{
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 12px;
+    display: inline-block;
+}
+.item-setting .setting-icon{
+    background: url("/img/sprite.svg") no-repeat;
+    background-position: 10.793650793650794% 57.53846153846154%;
+    width: 34px;
+    height: 24px;
+    display: block;
+    margin-top: 20px;
+}
+.item-setting .setting-icon:hover{
+    background-position: 52.698412698412696% 48.92307692307692%;
+}
+.setting-menu li i{
+    width: 18px;
+    height: 18px;
+    float: right;
+    position: relative;
+    top:2px;
+}
+.setting-sel.selected i{
+    background: url("/img/sprite.svg") no-repeat;
+    background-position: 79.75830815709969% 95.16616314199396%;
+}
+.setting-sort.desc i{
+    background: url("/img/sprite.svg") no-repeat;
+    background-position: 16.91842900302115% 95.16616314199396%;
+}
+.setting-sort.asc i{
+    background: url("/img/sprite.svg") no-repeat;
+    background-position: 90.6344410876133% 95.16616314199396%;
+}
+.item-back{
+    position: absolute;
+    top: 18px;
+    left: 9px;
+    background: url("/img/sprite.svg") no-repeat;
+    background-position: 21.58730158730159% 57.53846153846154%;
+    width: 34px;
+    height: 24px;
+    cursor:pointer;
+}
+.item-back:hover{
+    background-position: 41.904761904761905% 48.92307692307692%;
+}
+.item-back.disabled{
+    opacity:0.3;
+}
+.item-back.disabled:hover{
+    background-position: 21.58730158730159% 57.53846153846154%;
 }
 .item-list {
     position: absolute;
@@ -243,7 +303,7 @@ ul{
     margin: 0px 60px 0 50px;
 }
 .search-icon{
-    background: url("https://shared-https.ydstatic.com/ynote/ydoc/e1e06b7a.sprite.svg") no-repeat;
+    background: url("/img/sprite.svg") no-repeat;
     background-position: 51.69230769230769% 76%;
     width: 24px;
     height: 24px;
@@ -256,9 +316,10 @@ ul{
 .search-input{
     border: 1px solid rgba(148, 157, 166, 0.36);
     border-radius: 20px;
-    line-height: 24px;
+    line-height: 28px;
     padding: 2px 4px 2px 36px;
     outline: none;
+    width:100%;
 }
 .search-input:focus{
     border-color: #A6C8FF;
@@ -414,23 +475,38 @@ ul{
     margin-top:5px;
 }
 .dir-right-menu{
-    border:0;
     border-radius:2px;
     box-shadow: 0px 1px 16px 0 rgba(90, 109, 122, 0.41);
     min-width: auto;
     padding:0;
 }
+.dropdown-menu{
+    border:0;
+}
 .dir-right-menu li{
+    width:100px;
     padding:8px 20px;
+}
+.setting-menu li{
+    width:120px;
+    padding:8px 15px 8px 20px;
+}
+.setting-menu{
+    top:60px;
+    padding-top:0;
+    padding-bottom: 0;
+    min-width:120px;
+    box-shadow: 0px 1px 16px 0 rgba(90, 109, 122, 0.41);
+}
+.dropdown-menu li{
     color:#999;
     font-size:12px;
-    width:100px;
     cursor: pointer;
 }
-.dir-right-menu .li-divider{
+.dropdown-menu .li-divider{
     border-bottom:1px solid #EBF3FD;
 }
-.dir-right-menu li:hover{
+.dropdown-menu li:hover{
     background-color: #f4f9ff;
     color:#76b0f3;
 }
