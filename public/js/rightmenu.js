@@ -154,6 +154,7 @@ function change_name(){
     if(RightType == 'item'){
         var url = '/dir/update_note_name';
         var resObj = $(".li-note[data-id="+id+"] .name");
+        if(itemObj.hasClass('curr')) $('.note-detail .title').val(name);
     }else if(RightType == 'dir'){
         var url = '/dir/update_name';
         var resObj = $(".li-dir[data-id="+id+"] .name");
@@ -165,7 +166,6 @@ function change_name(){
         return false;
     }
     resObj.html(name);
-    if(itemObj.hasClass('curr')) $('.note-detail .title').val(name);
     rename_regain();
     ajax_update_name(url,name,id);
 }

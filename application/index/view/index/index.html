@@ -27,6 +27,8 @@
                     <div class="widget-scroller-bar"></div>
                 </div>
             </div>
+            <div class="list-toggle"><i></i></div>
+            <div class="drag-line"></div>
         </div>
 
         <div class="item-list">
@@ -46,17 +48,17 @@
                         <div class="widget-scroller-bar"></div>
                     </div>
                 </div>
+                <div class="drag-line"></div>
             </div>
-        </div>
-
-        <div class="detail-container">
-            <div class="note-detail">
-                <div class="title-wrap">
-                    <input id="note-id" type="hidden" />
-                    <input type="text" title="" class="title" />
-                    <button class="save btn btn-primary">保存</button>
+            <div class="detail-container">
+                <div class="note-detail">
+                    <div class="title-wrap">
+                        <input id="note-id" type="hidden" />
+                        <input type="text" title="" class="title" />
+                        <button class="save btn btn-primary">保存</button>
+                    </div>
+                    <div class="note-scroller-wrap note-view" id="wangDemo"></div>
                 </div>
-                <div class="note-scroller-wrap note-view" id="wangDemo"></div>
             </div>
         </div>
     </div>
@@ -79,7 +81,7 @@
 <script type="text/javascript" src='/wangEditor/wangEditor.min.js'></script>
 <script type="text/javascript" src="/wangEditor/index.js"></script>
 <script type="text/javascript" src="/js/jquery.cookie.js"></script>
-<script type="text/javascript" src="/js/mousewheel.js"></script>
+<script type="text/javascript" src="/js/mouseevent.js"></script>
 <script type="text/javascript" src="/js/rightmenu.js"></script>
 <script type="text/javascript" src="/js/drag.js"></script>
 <script type="text/javascript" src="/js/ajax.request.js"></script>
@@ -98,6 +100,7 @@
             var class_id = 1;
         }
         RightType = 'dir';
+        if($('.item-note .no-item').length > 0 ) $('.no-item').remove();
         create_dir(parent_id,class_id);
     })
 

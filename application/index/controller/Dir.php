@@ -108,7 +108,7 @@ class Dir extends Controller
         $data = ['dir_name' => $name ,'u_time'=>time()];
         $res = Db::table('dir')->where('dir_id', $dir_id)->update($data);
         if($res) splash('succ','重命名成功');
-        else splash('error','重命名失败，请刷新重试');
+    //    else splash('error','重命名失败，请刷新重试');
     }
 
     public function note_item(){
