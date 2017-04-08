@@ -122,13 +122,10 @@ function item_list(){
             $.each(obj.note, function(key, v){
                 html += create_note_html(v);
             })
-            if(obj.dir.length == 0 && obj.note.length == 0){
-                empty_note();
-                html = no_item_html();
-            }
             if(id != 0) $('.item-back').removeClass('disabled');
             else $('.item-back').addClass('disabled');
             $('.item-note').html(html);
+            no_item_html();
         },
         error:function(e){}
     });
@@ -178,8 +175,7 @@ function drap_note(curObj,id){
     var curr_dir_id = curObj.data('id');
     if(curr_dir_id == parent_id) return false;
     $('.li-note[data-id='+id+']').parent().remove();
-    empty_note();
-    if($('.widget-scroller .rightbtn').length == 0) $('.item-note').html(no_item_html());
+    no_item_html();
     $.ajax({
         url:  '/dir/update_drap_note',
         data:{'rec_id':id , 'dir_id':curr_dir_id},
@@ -218,7 +214,7 @@ function update_dir_list(obj,parent_id){
     });
 }
 //删除目录或者笔记
-function ajax_delete_btn(url,id){
+function ajax_delete_btn(url,id,delObj){
     $.ajax({
         url:  url,
         data:{'id':id},
@@ -229,6 +225,12 @@ function ajax_delete_btn(url,id){
                 alert(res.msg);
                 return false;
             }
+            if($(".dir-list .li-dir[data-id="+id+"]").parent('li').siblings('li').length == 0){
+                $(".dir-list .li-dir[data-id="+id+"]").parent('li').parent('ul').prev('.li-dir').children('.down-btn').removeClass('drop-down pack-up');
+            }
+            if(res.result == 'dir' && id == $('.dir-list .li-dir.curr').data('id')) $('.item-wrap .scroller-container ul').html('');
+            delObj.remove();
+            no_item_html();
         },
         error:function(e){}
     });

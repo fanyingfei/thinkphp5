@@ -99,10 +99,17 @@ class Dir extends Controller
         $request = Request::instance();
         //   $user_id = $request->session('uid');
         $user_id = 1;
-        $id = $request->param('id');
+        $dir_id = $request->param('id');
+
+        $children = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0,'parent_id'=>$dir_id])->find();
+        if(!empty($children)) splash('error','该目录下还有子目录，请先删除子目录');
+
         $data = ['is_delete' => 1 , 'u_time'=>time()];
-        $res = Db::table('dir')->where('dir_id', $id)->update($data);
-        if($res) splash('succ','删除目录成功');
+        $res = Db::table('dir')->where('dir_id', $dir_id)->update($data);
+        if($res){
+            Db::table('note')->where('dir_id', $dir_id)->update($data);
+            splash('succ','删除目录成功','dir');
+        }
         else splash('error','删除目录失败，请刷新重试');
     }
 
@@ -121,7 +128,7 @@ class Dir extends Controller
         $user_id = 1;
         $request = Request::instance();
         $rec_id = $request->param('rec_id');
-        $res = Db::table('note')->where(['rec_id'=>$rec_id,'uid'=>$user_id])->order('rank desc')->order('c_time asc')->find();
+        $res = Db::table('note')->where(['rec_id'=>$rec_id,'uid'=>$user_id,'is_delete'=>0])->order('rank desc')->order('c_time asc')->find();
         splash('succ','',$res);
     }
 

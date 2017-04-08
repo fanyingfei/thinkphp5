@@ -246,11 +246,15 @@
 
     //没有任何目录和笔记时调用此方法
     function no_item_html(){
-        return '<div class="no-item"><p>没有找到文件</p><button class="btn create-note">新建笔记</button></div>';
+        empty_note();
+        if($('.item-wrap ul .rightbtn').length > 0) return false;
+        var html = '<div class="no-item"><p>没有找到文件</p><button class="btn create-note">新建笔记</button></div>';
+        $('.item-note').html(html);
     }
 
     //没有笔记时view的显示
     function empty_note(){
+        if($('.item-note ul .rightbtn').length > 0) return false;
         $('.note-detail').addClass('empty');
         $('.note-detail').children().hide();
         $('.note-detail').append('<div class="empty-img"></div>');

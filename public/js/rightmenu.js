@@ -111,15 +111,9 @@ $(".delete").on("click", function(e){
     }else if(RightType == 'item'){
         var url = '/dir/delete_note';
         var resObj = $(".li-note[data-id="+id+"]").parent('li');
-        empty_note();
     }
 
-    if($(".dir-list .li-dir[data-id="+id+"]").parent('li').siblings('li').length == 0){
-        $(".dir-list .li-dir[data-id="+id+"]").parent('li').parent('ul').prev('.li-dir').children('.down-btn').removeClass('drop-down pack-up');
-    }
-    resObj.remove();
-    if($('.widget-scroller .rightbtn').length == 0) $('.item-note').html(no_item_html());
-    ajax_delete_btn(url,id);
+    ajax_delete_btn(url,id,resObj);
 });
 //重命名
 $(".rename").on("click", function(e){
