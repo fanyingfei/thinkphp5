@@ -191,28 +191,33 @@
         show_note();
     })
 
+    var clickTime ; //取消双击时触发单机事件
     //监听打开目录
     $("body").on("click", '.li-dir', function(){
-        $('.dir-list .li-dir.curr').removeClass('curr');
         var dir_id = $(this).data('id');
-        var obj = $(".dir-list .li-dir[data-id="+dir_id+"]");
-        var downBtn = obj.parent('li').parent('ul').prev('.li-dir').children('.down-btn');
-        obj.addClass('curr');
-        obj.parents('ul').show();
-        if(!downBtn.hasClass('pack-up')) downBtn.addClass('pack-up');
-        item_list();
-        show_note();
+        clearTimeout(clickTime);
+        clickTime = setTimeout(function() {
+            $('.dir-list .li-dir.curr').removeClass('curr');
+            var obj = $(".dir-list .li-dir[data-id="+dir_id+"]");
+            var downBtn = obj.parent('li').parent('ul').prev('.li-dir').children('.down-btn');
+            obj.addClass('curr');
+            obj.parents('ul').show();
+            if(!downBtn.hasClass('pack-up')) downBtn.addClass('pack-up');
+            item_list();
+            show_note();
+        },200);
+    })
+
+    //双击目录同样触发下单事件
+    $("body").on("dblclick", '.dir-list .li-dir', function(){
+        clearTimeout(clickTime);
+        open_dir($(this).children('.down-btn'));
+        return false;
     })
 
     //监听目录下拉事件
     $("body").on("click", '.li-dir .drop-down', function(){
         open_dir($(this));
-        return false;
-    })
-
-    //双击目录同样触发下单事件
-    $("body").on("dblclick", '.dir-list .li-dir', function(){
-        open_dir($(this).children('.down-btn'));
         return false;
     })
 
