@@ -43,7 +43,7 @@
                         <i class="setting-icon"></i>
                         <ul class="dropdown-menu setting-menu">
                             <li class="setting-sel selected" data-value="all">全部<i></i></li>
-                            <li class="li-divider setting-sel" data-value="note">文章<i></i></li>
+                            <li class="li-divider setting-sel" data-value="note">笔记<i></i></li>
                             <li class="setting-sort selected desc" data-col="rank">默认排序<i></i></li>
                             <li class="setting-sort" data-col="create">创建时间<i></i></li>
                             <li class="setting-sort" data-col="update">修改时间<i></i></li>
@@ -205,7 +205,7 @@
             if(!downBtn.hasClass('pack-up')) downBtn.addClass('pack-up');
             item_list();
             show_note();
-        },200);
+        },10);
     })
 
     //双击目录同样触发下单事件
@@ -252,14 +252,17 @@
     //没有任何目录和笔记时调用此方法
     function no_item_html(){
         empty_note();
-        if($('.item-wrap ul .rightbtn').length > 0) return false;
-        var html = '<div class="no-item"><p>没有找到文件</p><button class="btn create-note">新建笔记</button></div>';
-        $('.item-note').html(html);
+        if($('.item-wrap ul .rightbtn').length == 0 || ($('.item-dir').is(":hidden") && $('.item-note .rightbtn').length == 0)){
+            var html = '<div class="no-item"><p>没有找到文件</p><button class="btn create-note">新建笔记</button></div>';
+            $('.item-note').html(html);
+        }
+        if(!$('.item-dir').is(":hidden") && $('.item-wrap ul .rightbtn').length > 0) $('.item-note').html('');
     }
 
     //没有笔记时view的显示
     function empty_note(){
         if($('.item-note ul .rightbtn').length > 0) return false;
+        if($('.note-detail').hasClass('empty')) return false;
         $('.note-detail').addClass('empty');
         $('.note-detail').children().hide();
         $('.note-detail').append('<div class="empty-img"></div>');
@@ -292,17 +295,13 @@
     function show_note(){
         //没有任何笔记时
         if($('.item-note li').length == 0){
-            $('.note-detail').addClass('empty');
-            $('.note-detail').children().hide();
-            $('.note-detail').append('<div class="empty-img"></div>');
-            $('.title-wrap input').val('');
-            $('.note-detail .note-view').html('');
+            empty_note();
             return false;
         }
+
         if($('.note-detail').hasClass('empty')){
             $('.note-detail .empty-img').remove();
-            $('.note-detail').removeClass('empty');
-            $('.note-detail').children().show();
+            $('.note-detail').removeClass('empty').children().show();
         }
         //有笔记时
         if($('.item-note .li-note.curr').length > 0){
@@ -351,6 +350,7 @@
         if($(this).data('value') == 'all') $('.item-dir').show();
         else if($(this).data('value') == 'note') $('.item-dir').hide();
         $.cookie('setting_value',$(this).data('value'));
+        no_item_html();
     })
 
     $("body").on("click", '.setting-sort', function(){

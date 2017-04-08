@@ -253,6 +253,8 @@ ul{
     background-position: 53.9622641509434% 0;
     width: 84px;
     height: 84px;
+    position: absolute;
+    top: 50%;
 }
 .rightbtn{
     position: relative;
