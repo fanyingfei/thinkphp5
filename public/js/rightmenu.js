@@ -125,7 +125,7 @@ function create_update_name(obj){
     var text = obj.children('.name').text();
     var type = obj.hasClass('li-dir') ? 'dir' : 'item';
     obj.find('.name').html('<input prevalue="'+text+'" class="rename-input" value="'+text+'" />');
-    obj.attr('draggable','false');
+    obj.parent().attr('draggable','false');
     $(".rename-input").focus().select();
     if(type == 'item'){
         obj.find('.item-time').hide();
@@ -151,7 +151,7 @@ function change_name(){
     if($('.rename-input').length == 0) return false;
     var obj = $('.rename-input');
     var name = obj.val();
-    var itemObj = obj.parents('.rightbtn');
+    var itemObj = obj.parent('.name').parent('.rightbtn');
     var id = itemObj.data('id');
     if(RightType == 'item'){
         var url = '/dir/update_note_name';

@@ -148,14 +148,19 @@ class Dir extends Controller
         $time = time();
         $request = Request::instance();
         $rec_id = $request->param('rec_id');
-        $title = $request->param('title');
+        $title = trim($request->param('title'));
+        $precont = $request->param('precont');
         $content = $request->param('content');
+        $md5cont = md5($content);
+
+        if(empty($title)) splash('error','标题不能为空');
+        if($md5cont == $precont) splash('succ','保存成功');
+
         //   $user_id = $request->session('uid');
         $user_id = 1;
-        $data = ['uid'=>$user_id,'title'=>$title,'content'=>$content,'u_time'=>$time,'c_time'=>$time];
+        $data = ['uid'=>$user_id,'title'=>$title,'content'=>$content,'md5'=>$md5cont,'u_time'=>$time,'c_time'=>$time];
         $res = Db::table('note')->where('rec_id', $rec_id)->update($data);
-        if($res) splash('succ','编辑成功');
-        else splash('error','编辑失败，请刷新重试');
+        splash('succ','保存成功',$md5cont);
     }
 
     public function update_drap_note(){
@@ -203,7 +208,7 @@ class Dir extends Controller
         $dir_id = $request->param('dir_id');
         //   $user_id = $request->session('uid');
         $user_id = 1;
-        $data = ['dir_id' => $dir_id, 'uid'=>$user_id,'title'=>$title,'content'=>$content,'u_time'=>$time,'c_time'=>$time];
+        $data = ['dir_id' => $dir_id, 'uid'=>$user_id,'title'=>$title,'content'=>$content,'md5'=>md5($content),'u_time'=>$time,'c_time'=>$time];
         $rec_id = Db::name('note')->insertGetId($data);
 
         if($rec_id) splash('succ','新建笔记成功',['rec_id'=>$rec_id,'title'=>$title,'time'=>date('Y-m-d',$time)]);

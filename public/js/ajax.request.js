@@ -59,10 +59,12 @@ function create_note(dir_id){
 }
 //目录列表
 function dir_list(){
+    var flag = false;
     $.ajax({
         url:  '/dir/dir_list',
         data:{},
         type: "POST",
+        async: false,
         dataType:'json',
         success:function(res){
             var obj = res.result;
@@ -83,9 +85,11 @@ function dir_list(){
             $('.item-list').attr('parent-id',dir_id);
             item_list();
             show_note();
+            flag = true;
         },
         error:function(e){}
     });
+    return flag;
 }
 //中间的目录和笔记列表
 function item_list(){
@@ -108,16 +112,16 @@ function item_list(){
         async:false,
         dataType:'json',
         success:function(res){
+            var setting = $('.setting-sel.selected').data('value');
             var obj = res.result;
             $('.item-list').attr('parent-id',id);
             var html = '';
-            $.each(obj.dir, function(key, v){
-                html += '<li>'+create_dir_html(v,0)+'</li>';
-            })
+            if(setting == 'all'){
+                $.each(obj.dir, function(key, v){
+                    html += '<li>'+create_dir_html(v,0)+'</li>';
+                })
+            }
             $('.item-dir').html(html);
-            if($('.setting-sel.selected').data('value') == 'note') $('.item-dir').hide();
-            else if($('.setting-sel.selected').data('value') == 'all') $('.item-dir').show();
-
             html = '';
             $.each(obj.note, function(key, v){
                 html += create_note_html(v);
@@ -142,28 +146,28 @@ function ajax_show_note(rec_id){
             var obj = res.result;
             if(!obj) return false;
             $('#note-id').val(obj.rec_id);
-            $('.note-detail .title').val(obj.title).attr('title',obj.title);
-            $('.note-detail .note-view').html(obj.content);
+            $('.note-detail .title').val(obj.title).attr('prevalue',obj.title);
+            $('.note-detail .note-view').html(obj.content).attr('precontent',obj.md5);
         },
         error:function(e){}
     });
 }
 //保存笔记
-function save_note(){
+function save_note(flag){
     var title = $('.title').val();
     var rec_id = $('#note-id').val();
     var content = $('#wangDemo').html();
+    var precont = $('#wangDemo').attr('precontent');
     if(title == '') return false;
     $.ajax({
         url:  '/dir/note_update',
-        data:{'title':title,'content':content,'rec_id':rec_id},
+        data:{'title':title,'content':content,'rec_id':rec_id,'precont':precont},
         type: "POST",
         dataType:'json',
         success:function(obj){
-            if(obj.status == 'error'){
-                //     alert(obj.msg);
-                return false;
-            }
+            if(flag) alert(obj.msg);
+            if(obj.status == 'error') return false;
+            $('#wangDemo').attr('precontent',obj.result);
             if($(".li-note[data-id="+rec_id+"] .name").text() != title) $(".li-note[data-id="+rec_id+"] .name").html(title);
         },
         error:function(e){}

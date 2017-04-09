@@ -11,7 +11,8 @@
     <title>私人笔记本</title>
 </head>
 <body>
-<div class="main">
+<div class="loading-open"><img src="/img/loading_open.gif" alt="loading..." /></div>
+<div class="main none">
     <div class="top-banner"></div>
     <div class="main-container">
         <div class="sidebar">
@@ -66,7 +67,7 @@
                 <div class="note-detail">
                     <div class="title-wrap">
                         <input id="note-id" type="hidden" />
-                        <input type="text" title="" class="title" />
+                        <input type="text" prevalue="" class="title" />
                         <button class="save btn btn-primary">保存</button>
                     </div>
                     <div class="note-scroller-wrap note-view" id="wangDemo"></div>
@@ -97,6 +98,7 @@
 <script type="text/javascript" src="/js/rightmenu.js"></script>
 <script type="text/javascript" src="/js/drag.js"></script>
 <script type="text/javascript" src="/js/ajax.request.js"></script>
+<script type="text/javascript" src="/js/jquery.md5.js"></script>
 <script type="text/javascript">
     start_init();
 
@@ -113,7 +115,11 @@
             $('.setting-sort').removeClass('selected desc asc');
             $('.setting-sort[data-col='+sel_col+']').addClass(sel_sort+' selected');
         }
-        dir_list();
+        var flag = dir_list();
+        if(flag){
+            $('.main').removeClass('none');
+            $('.loading-open').remove();
+        }
     }
     //监听创建目录
     $("body").on("click", '.create-dir', function(){
@@ -252,11 +258,10 @@
     //没有任何目录和笔记时调用此方法
     function no_item_html(){
         empty_note();
-        if($('.item-wrap ul .rightbtn').length == 0 || ($('.item-dir').is(":hidden") && $('.item-note .rightbtn').length == 0)){
+        if($('.item-wrap ul .rightbtn').length == 0){
             var html = '<div class="no-item"><p>没有找到文件</p><button class="btn create-note">新建笔记</button></div>';
             $('.item-note').html(html);
         }
-        if(!$('.item-dir').is(":hidden") && $('.item-wrap ul .rightbtn').length > 0) $('.item-note').html('');
     }
 
     //没有笔记时view的显示
@@ -272,24 +277,29 @@
 
     //焦点离开笔记时触发，调用保存方法
     $("body").on("blur", '.note-detail', function(e){
-        var title = $('.title').val();
-        var pri_title = $('.title').attr('title');
         var content = $('#wangDemo').html();
-        if(title == pri_title && content == '') return false;
-        save_note();
+        if($.md5(content) == $('#wangDemo').attr('precontent')) return false;
+        save_note(false); //false自动保存，不要弹框提示
     })
 
     //保存笔记，调用保存方法
     $("body").on("click", '.save', function(){
         var title = $('.title').val();
         if(title == '') alert('标题不能为空');
-        save_note();
+        save_note(true);//true手动保存，需弹框提示
     })
 
     //笔记标题改变时同步中间的笔记名
-    $('.title').bind('input propertychange', function() {
+    $('.title-wrap .title').bind('input propertychange', function() {
         $('.li-note.curr .name').text($(this).val());
     });
+
+    $("body").on("blur", '.title-wrap .title', function(e){
+        var name = $('.title-wrap .title').val();
+        var rec_id = $('.title-wrap #note-id').val();
+        if(name == $('.title-wrap .title').attr('prevalue')) return false;
+        ajax_update_name('/dir/update_note_name',name,rec_id);
+    })
 
     //展示笔记
     function show_note(){
@@ -346,11 +356,11 @@
 
     $("body").on("click", '.setting-sel', function(){
         $('.setting-sel').removeClass('selected');
+        $('.item-note .no-item').remove();
         $(this).addClass('selected');
-        if($(this).data('value') == 'all') $('.item-dir').show();
-        else if($(this).data('value') == 'note') $('.item-dir').hide();
         $.cookie('setting_value',$(this).data('value'));
-        no_item_html();
+        item_list();
+        show_note();
     })
 
     $("body").on("click", '.setting-sort', function(){
@@ -370,6 +380,7 @@
         $.cookie('setting_col',$(this).data('col'));
         $.cookie('setting_sort',order_by);
         item_list();
+        show_note();
     })
 </script>
 </html>
