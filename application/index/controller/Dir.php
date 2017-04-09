@@ -11,7 +11,7 @@ class Dir extends Controller
     public function dir_list()
     {
         $user_id = 1;
-        $res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0])->order('rank desc')->order('c_time asc')->field('dir_id,dir_name,class_id,parent_id')->select();
+        $res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,parent_id')->select();
         $data = $this->nesting($res);
         splash('succ','',$data);
     }

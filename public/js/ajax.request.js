@@ -18,7 +18,8 @@ function create_dir(parent_id,class_id){
             obj.children('.down-btn').addClass('drop-down pack-up');
             obj.next('ul').show();
             if(parent_id == $('.item-list').attr('parent-id')) $('.item-dir').append(html);
-            create_update_name($(".dir-list .li-dir[data-id="+res.result.dir_id+"]"));
+            var curObj = $(".dir-list .li-dir[data-id="+res.result.dir_id+"]");
+            create_update_name(curObj);
         },
         error:function(e){}
     });

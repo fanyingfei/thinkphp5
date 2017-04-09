@@ -17,7 +17,7 @@ ul{
 }
 .hint-container{
     position: absolute;
-    top: 100px;
+    top: 120px;
     left: 50%;
     -webkit-transform: translateX(-50%);
     text-align: center;
