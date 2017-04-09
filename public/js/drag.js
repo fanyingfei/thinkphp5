@@ -90,6 +90,7 @@ function drap_dir(curObj,id){
 //拖放结束后排序
 function drap_dir_sort(obj,parent_id,result){
     var parentObj = $(".dir-list .li-dir[data-id="+parent_id+"]");
+    no_item_html();
     if(result.length <= 1) return false;
     $.each(result, function(k, v){
         if(v == obj.data('id')){

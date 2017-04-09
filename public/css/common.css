@@ -15,6 +15,56 @@ ul{
 .none{
     display: none !important;
 }
+.hint-container{
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    text-align: center;
+    z-index: 100000;
+}
+.widget-hint{
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    border-radius: 0 0 4px 4px;
+    background: #fff;
+    box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.12);
+}
+.widget-hint > p{
+    padding: 0 20px;
+}
+.widget-hint .icon-hint{
+    background: url("/img/sprite.svg") no-repeat;
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    top: 11px;
+    left: 20px;
+    display: block;
+}
+.widget-hint .success .icon-hint {
+    background-position: 68.8821752265861% 95.16616314199396%;
+}
+.widget-hint .error .icon-hint {
+    background-position: 63.4441087613293% 95.16616314199396%;
+}
+.widget-hint .warning .icon-hint {
+    background-position: 74.3202416918429% 95.16616314199396%;
+}
+.widget-hint .success .hint-msg,
+.widget-hint .error .hint-msg,
+.widget-hint .warning .hint-msg{
+    color: #888;
+    margin-left: 30px;
+    max-width: 290px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
+    line-height: 40px;
+    height: 40px;
+}
 .loading-open{
     width:100%;
     height:100%;
@@ -245,12 +295,12 @@ ul{
     position: relative;
     min-width:320px;
 }
-.note-detail.empty{
+.detail-container.empty{
     text-align: center;
     vertical-align: middle;
     background-color: #f8f8f8;
 }
-.note-detail.empty::before {
+.detail-container.empty::before {
     height: 100%;
     content: ' ';
     vertical-align: middle;

@@ -167,6 +167,7 @@ function save_note(flag){
         success:function(obj){
             if(flag) alert(obj.msg);
             if(obj.status == 'error') return false;
+            if(!flag && obj.status == 'succ') alert_msg('success','自动保存成功');
             $('#wangDemo').attr('precontent',obj.result);
             if($(".li-note[data-id="+rec_id+"] .name").text() != title) $(".li-note[data-id="+rec_id+"] .name").html(title);
         },

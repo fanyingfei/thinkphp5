@@ -267,10 +267,9 @@
     //没有笔记时view的显示
     function empty_note(){
         if($('.item-note ul .rightbtn').length > 0) return false;
-        if($('.note-detail').hasClass('empty')) return false;
-        $('.note-detail').addClass('empty');
-        $('.note-detail').children().hide();
-        $('.note-detail').append('<div class="empty-img"></div>');
+        var obj = $('.detail-container');
+        if(obj.hasClass('empty')) return false;
+        obj.addClass('empty').children().hide().end().append('<div class="empty-img"></div>');
         $('.title-wrap input').val('');
         $('.note-detail .note-view').html('');
     }
@@ -311,7 +310,7 @@
 
         if($('.note-detail').hasClass('empty')){
             $('.note-detail .empty-img').remove();
-            $('.note-detail').removeClass('empty').children().show();
+            $('.detail-container').removeClass('empty').children().show();
         }
         //有笔记时
         if($('.item-note .li-note.curr').length > 0){
@@ -382,5 +381,21 @@
         item_list();
         show_note();
     })
+
+    function alert_msg(status,msg){
+        if($('.hint-container').length > 0){
+            $('.hint-container').remove();
+        }
+        var html = '<div class="hint-container"><div class="widget-hint"><p class="'+status+'"><span class="icon-hint"></span><span class="hint-msg">'+msg+'</span></p></div></div>';
+
+        $('.detail-container').append(html);
+        var obj = $('.hint-container');
+        obj.fadeIn(500);
+        setTimeout(function(){
+            obj.fadeOut(500,function(){
+                if(obj != undefined) obj.remove();
+            });
+        },2000);
+    }
 </script>
 </html>

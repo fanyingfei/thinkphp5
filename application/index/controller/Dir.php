@@ -66,14 +66,16 @@ class Dir extends Controller
         $parent_id = $request->param('parent_id');
 
         foreach($list as $key=>$item){
-            $data = ['class_id' => $item[1] ,'parent_id'=>$item[2],'u_time'=>time(),'rank'=>0];
+            $data = ['dir_id'=>$item[0],'class_id' => $item[1] ,'parent_id'=>$item[2],'u_time'=>time(),'rank'=>0];
             if($data['parent_id'] == 0) $data['class_id'] = 1;
             if($data['class_id'] > 5) splash('error','最多创建五层目录');
             $list[$key] = $data;
         }
 
         foreach($list as $row){
-            Db::table('dir')->where('dir_id', $item[0])->update($row);
+            $dir_id = $row['dir_id'];
+            unset($row['dir_id']);
+            Db::table('dir')->where('dir_id', $dir_id)->update($row);
         }
         $res = Db::table('dir')->where(['uid'=>$user_id,'is_delete'=>0,'parent_id'=>$parent_id])->order('rank desc')->order('c_time asc')->column('dir_id');
         if($res) splash('succ','拖放目录成功',$res);
@@ -171,9 +173,8 @@ class Dir extends Controller
         $rec_id = $request->param('rec_id');
         $dir_id = $request->param('dir_id');
         $data = ['dir_id'=>$dir_id,'u_time'=>$time];
-        $res = Db::table('note')->where('rec_id', $rec_id)->update($data);
-        if($res) splash('succ','拖放笔记成功');
-        else splash('error','拖放笔记失败，请刷新重试');
+        Db::table('note')->where('rec_id', $rec_id)->update($data);
+        splash('succ','拖放笔记成功');
     }
 
     public function update_note_name(){
@@ -182,8 +183,7 @@ class Dir extends Controller
         $title = $request->param('name');
         $data = ['title' => $title ,'u_time'=>time()];
         $res = Db::table('note')->where('rec_id', $rec_id)->update($data);
-        if($res) splash('succ','重命名成功');
-        else splash('error','重命名失败，请刷新重试');
+        splash('succ','重命名成功');
     }
 
     public function update_note_sort(){
@@ -196,8 +196,7 @@ class Dir extends Controller
             $data = ['rank' => $item[1] , 'u_time'=>time()];
             $res = Db::table('note')->where('rec_id', $item[0])->update($data);
         }
-        if($res) splash('succ','排序成功');
-        else splash('error','排序失败，请刷新重试');
+        splash('succ','排序成功');
     }
 
     public function note_create(){
