@@ -6,6 +6,10 @@ if(!empty($_FILES["wangEditorPasteFile"])) $file= $_FILES["wangEditorPasteFile"]
 if ($file["size"] > 2000)
 {
     $path = 'upload/'.date('Ymd').'/';
+    if(!file_exists($path)){
+        mkdir($path,0777,true);
+    }
+
     if ($file['error'] > 0) {
         echo "error : " . $file['error'];
     }else{
@@ -13,7 +17,7 @@ if ($file["size"] > 2000)
             echo $file['name'] . ' already exists. ';
         }else{
             move_uploaded_file($file['tmp_name'], $path. $file['name']);
-            echo $path . $file['name'];exit;
+            echo '/'.$path . $file['name'];exit;
         }
     }
 }else{
