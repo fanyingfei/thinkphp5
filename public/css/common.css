@@ -71,8 +71,10 @@ ul{
     text-align: center;
     position: relative;
 }
-.loading-open img{
-    margin-top:40%;
+.loading-open p{
+    position: absolute;
+    width:100%;
+    top:40%;
 }
 .widget-scroller-wrap,
 .note-scroller-wrap{
@@ -515,6 +517,9 @@ ul{
     border-top:1px solid #eee ;
     border-bottom:1px solid #eee ;
 }
+.wangEditor-menu-container .menu-group:first-child{
+    display: none;
+}
 .title-wrap{
     padding:9px;
     clear:both;
@@ -606,4 +611,8 @@ ul{
     border-radius: 0;
     -webkit-opacity: 0.3;
     opacity: 0.3;
+}
+.markdown iframe{
+    width:100%;
+    height:100%;
 }

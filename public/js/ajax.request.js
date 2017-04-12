@@ -110,7 +110,7 @@ function item_list(){
         url:  '/dir/item_list',
         data:{'dir_id':id,'col':col,'sort':sort},
         type: "POST",
-        async:false,
+        async: false,
         dataType:'json',
         success:function(res){
             var setting = $('.setting-sel.selected').data('value');

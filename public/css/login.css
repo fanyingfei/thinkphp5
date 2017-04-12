@@ -1,0 +1,231 @@
+body {
+    font: 12px '微软雅黑', 'Microsoft Yahei', Helvetica Neue, Hiragino Sans GB, '宋体', 'simsun', '黑体', Arial, sans-serif;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+a {
+    text-decoration: none;
+    outline: none;
+}
+.none{
+    display: none;
+}
+.login-main {
+    position: relative;
+    width: 860px;
+    height: 410px;
+    margin: 80px auto;
+    border: 1px solid #f1f2f2;
+    background-color: #fff;
+    box-shadow: 0 0 18px 0 rgba(57, 141, 238, 0.12);
+}
+.login-main .login-left {
+    padding: 35px 75px 42px 57px;
+    width:300px;
+}
+.login-main .login-middle {
+    background-color: rgba(216, 216, 216, 0.61);
+    width: 1px;
+    height: 334px;
+    margin-top: 41px;
+}
+.login-main .login-right {
+    padding: 35px 0px 34px 65px;
+}
+.login-main h2 {
+    font-size: 18px;
+    margin-bottom: 38px;
+    color: #333;
+    font-weight: normal;
+}
+.login-main .login-left, .login-main .login-right, .login-main .login-middle {
+    float: left;
+}
+.login-main h2 {
+    font-size: 18px;
+    margin-bottom: 38px;
+    color: #333;
+    font-weight: normal;
+}
+.login-main .login-left .row {
+    margin-bottom: 20px;
+}
+.login-main .login-left .row .login-input {
+    padding: 5px 10px;
+    line-height: 38px;
+    outline: none;
+    font-size: 12px;
+    box-sizing: border-box;
+    border: 1px solid #d6d6d6;
+    border-radius: 3px;
+    height: 38px;
+    width: 296px;
+    font-family: "Microsoft yahei";
+}
+.login-main .login-left .check-row {
+    font-size: 12px;
+    position: relative;
+    margin-bottom: 34px;
+}
+.login-main .login-left .check-row .login-label {
+    color: #b1b1b1;
+}
+.login-main .login-left .check-row .login-label .login-checkbox {
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    top: -1px;
+    vertical-align: middle;
+}
+.login-main .login-left .check-row .login-nopassword {
+    color: #9bc1f1;
+    position: absolute;
+    right: 0;
+}
+.login-main .login-left .check-row .login-error {
+    position: absolute;
+    color: #fc4343;
+    display: none;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.login-main .login-middle {
+    background-color: rgba(216, 216, 216, 0.61);
+    width: 1px;
+    height: 334px;
+    margin-top: 41px;
+}
+.login-main .login-left .row-btn {
+    position: absolute;
+    top: 329px;
+}
+.login-main .login-right .btn {
+    display: block;
+    width: 298px;
+    height: 40px;
+    margin-bottom: 10px;
+    border: 1px solid #d6d6d6;
+    border-radius: 3px;
+    color: #9bc1f1;
+    background-color: #fffcf4;
+    box-sizing: border-box;
+    line-height: 40px;
+    padding-left: 70px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.login-main .login-right .btn span {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+    position: relative;
+    top: -2px;
+}
+.login-main .login-left .row-btn .btn {
+    display: inline-block;
+    font-family: "Microsoft yahei";
+    width: 130px;
+    height: 46px;
+    line-height: 46px;
+    border: 1px solid #398dee;
+    box-sizing: border-box;
+    border-radius: 3px;
+    padding: 0;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    float:left;
+}
+.login-main .login-left .row-btn .regist-btn {
+    margin-left: 36px;
+}
+.btn-white{
+    text-align: center;
+    color: #9bc1f1;
+    background-color: #fff;
+}
+.btn-blue{
+    text-align: center;
+    background-color: #398dee;
+    color: #fff;
+}
+.login-main .login-right .more {
+    margin-top: -10px;
+}
+.login-main .login-right .more .more-btn {
+    margin: 16px 0;
+    display: inline-block;
+    color: #b1b1b1;
+}
+.login-main .login-right .more .more-btn {
+    margin: 16px 0;
+    display: inline-block;
+    color: #b1b1b1;
+}
+.login-main .login-right .btn:hover {
+    color: #82b6f4;
+}
+.icon-qq {
+    background-image: url(/img/login.sprites.png);
+    background-position: 0px -36px;
+    width: 36px;
+    height: 36px;
+}
+.icon-weixin {
+    background-image: url(/img/login.sprites.png);
+    background-position: 0px 0px;
+    width: 36px;
+    height: 36px;
+}
+.icon-sina {
+    background-image: url(/img/login.sprites.png);
+    background-position: -72px -36px;
+    width: 36px;
+    height: 36px;
+}
+.icon-email {
+    background-image: url(/img/login.sprites.png);
+    background-position: -36px -36px;
+    width: 36px;
+    height: 36px;
+}
+#drag{
+    position: relative;
+    background-color: #ddd;
+    width: 296px;
+    height: 34px;
+    line-height: 34px;
+    text-align: center;
+}
+#drag .handler{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 38px;
+    height: 32px;
+    border: 1px solid #ccc;
+    cursor: move;
+}
+.handler_bg{
+    background: #fff url('/img/hua.png') no-repeat center;
+}
+.drag_ok .handler_bg{
+    background: #fff url('/img/hua_ok.png') no-repeat center;
+}
+.drag_bg{
+    background-color: #7ac23c;
+    height: 34px;
+    width: 0px;
+}
+.drag_text{
+    position: absolute;
+    top: 0px;
+    width: 296px;
+    color:#6c6c6c;
+}
+.drag_ok .drag_text{
+    color:#fff;
+}

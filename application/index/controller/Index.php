@@ -2,7 +2,8 @@
 namespace app\index\controller;
 
 use think\Controller;
-use \think\View;
+use think\View;
+use think\Session;
 
 class Index extends Controller
 {
@@ -12,6 +13,12 @@ class Index extends Controller
     }
 
     public function test(){
+        $uid = Session::get('uid');
+        if(empty($uid)) $this->redirect('/index/login',['name'=>'login']);
         return $this->fetch('index');
+    }
+
+    public function login($name = 'login'){
+        return $this->fetch('user/login',['name'=>$name]);
     }
 }
