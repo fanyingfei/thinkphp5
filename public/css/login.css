@@ -68,6 +68,26 @@ a {
     position: relative;
     margin-bottom: 34px;
 }
+.code-row{
+    position: relative;
+}
+.login-main .login-left .code-row .code{
+    padding-right:150px;
+}
+.code-row .code-span{
+    padding:11px;
+    display: block;
+    text-align: center;
+    width:100px;
+    color:#fff;
+    position: absolute;
+    background-color: #2CB9EA;
+    right:4px;
+    top:0;
+    border-bottom-right-radius: 3px;
+    border-top-right-radius: 3px;
+    cursor: pointer;
+}
 .login-main .login-left .check-row .login-label {
     color: #b1b1b1;
 }
@@ -87,7 +107,7 @@ a {
     position: absolute;
     color: #fc4343;
     display: none;
-    max-width: 250px;
+    max-width: 290px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -210,10 +230,13 @@ a {
     cursor: move;
 }
 .handler_bg{
-    background: #fff url('/img/hua.png') no-repeat center;
+    background-color: #fff;
+    background-image:url('/img/hua.png');
+    background-repeat: no-repeat;
+    background-position: center;
 }
 .drag_ok .handler_bg{
-    background: #fff url('/img/hua_ok.png') no-repeat center;
+    background-image:url('/img/hua_ok.png');
 }
 .drag_bg{
     background-color: #7ac23c;

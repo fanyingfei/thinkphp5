@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <link rel="stylesheet" type="text/css" href="/wangEditor/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/wangEditor/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="/wangEditor/common.css">
@@ -314,8 +314,11 @@
 
         if($('.detail-container').hasClass('empty')){
             $('.detail-container .empty-img').remove();
-            $('.detail-container').removeClass('empty').children().show();
+            $('.detail-container').removeClass('empty');
         }
+
+        $('.detail-container').addClass('loading').children().hide();
+
         //有笔记时
         if($('.item-note .li-note.curr').length > 0){
             var rec_id = $('.item-note .li-note.curr').data('id')

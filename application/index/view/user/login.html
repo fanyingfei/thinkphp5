@@ -40,8 +40,9 @@
             <div class="row">
                 <input type="password" placeholder="密码" class="login-input password">
             </div>
-            <div class="row">
-                <input type="password" placeholder="再次输入密码" class="login-input dbpass">
+            <div class="row code-row">
+                <input type="text" placeholder="请输入验证码" class="login-input code">
+                <span class="code-span get-code">获取验证码</span>
             </div>
             <div class="row check-row">
                 <div class="login-error"></div>
@@ -91,20 +92,21 @@
 <script type="text/javascript" src="/js/login.js"></script>
 <script type="text/javascript">
     var ref_url = document.referrer;
+    var countdown_seconds;
     function register(){
-        var phone = $('.register .phone').val();
-        var password = $('.register .password').val();
-        var dbpass = $('.register .dbpass').val();
+        var phone = $.trim($('.register .phone').val());
+        var password = $.trim($('.register .password').val());
+        var code = $.trim($('.register .code').val());
         $.ajax({
             url:  '/user/register',
-            data:{'phone':phone,'password':password,'dbpass':dbpass},
+            data:{'phone':phone,'password':password,'code':code},
             type: "POST",
             dataType:'json',
             success:function(res){
                 if(res.status == 'error'){
                     $('.register .login-error').text(res.msg).show();
                 }else{
-                    window.location.href='/index/test';
+                    window.location.href='/';
                 }
             },
             error:function(e){}
@@ -112,8 +114,8 @@
     }
 
     function login(){
-        var phone = $('.login .phone').val();
-        var password = $('.login .password').val();
+        var phone = $.trim($('.login .phone').val());
+        var password = $.trim($('.login .password').val());
 
         if($('.drag_text').attr('data-value') == 0){
             $('.login .login-error').text('请拖动滑块验证').show();
@@ -128,11 +130,45 @@
                 if(res.status == 'error'){
                     $('.login .login-error').text(res.msg).show();
                 }else{
-                    window.location.href='/index/test';
+                    window.location.href='/';
                 }
             },
             error:function(e){}
         });
+    }
+
+    $('.get-code').click(function(){
+        var phone = $.trim($('.register .phone').val());
+        if(!phone){
+            return false;
+        }
+        $('.code-span').removeClass('get-code');
+        $.ajax({
+            url:  '/user/sendHuYiSms',
+            data:{'phone':phone},
+            type: "POST",
+            dataType:'json',
+            success:function(res){
+                if(res.status == 'error'){
+                    $('.code-span').addClass('get-code');
+                    $('.register .login-error').text(res.msg).show();
+                }else{
+                    countdown_seconds = 60;
+                    $('.code-span').html('获取成功（<span>'+countdown_seconds+'</span>秒）');
+                    setTimeout(countdown, 1000);
+                }
+            },
+            error:function(e){}
+        });
+    })
+
+    function countdown(){
+        if(countdown_seconds > 1){
+            $('.code-span span').html(--countdown_seconds);
+            setTimeout(countdown, 1000);
+        }else{
+            $('.code-span').html('获取验证码').addClass('get-code');
+        }
     }
 
     function show_login(){

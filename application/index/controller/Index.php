@@ -14,7 +14,7 @@ class Index extends Controller
 
     public function test(){
         $uid = Session::get('uid');
-        if(empty($uid)) $this->redirect('/index/login',['name'=>'login']);
+        if(empty($uid)) $this->redirect('/login',['name'=>'login']);
         return $this->fetch('index');
     }
 

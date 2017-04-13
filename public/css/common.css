@@ -296,11 +296,22 @@ ul{
     height: 100%;
     position: relative;
     min-width:320px;
+    overflow: hidden;
+    padding-bottom: 10px;
 }
 .detail-container.empty{
     text-align: center;
     vertical-align: middle;
     background-color: #f8f8f8;
+}
+.detail-container.loading{
+    background-image: url('/img/note_loading.gif');
+    background-position: center;
+    background-repeat: no-repeat;
+    -webkit-background-size: 32px 32px;
+    -moz-background-size: 32px 32px;
+    -o-background-size: 32px 32px;
+    background-size: 32px 32px;
 }
 .detail-container.empty::before {
     height: 100%;

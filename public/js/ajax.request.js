@@ -149,6 +149,7 @@ function ajax_show_note(rec_id){
             $('#note-id').val(obj.rec_id);
             $('.note-detail .title').val(obj.title).attr('prevalue',obj.title);
             $('.note-detail .note-view').html(obj.content).attr('precontent',obj.md5);
+            $('.detail-container').removeClass('loading').children().show();
         },
         error:function(e){}
     });
