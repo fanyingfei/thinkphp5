@@ -106,15 +106,13 @@ class Dir extends Controller
         $time = time();
         $uid = $this->uid;
         $request = Request::instance();
-        $dir_id = $request->param('id');
-
-        $children = Db::table('dir')->where(['uid'=>$uid,'is_delete'=>0,'parent_id'=>$dir_id])->find();
-        if(!empty($children)) splash('error','该目录下还有子目录，请先删除子目录');
+        $dir_ids = $request->param('id/a');
+        if(empty($dir_ids)) splash('error','请选择要删除的目录');
 
         $data = ['is_delete' => 1 , 'u_time'=>time()];
-        $res = Db::table('dir')->where('dir_id', $dir_id)->update($data);
+        $res = Db::table('dir')->where('dir_id','in',$dir_ids)->update($data);
         if($res){
-            Db::table('note')->where('dir_id', $dir_id)->update($data);
+            Db::table('note')->where('dir_id','in',$dir_ids)->update($data);
             splash('succ','删除目录成功','dir');
         }
         else splash('error','删除目录失败，请刷新重试');

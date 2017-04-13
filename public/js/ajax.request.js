@@ -130,6 +130,7 @@ function item_list(){
             if(id != 0) $('.item-back').removeClass('disabled');
             else $('.item-back').addClass('disabled');
             $('.item-note').html(html);
+            $('.item-num span').html($('.item-wrap .rightbtn').length);
             no_item_html();
         },
         error:function(e){}
@@ -221,10 +222,10 @@ function update_dir_list(obj,parent_id){
     });
 }
 //删除目录或者笔记
-function ajax_delete_btn(url,id,delObj){
+function ajax_delete_btn(url,ids,delObj){
     $.ajax({
         url:  url,
-        data:{'id':id},
+        data:{'id':ids},
         type: "POST",
         dataType:'json',
         success:function(res){
@@ -232,6 +233,7 @@ function ajax_delete_btn(url,id,delObj){
                 alert(res.msg);
                 return false;
             }
+            var id = delObj.children('.rightbtn').data('id');
             if($(".dir-list .li-dir[data-id="+id+"]").parent('li').siblings('li').length == 0){
                 $(".dir-list .li-dir[data-id="+id+"]").parent('li').parent('ul').prev('.li-dir').children('.down-btn').removeClass('drop-down pack-up');
             }

@@ -7,6 +7,7 @@ html,.main,body{
 body{
     margin:0;
     font-size:13px;
+    font-family: "Century Gothic", "Microsoft yahei";
 }
 ul{
     list-style: none;
@@ -76,15 +77,15 @@ ul{
     width:100%;
     top:40%;
 }
+.dir-list .item-time{
+    display: none !important;
+}
 .widget-scroller-wrap,
 .note-scroller-wrap{
     overflow: hidden;
     height: 100%;
     width: 100%;
     outline: none;
-}
-.dir-list .item-time{
-    display: none !important;
 }
 .dir-warp{
     position: absolute;
@@ -277,6 +278,17 @@ ul{
     left: 240px;
     right: 0;
     bottom: 0;
+}
+.item-list .item-num {
+    position: absolute;
+    bottom: 0;
+    border-top: 1px solid #E0E1E5;
+    width: 100%;
+    box-sizing: border-box;
+    line-height: 30px;
+    padding-left: 20px;
+    color: #393939;
+    font-size: 12px;
 }
 .item-wrap{
     position: relative;
@@ -534,7 +546,7 @@ ul{
 .title-wrap{
     padding:9px;
     clear:both;
-    overflow: hidden;
+    height:60px;
 }
 .title{
     float:left;

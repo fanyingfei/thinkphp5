@@ -61,6 +61,7 @@
                         <div class="widget-scroller-bar"></div>
                     </div>
                 </div>
+                <div class="item-num">总共 <span></span> 项</div>
                 <div class="drag-line"></div>
             </div>
             <div class="detail-container">
@@ -166,7 +167,7 @@
 
     //得到富文本编辑器的高度
     function get_wangDemo_height(){
-        var height = $('.note-detail').height() - $("#wangDemo").offset().top + 30;
+        var height = $('.note-detail').height() - $(".title-wrap").outerHeight() - 40;
         $('#wangDemo').height(height);
     }
 

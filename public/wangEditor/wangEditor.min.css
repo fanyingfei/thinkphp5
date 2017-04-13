@@ -18,7 +18,7 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    line-height:1
+    line-height:20px;
 }
 .wangEditor-container .clearfix:after {
     content:'';
@@ -216,7 +216,7 @@
     border-collapse:collapse
 }
 .wangEditor-container .wangEditor-txt table td,.wangEditor-container .wangEditor-txt table th {
-    border:1px solid #999;
+    border:1px solid #ccc;
     padding:8px;
     min-width:50px;
     min-height:20px;

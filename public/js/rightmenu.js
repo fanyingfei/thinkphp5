@@ -108,13 +108,31 @@ $(".delete").on("click", function(e){
     if(RightType == 'dir'){
         var url = '/dir/delete_dir';
         var resObj = $(".li-dir[data-id="+id+"]").parent('li');
+        var delObj = $(".dir-list .li-dir[data-id="+id+"]");
+        var list = get_dir_list(delObj);
+        list.push(id);
+        ajax_delete_btn(url,list,resObj);
     }else if(RightType == 'item'){
         var url = '/dir/delete_note';
         var resObj = $(".li-note[data-id="+id+"]").parent('li');
+        ajax_delete_btn(url,id,resObj);
     }
-
-    ajax_delete_btn(url,id,resObj);
 });
+
+function get_dir_list(obj){
+    var item = new Array();
+    $(obj).next('ul').children('li').each(function(){
+        item.push($(this).children('.li-dir').data('id'));
+        if($(this).children('.li-dir').next('ul').length > 0){
+            var item_list = get_dir_attr($(this).children('.li-dir'));
+            for(var i=0;i<item_list.length;i++){
+                item.push(item_list[i]);
+            }
+        }
+    });
+    return item;
+}
+
 //重命名
 $(".rename").on("click", function(e){
     hide_dropdown_menu();
