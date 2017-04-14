@@ -90,14 +90,13 @@ function drap_dir(curObj,id){
 //拖放结束后排序
 function drap_dir_sort(obj,parent_id,result){
     var parentObj = $(".dir-list .li-dir[data-id="+parent_id+"]");
-    no_item_html();
     if(result.length <= 1) return false;
     $.each(result, function(k, v){
         if(v == obj.data('id')){
-            if(k == result.length-1) return false;
-            parentObj.next('ul').children('li').eq(k-1).after(obj.parent('li'));
+            if(k == result.length-1) return false; //最后一个时不用再排序，默认添加到最后一个
+            parentObj.next('ul').children('li').eq(k).before(obj.parent('li'));
             if($(".dir-list .li-dir[data-id="+parent_id+"]").hasClass('curr')){
-                $(".item-dir li").eq(k-1).after($(".item-dir .li-dir[data-id="+v+"]").parent('li'));
+                $(".item-dir li").eq(k).before($(".item-dir .li-dir[data-id="+v+"]").parent('li'));
             }
         }
     });
@@ -108,7 +107,7 @@ function get_dir_attr(obj){
     var parent_id = obj.data('id');
     var class_id = parseInt(obj.attr('class-id'))+1;
     $(obj).next('ul').children('li').each(function(){
-        item.push([$(this).children('.li-dir').data('id'),class_id,parent_id,$(this).children('.li-dir').text()]);
+        item.push([$(this).children('.li-dir').data('id'),class_id,parent_id,$(this).children('.li-dir').children('.name').text()]);
         if($(this).children('.li-dir').next('ul').length > 0){
             var item_list = get_dir_attr($(this).children('.li-dir'));
             for(var i=0;i<item_list.length;i++){

@@ -24,6 +24,10 @@
                 <div class="widget-scroller-wrap">
                     <div class="scroller-container">
                         <div class="dir-list"></div>
+                        <div class="sidebar-trash">
+                            <i class="icon-trash"></i>
+                            <div class="text-trash">回收站</div>
+                        </div>
                     </div>
                     <div class="widget-scroller-bar"></div>
                 </div>
@@ -31,7 +35,6 @@
             <div class="list-toggle"><i></i></div>
             <div class="drag-line"></div>
         </div>
-
         <div class="item-list">
             <div class="item-wrap">
                 <div class="item-hd">
@@ -77,14 +80,6 @@
         </div>
     </div>
 </div>
-<ul class="dropdown-menu dir-right-menu" role="menu">
-    <li class="move-up">上移</li>
-    <li class="move-down">下移</li>
-    <li class="delete">删除</li>
-    <li class="li-divider rename">重命名</li>
-    <li class="right-create-note">新建笔记</li>
-    <li class="right-create-dir">新建文件夹</li>
-</ul>
 <div class="none">
     <img id="drop-dir" src="/img/drap_dir.png" />
     <img id="drop-note" src="/img/drap_note.png" />
@@ -202,13 +197,21 @@
         show_note();
     })
 
+    //监听回收站
+    $("body").on("click", '.sidebar-trash', function(){
+        $('.dir-warp .curr').removeClass('curr');
+        $(this).addClass('curr');
+        ajax_trash_list();
+        show_note();
+    })
+
     var clickTime ; //取消双击时触发单机事件
     //监听打开目录
     $("body").on("click", '.li-dir', function(){
         var dir_id = $(this).data('id');
         clearTimeout(clickTime);
         clickTime = setTimeout(function() {
-            $('.dir-list .li-dir.curr').removeClass('curr');
+            $('.dir-warp .curr').removeClass('curr');
             var obj = $(".dir-list .li-dir[data-id="+dir_id+"]");
             var downBtn = obj.parent('li').parent('ul').prev('.li-dir').children('.down-btn');
             obj.addClass('curr');
@@ -246,12 +249,12 @@
     }
 
     //创建目录列表的HTML，循环嵌套
-    function creat_list(obj){
+    function create_list(obj){
         var html = '<ul>';
         $.each(obj, function(key, v){
             if(v.child){
                 html += '<li>'+create_dir_html(v,1);
-                html += creat_list(v.child);
+                html += create_list(v.child);
                 html += '</li>';
             }else{
                 html += '<li>'+create_dir_html(v,0)+'</li>';
@@ -265,6 +268,13 @@
         empty_note();
         if($('.item-wrap ul .rightbtn').length == 0){
             var html = '<div class="no-item"><p>没有找到文件</p><button class="btn create-note">新建笔记</button></div>';
+            $('.item-note').html(html);
+        }
+    }
+
+    function no_trash_html(){
+        if($('.item-wrap ul .rightbtn').length == 0){
+            var html = '<div class="no-item"><p>回收站为空</p></div>';
             $('.item-note').html(html);
         }
     }
@@ -356,6 +366,7 @@
 
     //item设置
     $("body").on("click", '.setting-icon', function(){
+        if($('.item-setting').hasClass('disabled')) return false;
         hide_dropdown_menu();
         $('.setting-menu').show();
         return false;

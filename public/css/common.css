@@ -77,6 +77,10 @@ ul{
     width:100%;
     top:40%;
 }
+.my-dir-list,
+.text-trash{
+    font-size:13px;
+}
 .dir-list .item-time{
     display: none !important;
 }
@@ -234,6 +238,9 @@ ul{
 .item-setting .setting-icon:hover{
     background-position: 52.698412698412696% 48.92307692307692%;
 }
+.item-setting.disabled .setting-icon:hover{
+    background-position: 10.793650793650794% 57.53846153846154%;
+}
 .setting-menu li i{
     width: 18px;
     height: 18px;
@@ -266,8 +273,9 @@ ul{
 .item-back:hover{
     background-position: 41.904761904761905% 48.92307692307692%;
 }
-.item-back.disabled{
+.item-hd .disabled{
     opacity:0.3;
+    cursor: default !important;
 }
 .item-back.disabled:hover{
     background-position: 21.58730158730159% 57.53846153846154%;
@@ -316,8 +324,8 @@ ul{
     vertical-align: middle;
     background-color: #f8f8f8;
 }
-.detail-container.loading{
-    background-image: url('/img/note_loading.gif');
+.loading{
+    background-image: url('/img/loading.gif');
     background-position: center;
     background-repeat: no-repeat;
     -webkit-background-size: 32px 32px;
@@ -365,9 +373,9 @@ ul{
     padding-top:9px !important;
     padding-bottom:9px !important;
 }
-.dir-list .li-dir.curr{
-    background-color: #398dee;
-    color: #fff;
+.dir-warp .curr{
+    background-color: #398dee !important;
+    color: #fff !important;
 }
 .widget-scroller li > div{
     padding: 15px;
@@ -635,7 +643,32 @@ ul{
     -webkit-opacity: 0.3;
     opacity: 0.3;
 }
-.markdown iframe{
-    width:100%;
-    height:100%;
+.sidebar-trash {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    cursor: pointer;
+    padding: 5px 0;
+    box-sizing: border-box;
+    border: 1px solid transparent;
+    color: #393939;
+    margin-top:10px;
+}
+.sidebar-trash .icon-trash {
+     background: url("/img/sprite.svg") no-repeat;
+     background-position: 7.384615384615385% 83.38461538461539%;
+     width: 24px;
+     height: 24px;
+    display: block;
+    position: absolute;
+    top: 7px;
+    left: 30px;
+ }
+.sidebar-trash.curr  .icon-trash {
+    background-position: 87.6923076923077% 73.84615384615384%;
+}
+.sidebar-trash .text-trash {
+    display: inline-block;
+    margin-left:62px;
+    line-height: 30px;
 }
