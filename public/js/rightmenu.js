@@ -256,9 +256,10 @@ function get_menu_html(type,e){
         html += '<li class="move-down">下移</li>';
         html += '<li class="delete">删除</li>';
         html += '<li class="li-divider rename">重命名</li>';
-    }else if(type == 'dir'){
-        html += '<li class="right-create-note">新建笔记</li>';
-        html += '<li class="right-create-dir">新建文件夹</li>';
+        if(type == 'dir'){
+            html += '<li class="right-create-note">新建笔记</li>';
+            html += '<li class="right-create-dir">新建文件夹</li>';
+        }
     }else if(type == 'trash'){
         html += '<li class="right-trash-recover">恢复</li>';
         html += '<li class="right-trash-delete">永久删除</li>';

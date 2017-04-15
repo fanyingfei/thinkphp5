@@ -132,7 +132,7 @@ function item_list(){
             $('.item-note').html(html);
             set_item_num();
             no_item_html();
-            $('.item-wrap .widget-scroller-wrap').removeClass('loading').children('.scroller-container').show();
+            $('.item-wrap .widget-scroller-wrap').removeClass('loading').children('.scroller-container').slideDown('fast');
         },
         error:function(e){}
     });
@@ -178,7 +178,7 @@ function ajax_show_note(rec_id){
             $('#note-id').val(obj.rec_id);
             $('.note-detail .title').val(obj.title).attr('prevalue',obj.title);
             $('.note-detail .note-view').html(obj.content).attr('precontent',obj.md5);
-            $('.detail-container').removeClass('loading').children().show();
+            $('.detail-container').removeClass('loading').children().fadeIn('fast');
         },
         error:function(e){}
     });
@@ -264,13 +264,17 @@ function ajax_delete_btn(url,ids,delObj){
             }
             var id = delObj.children('.rightbtn').data('id');
             if(res.result == 'dir'){
+                //当前选中的文件夹被删除后，item那列置为空
+                if(id == $('.dir-list .li-dir.curr').data('id')) $('.item-wrap .scroller-container ul').html('');
                 var parObj = $(".dir-list .li-dir[data-id="+id+"]").parent('li');
                 if(parObj.siblings('li').length == 0){
                     parObj.parent('ul').prev('.li-dir').children('.down-btn').removeClass('drop-down pack-up');
                     parObj.parent('ul').remove();
                 }
-                //当前选中的文件夹被删除后，item那列置为空
-                if(id == $('.dir-list .li-dir.curr').data('id')) $('.item-wrap .scroller-container ul').html('');
+                if($('.sidebar-trash').hasClass('curr')){
+                    ajax_trash_list();
+                    show_note();
+                }
             }
             delObj.remove();
             set_item_num();
@@ -293,7 +297,7 @@ function ajax_trash_btn(url,ids,delObj){
             }
             var data = res.result;
             if(data.type == 'dir') {
-                delObj.find('.rightbtn').attr('draggable', true);
+                delObj.find('.rightbtn').attr('draggable', true).removeClass('li-trash');
                 var parent_id = data.parent_id;
                 var dir_id = delObj.children('.rightbtn').data('id');
                 var parObj = $(".dir-list .li-dir[data-id=" + parent_id + "]");
@@ -306,9 +310,7 @@ function ajax_trash_btn(url,ids,delObj){
                     parObj.children('.down-btn').addClass('drop-down');
                 }
             }
-            delObj.remove();
-            set_item_num();
-            no_trash_html();
+            trash_change(delObj,ids,data.type);
         },
         error:function(e){}
     });
@@ -326,9 +328,7 @@ function ajax_trash_delete(url,ids,delObj){
                 return false;
             }
             var data = res.result;
-            delObj.remove();
-            set_item_num();
-            no_trash_html();
+            trash_change(delObj,ids,data.type);
         },
         error:function(e){}
     });
@@ -433,4 +433,16 @@ function set_item_hd(id,type){
 
 function set_item_num(){
     $('.item-num span').html($('.item-wrap .rightbtn').length);
+}
+
+function trash_change(delObj,delList,type){
+    if(type == 'dir'){console.log(delList);
+        $.each(delList , function(k,v){
+            var parent_id = v[0];
+            $('.item-note .li-trash[parent-id="'+parent_id+'"]').parent('li').remove();
+        })
+    }
+    delObj.remove();
+    set_item_num();
+    no_trash_html();
 }

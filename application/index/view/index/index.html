@@ -147,7 +147,9 @@
 
     //创建笔记的HTML
     function create_note_html(obj){
-        return '<li><div draggable="true" class="li-note rightbtn" data-id="'+ obj.rec_id+'"><i class="icon"></i><div class="name">'+ obj.title+'</div><div class="item-time">'+ obj.time+'</div><i class="right-menu"></i></div></li>';
+        var html = '<li><div draggable="true" class="li-note rightbtn" data-id="'+ obj.rec_id+'" parent-id="'+ obj.dir_id+'">';
+        html += '<i class="icon"></i><div class="name">'+ obj.title+'</div><div class="item-time">'+ obj.time+'</div><i class="right-menu"></i></div></li>';
+        return html;
     }
 
     //监听创建笔记
@@ -208,6 +210,7 @@
     var clickTime ; //取消双击时触发单机事件
     //监听打开目录
     $("body").on("click", '.li-dir', function(){
+        if($(this).hasClass('li-trash')) return false;
         var dir_id = $(this).data('id');
         clearTimeout(clickTime);
         clickTime = setTimeout(function() {
@@ -239,10 +242,10 @@
     function open_dir(obj){
         var parent = obj.parent();
         if(parent.next('ul').is(":hidden")){
-            parent.next('ul').show();
+            parent.next('ul').slideDown('fast');
             obj.addClass('pack-up');
         }else{
-            parent.parent().find('ul').hide();
+            parent.parent().find('ul').slideUp('fast');
             parent.parent().find('ul').prev('.li-dir').children('.down-btn').removeClass('pack-up');
         }
         $(".dir-right-menu").hide();
