@@ -6,6 +6,7 @@ use think\Request;
 use think\Controller;
 use think\View;
 use think\Session;
+use think\Cookie;
 
 class User extends Controller
 {
@@ -31,13 +32,14 @@ class User extends Controller
         $data = ['phone' =>$phone, 'password' =>md5($password.$time),'c_time'=>$time];
         $uid = Db::name('user')->insertGetId($data);
         $res['uid'] = $uid;
-        $this->set_login($res);
+        set_login($res);
         splash('succ','注册成功');
     }
 
     public function login(){
         $request = Request::instance();
         $phone = $request->param('phone');
+        $remeber = intval($request->param('remeber'));
         if(!preg_match("/^1[34578]\d{9}$/", $phone)) splash('error','请输入正确手机号');
 
         $res = Db::table('user')->where('phone',$phone)->find();
@@ -46,7 +48,13 @@ class User extends Controller
         $password = $request->param('password');
         if($res['password'] != md5($password.$res['c_time'])) splash('error','密码不正确');
 
-        $this->set_login($res);
+        set_login($res);
+        if($remeber == 1){
+            $user_info = urlencode(json_encode(['m'=>$phone,'p'=>$res['password']]));
+            Cookie::set('user',$user_info,3600*24*30);//记住一个月
+        }else{
+            Cookie::delete('user');
+        }
         splash('succ','登录成功');
     }
 
@@ -75,8 +83,4 @@ class User extends Controller
         }
     }
 
-
-    public function set_login($res){
-        Session::set('uid',$res['uid']);
-    }
 }

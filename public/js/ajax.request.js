@@ -327,8 +327,7 @@ function ajax_trash_delete(url,ids,delObj){
                 alert(res.msg);
                 return false;
             }
-            var data = res.result;
-            trash_change(delObj,ids,data.type);
+            trash_change(delObj,ids,res.result);
         },
         error:function(e){}
     });
@@ -436,9 +435,9 @@ function set_item_num(){
 }
 
 function trash_change(delObj,delList,type){
-    if(type == 'dir'){console.log(delList);
+    if(type == 'dir'){
         $.each(delList , function(k,v){
-            var parent_id = v[0];
+            var parent_id = v[0] == undefined ? v : v[0];
             $('.item-note .li-trash[parent-id="'+parent_id+'"]').parent('li').remove();
         })
     }

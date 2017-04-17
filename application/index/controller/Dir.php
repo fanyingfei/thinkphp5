@@ -42,7 +42,7 @@ class Dir extends Controller
         $dir_id = $request->param('dir_id');
 
         $dir_res = Db::table('dir')->where(['uid'=>$uid,'is_delete'=>0,'parent_id'=>$dir_id])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
-        $note_res = Db::table('note')->where(['uid'=>$uid,'is_delete'=>0,'dir_id'=>$dir_id])->order($col.' '.$sort)->order('rec_id asc')->field('rec_id,title,dir_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
+        $note_res = Db::table('note')->where(['uid'=>$uid,'is_delete'=>0,'dir_id'=>$dir_id])->order($col.' '.$sort)->order('rec_id desc')->field('rec_id,title,dir_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
 
         splash('succ','',['dir'=>$dir_res,'note'=>$note_res]);
     }

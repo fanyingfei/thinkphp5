@@ -248,7 +248,7 @@
             parent.parent().find('ul').slideUp('fast');
             parent.parent().find('ul').prev('.li-dir').children('.down-btn').removeClass('pack-up');
         }
-        $(".dir-right-menu").hide();
+        $(".dir-right-menu").remove();
     }
 
     //创建目录列表的HTML，循环嵌套
@@ -369,9 +369,13 @@
 
     //item设置
     $("body").on("click", '.setting-icon', function(){
+        hide_dropdown_menu('setting');
         if($('.item-setting').hasClass('disabled')) return false;
-        hide_dropdown_menu();
-        $('.setting-menu').show();
+        if($('.setting-menu').is(":hidden")){
+            $('.setting-menu').show();
+        }else{
+            $('.setting-menu').hide();
+        }
         return false;
     })
 

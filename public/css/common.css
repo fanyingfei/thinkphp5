@@ -84,6 +84,9 @@ ul{
 .dir-list .item-time{
     display: none !important;
 }
+.dir-list > ul{
+    padding-bottom:10px;
+}
 .widget-scroller-wrap,
 .note-scroller-wrap{
     overflow: hidden;
@@ -652,7 +655,6 @@ ul{
     box-sizing: border-box;
     border: 1px solid transparent;
     color: #393939;
-    margin-top:10px;
 }
 .sidebar-trash .icon-trash {
      background: url("/img/sprite.svg") no-repeat;

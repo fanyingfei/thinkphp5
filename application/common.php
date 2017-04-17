@@ -8,6 +8,7 @@
 // +----------------------------------------------------------------------
 // | Author: 流年 <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+use think\Session;
 
 // 应用公共文件
 function splash($status , $msg,$data=''){
@@ -25,6 +26,10 @@ function ajax_response($response){
     }
 
     die($response);
+}
+
+function set_login($res){
+    Session::set('uid',$res['uid']);
 }
 
 function post_fsockopen($url = '', $post = array() , $method = 'POST', $header = null, $timeout = 20 ){

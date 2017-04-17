@@ -1,9 +1,11 @@
 <?php
 namespace app\index\controller;
 
+use think\Db;
 use think\Controller;
 use think\View;
 use think\Session;
+use think\Cookie;
 
 class Index extends Controller
 {
@@ -14,11 +16,33 @@ class Index extends Controller
 
     public function test(){
         $uid = Session::get('uid');
-        if(empty($uid)) $this->redirect('/login',['name'=>'login']);
+        if(empty($uid)) $this->redirect('/login',302);
         return $this->fetch('index');
     }
 
     public function login($name = 'login'){
-        return $this->fetch('user/login',['name'=>$name]);
+        $user = Cookie::get('user');
+        if(empty($user)){
+            return $this->fetch('user/login',['name'=>$name]);
+        }else{
+            $user = json_decode(urldecode($user),true);
+            if(empty($user['m']) || empty($user['p'])){
+                Cookie::delete('user');
+                return $this->fetch('user/login',['name'=>$name]);
+            }
+            $user_info = Db::table('user')->where('phone', $user['m'])->find();
+            if(empty($user_info)){
+                Cookie::delete('user');
+                return $this->fetch('user/login',['name'=>$name]);
+            }
+            if($user_info['password'] != $user['p']){
+                Cookie::delete('user');
+                return $this->fetch('user/login',['name'=>$name]);
+            }
+            set_login($user_info);
+            $url = empty($_SERVER['HTTP_REFERER']) ? '/' : $_SERVER['HTTP_REFERER'];
+            if(strpos($url,'login') !== false) $url = '/';
+            $this->redirect($url,302);
+        }
     }
 }

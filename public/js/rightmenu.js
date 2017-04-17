@@ -182,12 +182,13 @@ function get_dir_list(obj){
 }
 
 //重命名
-$(".rename").on("click", function(e){
+$("body").on("click", '.rename', function(){
     hide_dropdown_menu();
     create_update_name(RightObj);
 });
 //创建重命名的input
 function create_update_name(obj){
+    obj.attr('draggable',false);//重命名时阻止拖放
     var text = obj.children('.name').text();
     var type = obj.hasClass('li-dir') ? 'dir' : 'item';
     obj.find('.name').html('<input prevalue="'+text+'" class="rename-input" value="'+text+'" />');
@@ -218,6 +219,7 @@ function change_name(){
     var obj = $('.rename-input');
     var name = obj.val();
     var itemObj = obj.parent('.name').parent('.rightbtn');
+    itemObj.attr('draggable',true);//改名后可重新拖放
     var id = itemObj.data('id');
     if(RightType == 'note'){
         var url = '/dir/update_note_name';
@@ -244,9 +246,13 @@ function rename_regain(){
     $('.right-menu').removeClass('none');
 }
 
-function hide_dropdown_menu(){
-    $(".dropdown-menu").hide();
-    $('.dir-right-menu').remove();
+function hide_dropdown_menu(menu){
+    if(menu != 'setting'){ //setting-menu的下拉菜单
+        $(".dropdown-menu").hide();
+    }
+    if(menu != 'rightMenu'){ // 我的文件夹的右键菜单
+        $('.dir-right-menu').remove();
+    }
 }
 
 function get_menu_html(type,e){

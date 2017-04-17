@@ -95,7 +95,7 @@
     var countdown_seconds;
     function register(){
         var phone = $.trim($('.register .phone').val());
-        var password = $.trim($('.register .password').val());
+        var password = $('.register .password').val();
         var code = $.trim($('.register .code').val());
         $.ajax({
             url:  '/user/register',
@@ -115,7 +115,8 @@
 
     function login(){
         var phone = $.trim($('.login .phone').val());
-        var password = $.trim($('.login .password').val());
+        var password = $('.login .password').val();
+        var remeber = $(".login .login-checkbox").is(':checked') ? 1 : 0;
 
         if($('.drag_text').attr('data-value') == 0){
             $('.login .login-error').text('请拖动滑块验证').show();
@@ -123,7 +124,7 @@
         }
         $.ajax({
             url:  '/user/login',
-            data:{'phone':phone,'password':password},
+            data:{'phone':phone,'password':password,'remeber':remeber},
             type: "POST",
             dataType:'json',
             success:function(res){
