@@ -84,9 +84,6 @@ ul{
 .dir-list .item-time{
     display: none !important;
 }
-.dir-list > ul{
-    padding-bottom:10px;
-}
 .widget-scroller-wrap,
 .note-scroller-wrap{
     overflow: hidden;
@@ -362,6 +359,7 @@ ul{
     background-color: #e4edf8;
 }
 .cur-drap{
+    opacity: 0.8;
     background-color: #e0e1e5;
 }
 .dir-list .cur-drap{
@@ -376,9 +374,15 @@ ul{
     padding-top:9px !important;
     padding-bottom:9px !important;
 }
-.dir-warp .curr{
-    background-color: #398dee !important;
+.sidebar .dir-warp .curr{
+    background-color: #398dee;
     color: #fff !important;
+}
+.dir-warp .obj-drap{
+    background-color: #e4edf8;
+}
+.item-wrap .obj-drap{
+    background-color: #f6f7f9;
 }
 .widget-scroller li > div{
     padding: 15px;
@@ -456,6 +460,12 @@ ul{
 .li-dir .icon,.li-dir span{
     display: block;
     float: left;
+}
+.dir-list ul{
+    position: relative;
+}
+.li-sort{
+    width:100%;
 }
 .dir-list .li-dir .down-btn{
     margin-top: 6px;
@@ -673,4 +683,7 @@ ul{
     display: inline-block;
     margin-left:62px;
     line-height: 30px;
+}
+.ui-widget-header{
+    z-index: 999;
 }

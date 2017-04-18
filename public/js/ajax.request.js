@@ -133,6 +133,7 @@ function item_list(){
             set_item_num();
             no_item_html();
             $('.item-wrap .widget-scroller-wrap').removeClass('loading').children('.scroller-container').slideDown('fast');
+            ele_draggable();
         },
         error:function(e){}
     });
@@ -149,17 +150,17 @@ function ajax_trash_list(){
         dataType:'json',
         success:function(res){
             var obj = res.result;
-            var html = create_list(obj.dir);
-            html = html.substring(4,html.length -5);
+            var html = create_list(obj.dir,'trash');
             $('.item-dir').html(html);
             html = '';
             $.each(obj.note, function(key, v){
                 html += create_note_html(v);
             })
             $('.item-note').html(html);
-            $('.item-wrap .rightbtn').attr('draggable',false).addClass('li-trash');
+            $('.item-wrap .rightbtn').addClass('li-trash');
             set_item_num();
             no_trash_html();
+            ele_draggable();
         },
         error:function(e){}
     });
@@ -297,7 +298,7 @@ function ajax_trash_btn(url,ids,delObj){
             }
             var data = res.result;
             if(data.type == 'dir') {
-                delObj.find('.rightbtn').attr('draggable', true).removeClass('li-trash');
+                delObj.find('.rightbtn').removeClass('li-trash');
                 var parent_id = data.parent_id;
                 var dir_id = delObj.children('.rightbtn').data('id');
                 var parObj = $(".dir-list .li-dir[data-id=" + parent_id + "]");
@@ -309,6 +310,7 @@ function ajax_trash_btn(url,ids,delObj){
                     parObj.after('<ul>' + html + '</ul>');
                     parObj.children('.down-btn').addClass('drop-down');
                 }
+                parObj.next('ul').slideDown('fast');
             }
             trash_change(delObj,ids,data.type);
         },

@@ -58,8 +58,8 @@
                 <div class="widget-scroller">
                     <div class="widget-scroller-wrap">
                         <div class="scroller-container">
-                            <ul class="item-dir"></ul>
-                            <ul class="item-note"></ul>
+                            <ul class="item-dir sortable"></ul>
+                            <ul class="item-note sortable"></ul>
                         </div>
                         <div class="widget-scroller-bar"></div>
                     </div>
@@ -90,11 +90,12 @@
 <script type="text/javascript" src='/wangEditor/wangEditor.min.js'></script>
 <script type="text/javascript" src="/wangEditor/index.js"></script>
 <script type="text/javascript" src="/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="/js/jquery.ui.js"></script>
 <script type="text/javascript" src="/js/mouseevent.js"></script>
 <script type="text/javascript" src="/js/rightmenu.js"></script>
-<script type="text/javascript" src="/js/drag.js"></script>
 <script type="text/javascript" src="/js/ajax.request.js"></script>
 <script type="text/javascript" src="/js/jquery.md5.js"></script>
+<script type="text/javascript" src="/js/draggable.js"></script>
 <script type="text/javascript">
 
     $(document).ready(function(){
@@ -137,7 +138,7 @@
 
     //创建目录的HTML
     function create_dir_html(obj,is_parent){
-        var html = '<div draggable="true" class="li-dir rightbtn" class-id="'+ obj.class_id+'" data-id="'+ obj.dir_id+'" >';
+        var html = '<div class="li-dir rightbtn" class-id="'+ obj.class_id+'" data-id="'+ obj.dir_id+'" >';
         if(is_parent == 1) html += '<span class="down-btn drop-down"></span>';
         else html += '<span class="down-btn"></span>';
         html += '<i class="icon"></i><div class="name">'+obj.dir_name+'</div>';
@@ -147,7 +148,7 @@
 
     //创建笔记的HTML
     function create_note_html(obj){
-        var html = '<li><div draggable="true" class="li-note rightbtn" data-id="'+ obj.rec_id+'" parent-id="'+ obj.dir_id+'">';
+        var html = '<li class="note-drap"><div class="li-note rightbtn" data-id="'+ obj.rec_id+'" parent-id="'+ obj.dir_id+'">';
         html += '<i class="icon"></i><div class="name">'+ obj.title+'</div><div class="item-time">'+ obj.time+'</div><i class="right-menu"></i></div></li>';
         return html;
     }
@@ -211,6 +212,7 @@
     //监听打开目录
     $("body").on("click", '.li-dir', function(){
         if($(this).hasClass('li-trash')) return false;
+        if($(this).parent().hasClass('ui-sortable-helper')) return false;//拖放排序时
         var dir_id = $(this).data('id');
         clearTimeout(clickTime);
         clickTime = setTimeout(function() {
@@ -252,18 +254,19 @@
     }
 
     //创建目录列表的HTML，循环嵌套
-    function create_list(obj){
-        var html = '<ul>';
+    function create_list(obj , type){
+        var html = '';
         $.each(obj, function(key, v){
             if(v.child){
-                html += '<li>'+create_dir_html(v,1);
+                html += '<li class="li-sort">'+create_dir_html(v,1);
                 html += create_list(v.child);
                 html += '</li>';
             }else{
-                html += '<li>'+create_dir_html(v,0)+'</li>';
+                html += '<li class="li-sort">'+create_dir_html(v,0)+'</li>';
             }
         })
-        return html += '</ul>';
+        if(type == 'trash') return html;
+        else return '<ul class="sortable">'+html+'</ul>';
     }
 
     //没有任何目录和笔记时调用此方法
@@ -284,7 +287,7 @@
 
     //没有笔记时view的显示
     function empty_note(){
-        if($('.item-note ul .rightbtn').length > 0) return false;
+        if($('.item-note .rightbtn').length > 0) return false;
         var obj = $('.detail-container');
         if(obj.hasClass('empty')) return false;
         obj.addClass('empty').children().hide().end().append('<div class="empty-img"></div>');

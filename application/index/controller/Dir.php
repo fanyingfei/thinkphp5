@@ -82,7 +82,7 @@ class Dir extends Controller
         $parent_id = $request->param('parent_id');
 
         foreach($list as $key=>$item){
-            $data = ['dir_id'=>$item[0],'class_id' => $item[1] ,'parent_id'=>$item[2],'u_time'=>time(),'rank'=>0];
+            $data = ['dir_id'=>$item[0],'class_id' => $item[1] ,'parent_id'=>$item[2],'u_time'=>time(),'rank'=>0,'is_delete'=>0];
             if($data['parent_id'] == 0) $data['class_id'] = 1;
             if($data['class_id'] > $this->maxDir) splash('error','最多拥有五层目录');
             $list[$key] = $data;
@@ -292,7 +292,7 @@ class Dir extends Controller
         $request = Request::instance();
         $rec_id = $request->param('rec_id');
         $dir_id = $request->param('dir_id');
-        $data = ['dir_id'=>$dir_id,'u_time'=>$time];
+        $data = ['dir_id'=>$dir_id,'u_time'=>$time,'is_delete'=>0];
         Db::table('note')->where('rec_id', $rec_id)->update($data);
         splash('succ','拖放笔记成功');
     }
