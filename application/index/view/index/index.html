@@ -58,8 +58,6 @@
                 <div class="widget-scroller">
                     <div class="widget-scroller-wrap">
                         <div class="scroller-container">
-                            <ul class="item-dir sortable"></ul>
-                            <ul class="item-note sortable"></ul>
                         </div>
                         <div class="widget-scroller-bar"></div>
                     </div>
@@ -258,14 +256,14 @@
         var html = '';
         $.each(obj, function(key, v){
             if(v.child){
-                html += '<li class="li-sort">'+create_dir_html(v,1);
+                html += '<li>'+create_dir_html(v,1);
                 html += create_list(v.child);
                 html += '</li>';
             }else{
-                html += '<li class="li-sort">'+create_dir_html(v,0)+'</li>';
+                html += '<li>'+create_dir_html(v,0)+'</li>';
             }
         })
-        if(type == 'trash') return html;
+        if(type == 'item')  return '<ul class="item-dir">'+html+'</ul>';
         else return '<ul class="sortable">'+html+'</ul>';
     }
 

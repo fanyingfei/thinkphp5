@@ -117,19 +117,18 @@ function item_list(){
         success:function(res){
             var setting = $('.setting-sel.selected').data('value');
             var obj = res.result;
-            var html = '';
+            var html = '<ul class="item-dir sortable">';
             if(setting == 'all'){
                 $.each(obj.dir, function(key, v){
                     html += '<li>'+create_dir_html(v,0)+'</li>';
                 })
             }
-            $('.item-dir').html(html);
-            html = '';
+            html += '</ul><ul class="item-note sortable">';
             $.each(obj.note, function(key, v){
                 html += create_note_html(v);
             })
-
-            $('.item-note').html(html);
+            html += '</ul>';
+            $('.item-wrap .scroller-container').html(html);
             set_item_num();
             no_item_html();
             $('.item-wrap .widget-scroller-wrap').removeClass('loading').children('.scroller-container').slideDown('fast');
@@ -150,13 +149,13 @@ function ajax_trash_list(){
         dataType:'json',
         success:function(res){
             var obj = res.result;
-            var html = create_list(obj.dir,'trash');
-            $('.item-dir').html(html);
-            html = '';
+            var html = create_list(obj.dir,'item');
+            html += '<ul class="item-note">';
             $.each(obj.note, function(key, v){
                 html += create_note_html(v);
             })
-            $('.item-note').html(html);
+            html += '</ul>';
+            $('.item-wrap .scroller-container').html(html);
             $('.item-wrap .rightbtn').addClass('li-trash');
             set_item_num();
             no_trash_html();

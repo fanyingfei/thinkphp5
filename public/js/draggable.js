@@ -29,9 +29,6 @@ function ele_draggable(){
     $( ".sortable" ).sortable({
         axis: "y",
         revert: true,
-        start:function(){
-            if($(this).hasClass('li-trash')) return false;
-        },
         update: function(event, ui) {
             var obj = $(this).children('li').eq(0).children('.rightbtn');
             if(obj.hasClass('li-dir')){
@@ -59,9 +56,6 @@ function ele_draggable(){
             $(this).addClass('obj-drap');
             drapNoteId = $(this).data('id');
         },
-        drag: function() {
-            //期间
-        },
         stop: function() {
             //结束
             $('.obj-drap').removeClass('obj-drap');
@@ -73,10 +67,8 @@ function ele_draggable(){
     $( ".li-dir" ).droppable({
         accept: ".rightbtn",
         hoverClass: "cur-drap",
-        start:function(){
-            if($(this).hasClass('li-trash')) return false;
-        },
         drop: function( event, ui ) {
+            if($(this).hasClass('li-trash')) return false;
             $('.ui-widget-header').remove();
             $('.obj-drap').removeClass('obj-drap');
             if(drapDirId){
