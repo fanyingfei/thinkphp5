@@ -13,7 +13,12 @@
 <body>
 <div class="loading-open"><p><img src="/img/loading_open.gif" alt="loading..." /></p></div>
 <div class="main none">
-    <div class="top-banner"></div>
+    <div class="top-banner">
+        <div class="top-left"></div>
+        <div class="top-right">
+            <span class="user-name"></span>
+        </div>
+    </div>
     <div class="main-container">
         <div class="sidebar">
             <div class="dir-hd">
@@ -23,7 +28,8 @@
             <div class="dir-warp">
                 <div class="widget-scroller-wrap">
                     <div class="scroller-container">
-                        <div class="dir-list"></div>
+                        <div class="dir-list row-wrap"></div>
+                        <div class="group-list row-wrap"></div>
                         <div class="sidebar-trash">
                             <i class="icon-trash"></i>
                             <div class="text-trash">回收站</div>
@@ -41,7 +47,7 @@
                     <div class="item-back" title="返回上一级"></div>
                     <div class="search-wrap">
                         <i class="search-icon"></i>
-                        <input class="search-input" placeholder="搜索" >
+                        <input class="search-input" placeholder="搜索笔记" >
                     </div>
                     <div class="item-setting">
                         <i class="setting-icon"></i>
@@ -77,6 +83,7 @@
             </div>
         </div>
     </div>
+    <div class="my-invite-list"></div>
 </div>
 <div class="none">
     <img id="drop-dir" src="/img/drap_dir.png" />
@@ -91,17 +98,19 @@
 <script type="text/javascript" src="/js/jquery.ui.js"></script>
 <script type="text/javascript" src="/js/mouseevent.js"></script>
 <script type="text/javascript" src="/js/rightmenu.js"></script>
+<script type="text/javascript" src="/js/draggable.js"></script>
 <script type="text/javascript" src="/js/ajax.request.js"></script>
 <script type="text/javascript" src="/js/jquery.md5.js"></script>
-<script type="text/javascript" src="/js/draggable.js"></script>
 <script type="text/javascript">
 
     $(document).ready(function(){
         start_init();
+        get_invite_group();
         get_wangDemo_height();
     });
 
     function start_init(){
+        get_user_info();
         //初始得到目录列表
         var sel_col = $.cookie('setting_col');
         var sel_sort = $.cookie('setting_sort');
@@ -114,6 +123,7 @@
             $('.setting-sort').removeClass('selected desc asc');
             $('.setting-sort[data-col='+sel_col+']').addClass(sel_sort+' selected');
         }
+        group_list();
         var flag = dir_list();
         if(flag){
             $('.main').removeClass('none');
@@ -122,21 +132,29 @@
     }
     //监听创建目录
     $("body").on("click", '.create-dir', function(){
-        if($(".dir-list .curr").length > 0){
-            var parent_id = $('.dir-list .li-dir.curr').data('id');
-            var class_id = parseInt($('.dir-list .li-dir.curr').attr('class-id')) + 1;
+        if($('.my-group-list.curr').length > 0){
+            alert('请选择具体的协作目录');
+            return false;
+        }
+        if($(".dir-warp .curr").length > 0){
+            var parent_id = $('.dir-warp .curr').data('id');
+            var group_id = $('.dir-warp .curr').attr('group-id');
+            var class_id = parseInt($('.dir-warp .curr').attr('class-id')) + 1;
         }else{
             var parent_id = 0;
             var class_id = 1;
+            var group_id = 0;
         }
         RightType = 'dir';
         if($('.item-note .no-item').length > 0 ) $('.no-item').remove();
-        create_dir(parent_id,class_id);
+        create_dir(parent_id,class_id,group_id);
     })
 
     //创建目录的HTML
     function create_dir_html(obj,is_parent){
-        var html = '<div class="li-dir rightbtn" class-id="'+ obj.class_id+'" data-id="'+ obj.dir_id+'" >';
+        var className = '';
+        if(obj.group_id > 0) var className = ' item-group';
+        var html = '<div class="li-dir'+className+' rightbtn" group-id="'+obj.group_id+'" class-id="'+ obj.class_id+'" data-id="'+ obj.dir_id+'" >';
         if(is_parent == 1) html += '<span class="down-btn drop-down"></span>';
         else html += '<span class="down-btn"></span>';
         html += '<i class="icon"></i><div class="name">'+obj.dir_name+'</div>';
@@ -146,19 +164,33 @@
 
     //创建笔记的HTML
     function create_note_html(obj){
-        var html = '<li class="note-drap"><div class="li-note rightbtn" data-id="'+ obj.rec_id+'" parent-id="'+ obj.dir_id+'">';
+        var html = '<li class="note-drap"><div class="li-note rightbtn" group-id="'+obj.group_id+'" data-id="'+ obj.rec_id+'" parent-id="'+ obj.dir_id+'">';
         html += '<i class="icon"></i><div class="name">'+ obj.title+'</div><div class="item-time">'+ obj.time+'</div><i class="right-menu"></i></div></li>';
+        return html;
+    }
+
+    function create_group_html(obj){
+        var html = '<div class="li-group" group-id="'+ obj.group_id+'" data-id="0" class-id="0" version="'+obj.version+'">';
+        if(obj.dir_list != undefined && obj.dir_list != '') html += '<span class="down-btn drop-down"></span>';
+        else html += '<span class="down-btn"></span>';
+        html += '<i class="icon"></i><div class="name">'+obj.group_name+'</div>';
+        html += '<div class="item-time">'+obj.time+'</div><i class="right-menu"></i></div>';
         return html;
     }
 
     //监听创建笔记
     $("body").on("click", '.create-note', function(){
-        if($(".li-dir").hasClass("curr")){
-            var dir_id = $('.li-dir.curr').data('id');
-        }else{
-            var dir_id = $('.sidebar .li-dir:first-child').data('id');
+        if($('.my-group-list.curr').length > 0){
+            alert('请选择具体的协作目录');
+            return false;
         }
-        create_note(dir_id);
+        if($(".dir-warp .curr").length > 0){
+            var dir_id = $('.curr').data('id');
+            var group_id = $('.curr').attr('group-id');
+        }else{
+            var dir_id = $('.dir-warp .li-dir:first-child').data('id');
+        }
+        create_note(dir_id,group_id);
     })
 
     //得到富文本编辑器的高度
@@ -200,6 +232,7 @@
 
     //监听回收站
     $("body").on("click", '.sidebar-trash', function(){
+        $('.search-input').val('');
         $('.dir-warp .curr').removeClass('curr');
         $(this).addClass('curr');
         ajax_trash_list();
@@ -209,31 +242,67 @@
     var clickTime ; //取消双击时触发单机事件
     //监听打开目录
     $("body").on("click", '.li-dir', function(){
-        if($(this).hasClass('li-trash')) return false;
-        if($(this).parent().hasClass('ui-sortable-helper')) return false;//拖放排序时
-        var dir_id = $(this).data('id');
+        $('.search-input').val('');
+        var clickObj = $(this);
+        var dir_id = clickObj.data('id');
+        if(clickObj.hasClass('li-trash')) return false;
+        if(clickObj.parent().hasClass('ui-sortable-helper')) return false;//拖放排序时取消单击事件
         clearTimeout(clickTime);
         clickTime = setTimeout(function() {
             $('.dir-warp .curr').removeClass('curr');
-            var obj = $(".dir-list .li-dir[data-id="+dir_id+"]");
-            var downBtn = obj.parent('li').parent('ul').prev('.li-dir').children('.down-btn');
-            obj.addClass('curr');
-            obj.parents('ul').show();
+            if(clickObj.hasClass('item-group')){
+                var curObj = $(".group-list .li-dir[data-id="+dir_id+"]");
+            }else{
+                var curObj = $(".dir-list .li-dir[data-id="+dir_id+"]");
+            }
+            var downBtn = curObj.parent('li').parent('ul').prev('div').children('.down-btn');
+            curObj.addClass('curr');
+            curObj.parents('ul').slideDown('fast');
             if(!downBtn.hasClass('pack-up')) downBtn.addClass('pack-up');
-            item_list();
+            item_list_dir();
             show_note();
         },10);
     })
 
     //双击目录同样触发下单事件
-    $("body").on("dblclick", '.dir-list .li-dir', function(){
+    $("body").on("dblclick", '.li-dir', function(){
         clearTimeout(clickTime);
         open_dir($(this).children('.down-btn'));
         return false;
     })
 
+    //双击协作同样触发下单事件
+    $("body").on("dblclick", '.li-group', function(){
+        clearTimeout(clickTime);
+        open_dir($(this).children('.down-btn'));
+        return false;
+    })
+
+    $("body").on("click", '.li-group', function(){
+        $('.search-input').val('');
+        var clickObj = $(this);
+        var group_id = $(this).attr('group-id');
+        if(clickObj.hasClass('li-trash')) return false;
+        if(clickObj.parent().hasClass('ui-sortable-helper')) return false;//拖放排序时取消单击事件
+        clearTimeout(clickTime);
+        clickTime = setTimeout(function() {
+            $('.dir-warp .curr').removeClass('curr');
+            clickObj.addClass('curr');
+            if(clickObj.hasClass('my-group-list')){
+                item_group();
+            }else{
+                var curObj = $(".group-list .li-group[group-id="+group_id+"]");
+                var downBtn = curObj.parent('li').parent('ul').prev('div').children('.down-btn');
+                curObj.addClass('curr');
+                curObj.parents('ul').slideDown('fast');
+                if(!downBtn.hasClass('pack-up')) downBtn.addClass('pack-up');
+                item_list_group();
+            }
+        },10);
+    })
+
     //监听目录下拉事件
-    $("body").on("click", '.li-dir .drop-down', function(){
+    $("body").on("click", '.drop-down', function(){
         open_dir($(this));
         return false;
     })
@@ -246,9 +315,9 @@
             obj.addClass('pack-up');
         }else{
             parent.parent().find('ul').slideUp('fast');
-            parent.parent().find('ul').prev('.li-dir').children('.down-btn').removeClass('pack-up');
+            parent.parent().find('ul').prev('div').children('.down-btn').removeClass('pack-up');
         }
-        $(".dir-right-menu").remove();
+        hide_dropdown_menu();
     }
 
     //创建目录列表的HTML，循环嵌套
@@ -270,6 +339,10 @@
     //没有任何目录和笔记时调用此方法
     function no_item_html(){
         empty_note();
+        if($('.item-wrap .scroller-container ul.item-group').length > 0 && $('.item-wrap .scroller-container ul.item-group li').length == 0){
+            $('.item-wrap .scroller-container ul.item-group').html('<div class="no-item"><p>还没有协作</p></div>');
+            return false;
+        }
         if($('.item-wrap ul .rightbtn').length == 0){
             var html = '<div class="no-item"><p>没有找到文件</p><button class="btn create-note">新建笔记</button></div>';
             $('.item-note').html(html);
@@ -359,13 +432,32 @@
 
     //回到上一级
     $("body").on("click", '.item-back', function(){
-        var dir_id = $('.item-list').attr('parent-id');
-        if(dir_id == 0) return false;
-        $('.dir-list .li-dir.curr').removeClass('curr');
-        var obj = $('.dir-list .li-dir[data-id='+dir_id+']').parent().parent().prev('.li-dir');
+        if($(this).hasClass('disabled')) return false;
+        var type = $('.item-list').attr('type');
+        if(type == 'group'){
+            var dir_id = $('.item-list').attr('parent-id');
+            if($('.dir-warp .curr').hasClass('li-group')){
+                //我的协作这两层目录
+                var obj = $('.group-list .li-group[group-id='+dir_id+']').parent().parent().prev('div');
+            }else{
+                var obj = $('.group-list .li-dir[data-id='+dir_id+']').parent().parent().prev('div');
+            }
+            $('.group-list .curr').removeClass('curr');
+            obj.addClass('curr').parents('ul').show().prev('div').children('.down-btn').addClass('pack-up');
+            if(obj.data('id') == 0){
+                //我的协作列表
+                item_list_group();
+                return false;
+            }
+        }else{
+            var dir_id = $('.item-list').attr('parent-id');
+            if(dir_id == 0) return false;
+            $('.dir-list .li-dir.curr').removeClass('curr');
+            var obj = $('.dir-list .li-dir[data-id='+dir_id+']').parent().parent().prev('div');
+        }
         if(obj.data('id') == 0) $('.item-back').addClass('disabled');
-        obj.addClass('curr').parents('ul').show().prev('.li-dir').children('.down-btn').addClass('pack-up');
-        item_list();
+        obj.addClass('curr').parents('ul').show().prev('div').children('.down-btn').addClass('pack-up');
+        item_list_dir();
     })
 
     //item设置
@@ -385,8 +477,12 @@
         $('.item-note .no-item').remove();
         $(this).addClass('selected');
         $.cookie('setting_value',$(this).data('value'));
-        item_list();
-        show_note();
+        if($('.li-group.curr').length > 0){
+            item_list_group();
+        }else{
+            item_list_dir();
+            show_note();
+        }
     })
 
     $("body").on("click", '.setting-sort', function(){
@@ -405,8 +501,12 @@
         }
         $.cookie('setting_col',$(this).data('col'));
         $.cookie('setting_sort',order_by);
-        item_list();
-        show_note();
+        if($('.li-group.curr').length > 0){
+            item_list_group();
+        }else{
+            item_list_dir();
+            show_note();
+        }
     })
 
     function alert_msg(status,msg){
@@ -424,5 +524,7 @@
             });
         },2000);
     }
+
+
 </script>
 </html>

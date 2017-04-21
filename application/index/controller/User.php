@@ -29,7 +29,8 @@ class User extends Controller
         if(strtolower($code) != strtolower($verification_code)) splash('error','验证码不正确');
         if($time > $verification_time) splash('error','验证码已过期');
 
-        $data = ['phone' =>$phone, 'password' =>md5($password.$time),'c_time'=>$time];
+        $user_name = substr_replace($phone,'****',3,4);
+        $data = ['phone' =>$phone,'user_name'=>$user_name, 'password' =>md5($password.$time),'c_time'=>$time];
         $uid = Db::name('user')->insertGetId($data);
         $res['uid'] = $uid;
         set_login($res);
@@ -81,6 +82,13 @@ class User extends Controller
         }else{
             splash('error',$result['msg']);
         }
+    }
+
+    public function user_info(){
+        $uid = Session::get('uid');
+        if(empty($uid)) splash('error','nologin');
+        $res = Db::table('user')->where('uid',$uid)->find();
+        splash('succ','获取用户信息功能',$res);
     }
 
 }

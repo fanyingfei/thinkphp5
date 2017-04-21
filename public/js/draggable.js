@@ -11,7 +11,7 @@ function ele_draggable(){
         },
         start: function() {
             //开始
-            if($(this).hasClass('my-dir-list')) return false;
+            if($(this).hasClass('my-dir-list li-group')) return false;
             $(this).addClass('obj-drap');
             drapDirId = $(this).data('id');
         },
@@ -26,19 +26,28 @@ function ele_draggable(){
     });
 
     //目录排序
-    $( ".sortable" ).sortable({
+    $( ".sortable").sortable({
         axis: "y",
         revert: true,
+        containment:'parent',
+        sort:function(){
+            $(this).find('ul').hide().end().find('.pack-up').removeClass('pack-up');
+            var sortableHeight = $(this).children('li').eq(0).children('div').outerHeight();
+            $('.ui-sortable-placeholder').height(sortableHeight);
+            $('.ui-sortable-helper').height(sortableHeight);
+        },
         update: function(event, ui) {
             var obj = $(this).children('li').eq(0).children('.rightbtn');
-            if(obj.hasClass('li-dir')){
+            if(obj.hasClass('li-group')){
+                var url = '/dir/update_group_sort';
+                group_update_sort(obj,url);
+            }else if(obj.hasClass('li-dir')){
                 var url = '/dir/update_dir_sort';
+                update_sort(obj,url);
             }else if(obj.hasClass('li-note')){
-                var url = '/dir/update_note_sort'
-            }else{
-                return false;
+                var url = '/dir/update_note_sort';
+                update_sort(obj,url);
             }
-            update_sort(obj,url);
         }
     });
 
@@ -63,6 +72,13 @@ function ele_draggable(){
         }
     });
 
+    //邀请协作可拖动位置
+    $('.invite-group-warp').draggable({
+        accept: ".dialog-header",
+        containment:'.dialog-mask',
+        scroll: false
+    });
+
     //目录drop
     $( ".li-dir" ).droppable({
         accept: ".rightbtn",
@@ -72,10 +88,28 @@ function ele_draggable(){
             $('.ui-widget-header').remove();
             $('.obj-drap').removeClass('obj-drap');
             if(drapDirId){
-                drap_dir($(this).data('id'),drapDirId,ui);
+                drap_dir($(this),ui);
                 drapDirId = 0;
             }else if(drapNoteId){
-                drap_note($(this),drapNoteId);
+                drap_note($(this),ui);
+                drapNoteId = 0;
+            }
+        }
+    });
+
+    //协作drop
+    $( "li .li-group" ).droppable({
+        accept: ".rightbtn",
+        hoverClass: "cur-drap",
+        drop: function( event, ui ) {
+            if($(this).hasClass('li-trash')) return false;
+            $('.ui-widget-header').remove();
+            $('.obj-drap').removeClass('obj-drap');
+            if(drapDirId){
+                drap_dir($(this),ui);
+                drapDirId = 0;
+            }else if(drapNoteId){
+                drap_note($(this),ui);
                 drapNoteId = 0;
             }
         }
@@ -109,20 +143,35 @@ function ele_draggable(){
 
 
 //拖放目录
-function drap_dir(curId,dragId,ui){
+function drap_dir(drapObj , ui){
+    var curId = drapObj.data('id');
+    var dragId = ui.draggable.data('id');
+    var groupId = drapObj.attr('group-id');
+    var dragGroupId = ui.draggable.attr('group-id');
+
     if(curId == dragId) return false;
-    var parObj = $(".dir-list .li-dir[data-id="+dragId+"]").parent('li').parent('ul').prev('.li-dir');
-    var parent_id = parObj.data('id');
-    if(curId == parent_id) return false;
-    var curObj = $(".dir-list .li-dir[data-id="+curId+"]");
+    if(curId == 0 && groupId > 0){
+        var parObj = $(".dir-warp .li-dir[data-id="+dragId+"]").parent('li').parent('ul').prev('div');
+        var parentGroupId = parObj.attr('group-id');
+        var parentDirId =  parObj.data('id');
+        if(groupId == parentGroupId && curId == parentDirId) return false;
+        var curObj = $(".dir-warp .li-group[group-id="+groupId+"]");
+    }else{
+        var parObj = $(".dir-warp .li-dir[data-id="+dragId+"]").parent('li').parent('ul').prev('div');
+        var parentGroupId = parObj.attr('group-id');
+        var parent_id = parObj.data('id');
+        //父元素和要拖放进去的元素相同时
+        if(curId == parent_id && groupId == parentGroupId) return false;
+        var curObj = $(".dir-warp .li-dir[data-id="+curId+"]");
+    }
 
     if(ui.draggable.hasClass('li-trash')){
         var dragObj = $(".li-trash[data-id="+dragId+"]");
     }else{
-        var dragObj = $(".dir-list .li-dir[data-id="+dragId+"]");
+        var dragObj = $(".dir-warp .li-dir[data-id="+dragId+"]");
     }
 
-    if(parObj.next('ul').children('li').length == 1){
+    if(parObj.next('ul').children('li').length <= 1){
         parObj.children('.down-btn').removeClass('drop-down pack-up');
     }
 
@@ -155,30 +204,18 @@ function drap_dir(curId,dragId,ui){
         curObj.next('ul').show();
     }
     ele_draggable();//新添加的元素也可以拖放
-    update_dir_list($(".dir-list .li-dir[data-id="+dragId+"]"),curId);
-}
-
-//拖放结束后排序
-function drap_dir_sort(obj,parent_id,result){
-    var parentObj = $(".dir-list .li-dir[data-id="+parent_id+"]");
-    if(result.length <= 1) return false;
-    $.each(result, function(k, v){
-        if(v == obj.data('id')){
-            if(k == result.length-1) return false; //最后一个时不用再排序，默认添加到最后一个
-            parentObj.next('ul').children('li').eq(k).before(obj.parent('li'));
-            if($(".dir-list .li-dir[data-id="+parent_id+"]").hasClass('curr')){
-                $(".item-dir li").eq(k).before($(".item-dir .li-dir[data-id="+v+"]").parent('li'));
-            }
-        }
-    });
+    set_item_num();
+    update_dir_list($(".dir-warp .li-dir[data-id="+dragId+"]"),curId);
 }
 
 function get_dir_attr(obj){
     var item = new Array();
     var parent_id = obj.data('id');
+    var group_id = obj.attr('group-id');
     var class_id = parseInt(obj.attr('class-id'))+1;
     $(obj).next('ul').children('li').each(function(){
-        item.push([$(this).children('.li-dir').data('id'),class_id,parent_id,$(this).children('.li-dir').children('.name').text()]);
+        $(this).attr('class-id',class_id).attr('group-id',group_id);
+        item.push([$(this).children('.li-dir').data('id'),class_id,parent_id,$(this).children('.li-dir').children('.name').text(),group_id]);
         if($(this).children('.li-dir').next('ul').length > 0){
             var item_list = get_dir_attr($(this).children('.li-dir'));
             for(var i=0;i<item_list.length;i++){

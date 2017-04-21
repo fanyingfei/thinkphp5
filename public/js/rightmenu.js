@@ -1,36 +1,29 @@
-var RightObj ;
-var RightDirId ;
-var RightType;
 //监听鼠标右键点击
+var RightObj;
 $("body").on("contextmenu", '.rightbtn', function(e){
-    hide_dropdown_menu();
-    RightObj = $(this);
-    RightDirId = $(this).data('id');
-    if($(this).hasClass('li-note')) RightType = 'note';
-    else if($(this).hasClass('li-dir')) RightType = 'dir';
-
-    var menu_type = RightType;
-    if($(this).hasClass('li-trash')) menu_type = 'trash';
-    get_menu_html(menu_type,e);
+    get_menu_html($(this) , e);
+    return false;
+})
+$("body").on("contextmenu", '.my-dir-list', function(e){
+    get_menu_html($(this) , e);
+    return false;
+})
+$("body").on("contextmenu", '.my-group-list', function(e){
+    get_menu_html($(this) , e);
+    return false;
+})
+$("body").on("contextmenu", 'li .li-group', function(e){
+    get_menu_html($(this) , e);
     return false;
 })
 //清空回收站
 $("body").on("contextmenu", '.sidebar-trash', function(e){
-    hide_dropdown_menu();
-    get_menu_html('trash-all',e);
+    get_menu_html($(this) , e);
     return false;
 })
 //监听右键按钮点击
 $("body").on("click", '.right-menu', function(e){
-    hide_dropdown_menu();
-    RightObj = $(this).parents('.rightbtn');
-    RightDirId = RightObj.data('id');
-    if(RightObj.hasClass('li-note')) RightType = 'note';
-    else if(RightObj.hasClass('li-dir')) RightType = 'dir';
-
-    var menu_type = RightType;
-    if(RightObj.hasClass('li-trash')) menu_type = 'trash';
-    get_menu_html(menu_type,e);
+    get_menu_html($(this).parent(),e);
     return false;
 })
 //阻双击冒泡事件
@@ -39,16 +32,23 @@ $("body").on("dblclick", '.right-menu', function(e){
 })
 //右键的创建目录
 $("body").on("click", '.right-create-dir', function(){
-    var parent_id = RightDirId;
-    var class_id = parseInt(RightObj.attr('class-id')) + 1;
+    var parent_id = $('.dir-right-menu').data('id');
+    var class_id = parseInt($('.dir-right-menu').attr('class-id')) + 1;
+    var group_id = $('.dir-right-menu').attr('group-id');
     hide_dropdown_menu();
-    create_dir(parent_id,class_id);
+    create_dir(parent_id,class_id,group_id);
 })
 //右键的创建笔记
-
 $("body").on("click", '.right-create-note', function(){
+    var parent_id = $('.dir-right-menu').data('id');
+    var group_id = $('.dir-right-menu').attr('group-id');
     hide_dropdown_menu();
-    create_note(RightDirId)
+    create_note(parent_id , group_id)
+})
+//右键的创建协作
+$("body").on("click", '.create-group', function(){
+    hide_dropdown_menu();
+    create_group();
 })
 //点击其他隐藏右键菜单
 $('body').click(function(){
@@ -63,74 +63,152 @@ $("body").on("click", '.dir-right-menu', function(e){
 });
 //上移
 $("body").on("click", '.move-up', function(){
-    if(RightType == 'dir'){
-        var url = '/dir/update_dir_sort';
-        var obj = $(".dir-list .li-dir[data-id="+RightDirId+"]");
-        var itemobj = $(".item-list .li-dir[data-id="+RightDirId+"]");
-        if(obj.parent('li').prev('li').length == 0) return false;
-        obj.parent('li').insertBefore(obj.parent('li').prev('li'));
-        itemobj.parent('li').insertBefore(itemobj.parent('li').prev('li'));
-    }else if(RightType == 'note'){
-        var url = '/dir/update_note_sort';
-        var obj = $(".li-note[data-id="+RightDirId+"]");
-        if(obj.parent('li').prev('li').length == 0) return false;
-        obj.parent('li').insertBefore(obj.parent('li').prev('li'));
-    }else{
-        return false;
-    }
-    update_sort(obj,url);
+    move_up_down('up');
 });
 //下移
 $("body").on("click", '.move-down', function(){
-    if(RightType == 'dir'){
-        var obj = $(".dir-list .li-dir[data-id="+RightDirId+"]");
+    move_up_down('down');
+});
+//邀请协作
+$("body").on("click", '.invite-group', function(){
+    var type = $('.dir-right-menu').attr('dirNote');
+    var groupId = $('.dir-right-menu').attr('group-id');
+    hide_dropdown_menu();
+    if(!(type == 'group' && groupId > 0)) return false;
+    var html = '<div class="dialog-mask"></div><div class="invite-group-warp" again="0" group-id="'+groupId+'">' +
+        '<div class="dialog-header"><h4>邀请协作</h4><span class="dialog-close" title="关闭">×</span></div>' +
+        '<div class="dialog-body"><p class="dialog-prompt">请输入要邀请的账号，暂仅支持手机号邀请（请慎重邀请）</p><input class="invite-input" placeholder="">' +
+        '<button class="invite-btn">邀请</button><div class="invite-prompt"><span class="icon-hint"></span><span class="invite-msg"></span></div></div></div>';
+    $('body').append(html);
+    ele_draggable();
+});
+$("body").on("click", '.dialog-close', function(){
+    $('.dialog-mask').slideUp('fast').remove();
+    $('.invite-group-warp').slideUp('fast').remove();
+});
+$("body").on("click", '.zoom-out', function(){
+    if($('.invite-item').is(":hidden")) $('.invite-item').slideDown('fast');
+});
+$("body").on("click", '.zoom-in', function(){
+    if(!$('.invite-item').is(":hidden")) $('.invite-item').slideUp('fast');
+});
+$("body").on("click", '.invite-item .yes', function(){
+    var group_id = $(this).parents('.invite-item').attr('group-id');
+    invite_agree_refuse(group_id,2);
+});
+$("body").on("click", '.invite-item .no', function(){
+    var group_id = $(this).parents('.invite-item').attr('group-id');
+    invite_agree_refuse(group_id,1);
+});
+//点击邀请
+$("body").on("click", '.invite-btn', function(){
+    var invite_phone = $.trim($('.invite-input').val());
+    var group_id = $('.invite-group-warp').attr('group-id');
+    var again = $('.invite-group-warp').attr('again');
+    if(invite_phone == ''){
+        $('.invite-msg').html('请输入要邀请的账号');
+        return false;
+    }
+    invite_group(invite_phone,group_id,again);
+});
+function move_up_down(upDown){
+    var type = $('.dir-right-menu').attr('dirNote');
+    var objId = $('.dir-right-menu').data('id');
+    var groupId = $('.dir-right-menu').attr('group-id');
+    hide_dropdown_menu();
+    if(type == 'dir'){
+        var obj = $(".dir-list .li-dir[data-id="+objId+"]");
         var url = '/dir/update_dir_sort';
-        var itemobj = $(".item-list .li-dir[data-id="+RightDirId+"]");
-        if(obj.parent('li').next('li').length == 0) return false;
-        obj.parent('li').next('li').insertBefore(obj.parent('li'));
-        itemobj.parent('li').next('li').insertBefore(itemobj.parent('li'));
-    }else if(RightType == 'note'){
-        var url = '/dir/update_note_sort'
-        var obj = $(".li-note[data-id="+RightDirId+"]");
-        if(obj.parent('li').next('li').length == 0) return false;
-        obj.parent('li').next('li').insertBefore(obj.parent('li'));
+        var itemobj = $(".item-list .li-dir[data-id="+objId+"]");
+        if(upDown == 'down'){
+            if(obj.parent('li').next('li').length == 0) return false;
+            obj.parent('li').next('li').insertBefore(obj.parent('li'));
+            itemobj.parent('li').next('li').insertBefore(itemobj.parent('li'));
+        }else if(upDown == 'up'){
+            if(obj.parent('li').prev('li').length == 0) return false;
+            obj.parent('li').insertBefore(obj.parent('li').prev('li'));
+            itemobj.parent('li').insertBefore(itemobj.parent('li').prev('li'));
+        }
+    }else if(type == 'note'){
+        var url = '/dir/update_note_sort';
+        var obj = $(".li-note[data-id="+objId+"]");
+        if(upDown == 'down'){
+            if(obj.parent('li').next('li').length == 0) return false;
+            obj.parent('li').next('li').insertBefore(obj.parent('li'));
+        }else if(upDown == 'up'){
+            if(obj.parent('li').prev('li').length == 0) return false;
+            obj.parent('li').insertBefore(obj.parent('li').prev('li'));
+        }
+    }else if(type == 'group'){
+        var url = '/dir/update_group_sort';
+        var obj = $(".group-list .li-group[group-id="+groupId+"]");
+        var itemobj = $(".item-list .li-group[group-id="+groupId+"]");
+        if(upDown == 'down'){
+            if(obj.parent('li').next('li').length == 0) return false;
+            obj.parent('li').next('li').insertBefore(obj.parent('li'));
+            itemobj.parent('li').next('li').insertBefore(itemobj.parent('li'));
+        }else if(upDown == 'up'){
+            if(obj.parent('li').prev('li').length == 0) return false;
+            obj.parent('li').insertBefore(obj.parent('li').prev('li'));
+            itemobj.parent('li').insertBefore(itemobj.parent('li').prev('li'));
+        }
     }else{
         return false;
     }
     update_sort(obj,url);
-});
+}
+
 //移动后的排序
 function update_sort(obj,url){
     var parent_ul = obj.parent('li').parent('ul');
     var list = new Array();
     var length = parent_ul.children('li').length;
     parent_ul.children('li').each(function(v){
-        list.push([$(this).children('.rightbtn').data('id'),length-v]);
+        if($(this).children('div').hasClass('li-group')){
+            list.push([$(this).children('div').attr('group-id'),length-v]);
+        }else{
+            list.push([$(this).children('.rightbtn').data('id'),length-v]);
+        }
+    });
+    ajax_update_sort(url,list);
+}
+//协作排序
+function group_update_sort(obj,url){
+    var parent_ul = obj.parent('li').parent('ul');
+    var list = new Array();
+    var length = parent_ul.children('li').length;
+    parent_ul.children('li').each(function(v){
+        list.push([$(this).children('.rightbtn').attr('group-id'),length-v]);
     });
     ajax_update_sort(url,list);
 }
 //右键目录和笔记的删除
 $("body").on("click", '.delete', function(){
+    var type = $('.dir-right-menu').attr('dirNote');
+    var id = $('.dir-right-menu').data('id');
+    var groupId = $('.dir-right-menu').attr('group-id');
     hide_dropdown_menu();
-    var id = RightDirId;
-    if(RightType == 'dir'){
+    if(type == 'dir'){
         var url = '/dir/delete_dir';
         var resObj = $(".li-dir[data-id="+id+"]").parent('li');
         var delObj = $(".dir-list .li-dir[data-id="+id+"]");
         var list = get_dir_list(delObj);
         list.push(id);
         ajax_delete_btn(url,list,resObj);
-    }else if(RightType == 'note'){
+    }else if(type == 'note'){
         var url = '/dir/delete_note';
         var resObj = $(".li-note[data-id="+id+"]").parent('li');
         ajax_delete_btn(url,id,resObj);
+    }else if(type == 'group'){
+        ajax_delete_group(groupId);
     }
 });
 //垃圾箱恢复
 $("body").on("click", '.right-trash-recover', function(){
+    var type = $('.dir-right-menu').attr('dirNote');
+    var id = $('.dir-right-menu').data('id');
     hide_dropdown_menu();
-    var id = RightDirId;
-    if(RightType == 'dir'){
+    if(type == 'dir'){
         var url = '/dir/dir_recover';
         var resObj = $(".item-dir .li-dir[data-id="+id+"]").parent('li');
         var delObj = $(".item-dir .li-dir[data-id="+id+"]");
@@ -138,7 +216,7 @@ $("body").on("click", '.right-trash-recover', function(){
         var list = get_dir_attr(delObj);
         list.push(cur_item);
         ajax_trash_btn(url,list,resObj);
-    }else if(RightType == 'note'){
+    }else if(type == 'note'){
         var url = '/dir/note_recover';
         var resObj = $(".li-note[data-id="+id+"]").parent('li');
         ajax_trash_btn(url,id,resObj);
@@ -151,16 +229,17 @@ $("body").on("click", '.trash-all-delete', function(){
 });
 //垃圾箱永久删除
 $("body").on("click", '.right-trash-delete', function(){
+    var type = $('.dir-right-menu').attr('dirNote');
+    var id = $('.dir-right-menu').data('id');
     hide_dropdown_menu();
-    var id = RightDirId;
-    if(RightType == 'dir'){
+    if(type == 'dir'){
         var url = '/dir/dir_trash_delete';
         var resObj = $(".item-dir .li-dir[data-id="+id+"]").parent('li');
         var delObj = $(".item-dir .li-dir[data-id="+id+"]");
         var list = get_dir_list(delObj);
         list.push(id);
         ajax_trash_delete(url,list,resObj);
-    }else if(RightType == 'note'){
+    }else if(type == 'note'){
         var url = '/dir/note_trash_delete';
         var resObj = $(".li-note[data-id="+id+"]").parent('li');
         ajax_trash_delete(url,id,resObj);
@@ -188,11 +267,9 @@ $("body").on("click", '.rename', function(){
 });
 //创建重命名的input
 function create_update_name(obj){
-    obj.attr('draggable',false);//重命名时阻止拖放
     var text = obj.children('.name').text();
     var type = obj.hasClass('li-dir') ? 'dir' : 'item';
     obj.find('.name').html('<input prevalue="'+text+'" class="rename-input" value="'+text+'" />');
-    obj.parent().attr('draggable','false');
     $(".rename-input").focus().select();
     if(type == 'item'){
         obj.find('.item-time').hide();
@@ -218,18 +295,24 @@ function change_name(){
     if($('.rename-input').length == 0) return false;
     var obj = $('.rename-input');
     var name = obj.val();
-    var itemObj = obj.parent('.name').parent('.rightbtn');
-    itemObj.attr('draggable',true);//改名后可重新拖放
+    var itemObj = obj.parent('.name').parent('div');
     var id = itemObj.data('id');
-    if(RightType == 'note'){
+    if(itemObj.hasClass('li-group')) var type = 'group';
+    else if(itemObj.hasClass('li-dir')) var type = 'dir';
+    else if(itemObj.hasClass('li-note')) var type = 'note';
+
+    if(type == 'note'){
         var url = '/dir/update_note_name';
         var resObj = $(".li-note[data-id="+id+"] .name");
         if(itemObj.hasClass('curr')) $('.note-detail .title').val(name);
-    }else if(RightType == 'dir'){
+    }else if(type == 'dir'){
         var url = '/dir/update_name';
         var resObj = $(".li-dir[data-id="+id+"] .name");
+    }else if(type == 'group'){
+        id = itemObj.attr('group-id');
+        var url = '/dir/update_group_name';
+        var resObj = $(".li-group[group-id="+id+"] .name");
     }
-    itemObj.attr('draggable','true');
     if(obj.attr('prevalue') == name){
         obj.parent('.name').html(name);
         rename_regain();
@@ -252,25 +335,68 @@ function hide_dropdown_menu(menu){
     }
     if(menu != 'rightMenu'){ // 我的文件夹的右键菜单
         $('.dir-right-menu').remove();
+        $('.right-hover').removeClass('right-hover');
     }
 }
 
-function get_menu_html(type,e){
-    var html = '<ul class="dropdown-menu dir-right-menu" role="menu">';
-    if(type == 'dir' || type == 'note'){
+function get_menu_html(obj,e){
+    hide_dropdown_menu();
+    obj.addClass('right-hover');
+    RightObj = obj;
+    var dir_id = obj.data('id');
+    var group_id = obj.attr('group-id');
+    var class_id = obj.attr('class-id') == undefined ? 0 : obj.attr('class-id');
+    var type = '', dirNote ='';
+    if(obj.hasClass('my-dir-list')){
+        type = 'sidebar-dir';
+    }else if(obj.hasClass('my-group-list')){
+        type = 'sidebar-group';
+    }else if(obj.hasClass('sidebar-trash')){
+        type = 'trash-all';
+    }else if(obj.hasClass('li-trash')){
+        type = 'trash';
+    }else if(obj.hasClass('li-search')){
+        type = 'search';
+    }else if(obj.hasClass('li-dir')){
+        type = 'dir';
+    }else if(obj.hasClass('li-note')){
+        type = 'note';
+    }else if(obj.hasClass('li-group')){
+        type = 'group';
+    }else{
+        return false;
+    }
+
+    if(obj.hasClass('li-group')){
+        dirNote = 'group';
+    }else if(obj.hasClass('li-dir')){
+        dirNote = 'dir';
+    }else if(obj.hasClass('li-note')){
+        dirNote = 'note';
+    }
+
+    var html = '<ul class="dropdown-menu dir-right-menu" role="menu" dirNote = "'+dirNote+'" ' +
+        'type="'+type+'" data-id="'+dir_id+'" group-id="'+group_id+'" class-id="'+class_id+'">';
+    if(type == 'dir' || type == 'note' || type == 'group'){
         html += '<li class="move-up">上移</li>';
         html += '<li class="move-down">下移</li>';
         html += '<li class="delete">删除</li>';
         html += '<li class="li-divider rename">重命名</li>';
-        if(type == 'dir'){
-            html += '<li class="right-create-note">新建笔记</li>';
-            html += '<li class="right-create-dir">新建文件夹</li>';
-        }
     }else if(type == 'trash'){
         html += '<li class="right-trash-recover">恢复</li>';
         html += '<li class="right-trash-delete">永久删除</li>';
     }else if(type == 'trash-all'){
         html += '<li class="trash-all-delete">清空回收站</li>';
+    }else if(type == 'search'){
+        html += '<li class="delete">删除</li>';
+        html += '<li class="li-divider">重命名</li>';
+    }else if(type == 'sidebar-group'){
+        html += '<li class="create-group">添加协作</li>';
+    }
+    if(type == 'dir' || type == 'group' || type == 'sidebar-dir'){
+        if(type == 'group') html += '<li class="invite-group">邀请协作</li>';
+        html += '<li class="right-create-note">新建笔记</li>';
+        html += '<li class="right-create-dir">新建文件夹</li>';
     }
     html += '</ul>';
     $('body').append(html);
