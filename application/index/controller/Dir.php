@@ -15,7 +15,7 @@ class Dir extends Controller
     private $groupRefuse = 1;
     private $groupAgree = 2;
     private $sortList = ['desc','asc'];
-    private $colList = ['rank'=>'rank','create'=>'c_time','update'=>'u_time','title'=>'convert(title USING gbk) COLLATE gbk_chinese_ci'];
+    private $colList = ['rank'=>'rank','create'=>'c_time','update'=>'u_time','name'=>'convert(name USING gbk) COLLATE gbk_chinese_ci'];
 
     public function __construct() {
         parent::__construct();
@@ -50,11 +50,24 @@ class Dir extends Controller
             if(empty($item['dir_list'])){
                 $item['dir_list'] = [];
             }else{
-                $item['dir_list'] = $this->nesting($item['dir_list'] , 1);
+                $item['dir_list'] = $this->nesting($item['dir_list']);
                 $this->change_group_list($item['dir_list']);
             }
         }
 
+        splash('succ','',$group_list);
+    }
+
+    public function group_item(){
+        $uid = $this->uid;
+        $request = Request::instance();
+        $group_id = $request->param('group_id');
+
+        $group_list = Db::table('group')->where('group_id',$group_id)->field('group_id,version,group_name,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->find();
+
+        $dir_res = Db::table('dir')->where('is_delete',0)->where('group_id', $group_id)->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
+
+        $group_list['dir_list'] = $this->nesting($dir_res);
         splash('succ','',$group_list);
     }
 
@@ -95,11 +108,19 @@ class Dir extends Controller
     }
 
 
-    public function my_invite_group(){
+    public function polling_info(){
         $uid = $this->uid;
+        $invite_list = $group_list = [];
         $my_group = Db::table('user_group')->alias('ug')->join('group g','ug.group_id = g.group_id')->join('user u','ug.inviter = u.uid')
-            ->where(['ug.uid'=>$uid,'ug.invite'=>$this->groupWait])->field('ug.group_id,u.user_name,g.group_name')->select();
-        splash('succ','',$my_group);
+            ->where(['ug.uid'=>$uid])->field('ug.group_id,u.user_name,g.group_name,g.version,ug.invite')->select();
+        foreach($my_group as $item){
+            if($item['invite'] == $this->groupAgree){
+                $group_list[] = $item;
+            }elseif($item['invite'] == $this->groupWait){
+                $invite_list[] = $item;
+            }
+        }
+        splash('succ','',['invite_list'=>$invite_list,'group_list'=>$group_list]);
     }
 
     public function invite_agree_refuse(){
@@ -112,6 +133,9 @@ class Dir extends Controller
 
         $res = Db::table('user_group')->where(['uid'=>$uid,'group_id'=>$group_id])->update(['invite'=>$invite,'u_time'=>$time]);
         $msg = $invite == $this->groupRefuse ? '邀请已拒绝' : '同意邀请成功，你已加入该协作';
+
+        //添加记录
+        if($invite == $this->groupAgree) $this->group_log($uid,$group_id,'加入协作','user');
         if($res) splash('succ',$msg);
         else splash('error','操作失败，请刷新重试');
     }
@@ -121,8 +145,8 @@ class Dir extends Controller
         $group_id = $request->param('group_id');
 
         $dir_res = Db::table('dir')->where(['group_id'=>$group_id,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,group_id,class_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
-        $dir_res = $this->nesting($dir_res,1);
-        $note_res = Db::table('note')->where(['group_id'=>$group_id,'is_delete'=>0,'dir_id'=>0])->order('rank desc')->order('rec_id desc')->field('rec_id,title,dir_id,group_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
+        $dir_res = $this->nesting($dir_res);
+        $note_res = Db::table('note')->where(['group_id'=>$group_id,'is_delete'=>0,'dir_id'=>0])->order('rank desc')->order('rec_id desc')->field('rec_id,name,dir_id,group_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
         splash('succ','',['dir'=>$dir_res,'note'=>$note_res]);
     }
 
@@ -139,17 +163,17 @@ class Dir extends Controller
         $dir_id = $request->param('dir_id');
         $group_id = $request->param('group_id');
 
-        $dir_res = Db::table('dir')->where(['uid'=>$uid,'is_delete'=>0,'parent_id'=>$dir_id,'group_id'=>$group_id])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,group_id,class_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
-        $note_res = Db::table('note')->where(['uid'=>$uid,'is_delete'=>0,'dir_id'=>$dir_id])->order($col.' '.$sort)->order('rec_id desc')->field('rec_id,title,dir_id,group_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
+        $dir_res = Db::table('dir')->where(['uid'=>$uid,'is_delete'=>0,'parent_id'=>$dir_id,'group_id'=>$group_id])->order($col.' '.$sort)->order('dir_id asc')->field('dir_id,dir_name,group_id,class_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
+        $note_res = Db::table('note')->where(['uid'=>$uid,'is_delete'=>0,'dir_id'=>$dir_id])->order($col.' '.$sort)->order('rec_id desc')->field('rec_id,name,dir_id,group_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
 
         splash('succ','',['dir'=>$dir_res,'note'=>$note_res]);
     }
 
     public function trash_list(){
         $uid = $this->uid;
-        $res = Db::table('dir')->where(['uid'=>$uid,'is_delete'=>1])->order('u_time desc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(u_time, "%Y-%m-%d") as time')->select();
-        $dir_res = $this->nesting($res,1);
-        $note_res = Db::table('note')->where(['uid'=>$uid,'is_delete'=>1])->order('u_time desc')->field('rec_id,title,dir_id,group_id,FROM_UNIXTIME(u_time, "%Y-%m-%d") as time')->select();
+        $res = Db::table('dir')->where(['uid'=>$uid,'is_delete'=>1])->order('u_time asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(u_time, "%Y-%m-%d") as time')->select();
+        $dir_res = $this->nesting($res);
+        $note_res = Db::table('note')->where(['uid'=>$uid,'is_delete'=>1])->order('u_time desc')->field('rec_id,name,dir_id,group_id,FROM_UNIXTIME(u_time, "%Y-%m-%d") as time')->select();
 
         splash('succ','',['dir'=>$dir_res,'note'=>$note_res]);
     }
@@ -167,10 +191,14 @@ class Dir extends Controller
         if($class_id > $this->maxDir) splash('error','最多拥有'.$this->maxDir.'层目录');
 
         $data = ['dir_name' => $name, 'uid'=>$uid,'class_id'=>$class_id,'group_id'=>$group_id,'parent_id'=>$parent_id,'u_time'=>$time,'c_time'=>$time];
-
         $dir_id = Db::name('dir')->insertGetId($data);
-        if($dir_id) splash('succ','新建文件夹成功',['dir_id'=>$dir_id,'dir_name'=>$name,'class_id'=>$class_id,'time'=>date('Y-m-d',$time)]);
-        else splash('error','新建文件夹失败，请刷新重试');
+
+        if($dir_id){
+            if($group_id > 0) $this->group_log($uid,$group_id,'新建目录','dir');
+            splash('succ','新建文件夹成功',['dir_id'=>$dir_id,'group_id'=>$group_id,'dir_name'=>$name,'class_id'=>$class_id,'time'=>date('Y-m-d',$time)]);
+        }else{
+            splash('error','新建文件夹失败，请刷新重试');
+        }
     }
 
     public function create_group(){
@@ -184,8 +212,12 @@ class Dir extends Controller
 
         $user_group = ['uid'=>$uid,'group_id'=>$group_id,'invite'=>$this->groupAgree,'inviter'=>$uid,'u_time'=>$time,'c_time'=>$time];
         Db::name('user_group')->insertGetId($user_group);
-        if($group_id) splash('succ','新建协作成功',['group_id'=>$group_id,'version'=>0,'group_name'=>$name,'time'=>date('Y-m-d',$time)]);
-        else splash('error','新建协作失败，请刷新重试');
+        if($group_id){
+            $this->group_log($uid,$group_id,'创建了该协作','group');
+            splash('succ','新建协作成功',['group_id'=>$group_id,'version'=>0,'group_name'=>$name,'time'=>date('Y-m-d',$time)]);
+        }else{
+            splash('error','新建协作失败，请刷新重试');
+        }
     }
 
     public function update_drap_dir(){
@@ -195,6 +227,9 @@ class Dir extends Controller
         $list = $request->param('list/a');
         $parent_id = $request->param('parent_id');
         $group_id = $request->param('group_id');
+        $cur_group = $request->param('cur_group');
+        $cur_name = $request->param('cur_name');
+        $parent_name = $request->param('parent_name');
 
         foreach($list as $key=>$item){
             $data = ['dir_id'=>$item[0],'class_id' => $item[1] ,'parent_id'=>$item[2],'group_id'=>$group_id,'u_time'=>time(),'rank'=>-1,'is_delete'=>0];
@@ -209,8 +244,21 @@ class Dir extends Controller
             $res = Db::table('dir')->where('dir_id', $dir_id)->update($row);
         }
 
-        if($res) splash('succ','拖放目录成功');
-        else splash('error','拖放目录失败，请刷新重试');
+        if($res){
+            if($group_id == $cur_group){
+                $this->group_log($uid,$group_id,'拖动目录['.$cur_name.']到['.$parent_name.']','dir');
+            }elseif($group_id == 0 && $cur_group > 0){
+                $this->group_log($uid,$cur_group,'将目录['.$cur_name.']拖离协作','dir');
+            }elseif($group_id > 0 && $cur_group == 0){
+                $this->group_log($uid,$group_id,'将目录['.$cur_name.']拖入协作','dir');
+            }elseif($group_id > 0 && $cur_group > 0){
+                $this->group_log($uid,$cur_group,'将目录['.$cur_name.']拖离协作','dir');
+                $this->group_log($uid,$group_id,'将目录['.$cur_name.']拖入协作','dir');
+            }
+            splash('succ','拖放目录成功');
+        }else{
+            splash('error','拖放目录失败，请刷新重试');
+        }
     }
 
     public function update_dir_sort(){
@@ -218,12 +266,19 @@ class Dir extends Controller
         $uid = $this->uid;
         $request = Request::instance();
         $list = $request->param('list/a');
+        $group_id = $request->param('group_id');
+        $parent_name = $request->param('parent_name');
+
         foreach($list as $item){
             $data = ['rank' => $item[1] , 'u_time'=>time()];
             $res = Db::table('dir')->where('dir_id', $item[0])->update($data);
         }
-        if($res) splash('succ','排序成功');
-        else splash('error','排序失败，请刷新重试');
+        if($res){
+            if($group_id > 0 ) $this->group_log($uid,$group_id,'操作['.$parent_name.']目录下文件夹排序','dir');
+            splash('succ','排序成功','dir');
+        }else{
+            splash('error','排序失败，请刷新重试');
+        }
     }
 
     public function update_group_sort(){
@@ -231,11 +286,12 @@ class Dir extends Controller
         $uid = $this->uid;
         $request = Request::instance();
         $list = $request->param('list/a');
+
         foreach($list as $item){
             $data = ['rank' => $item[1] , 'u_time'=>time()];
             $res = Db::table('group')->where('group_id', $item[0])->update($data);
         }
-        if($res) splash('succ','排序成功');
+        if($res) splash('succ','排序成功','group');
         else splash('error','排序失败，请刷新重试');
     }
 
@@ -244,12 +300,15 @@ class Dir extends Controller
         $uid = $this->uid;
         $request = Request::instance();
         $dir_ids = $request->param('id/a');
+        $name = $request->param('name');
+        $group_id = $request->param('group_id');
         if(empty($dir_ids)) splash('error','请选择要删除的目录');
 
-        $data = ['is_delete' => 1 , 'u_time'=>time()];
+        $data = ['is_delete' => 1,'rank'=>-1 , 'u_time'=>time()];
         $res = Db::table('dir')->where('uid',$uid)->where('dir_id','in',$dir_ids)->update($data);
         if($res){
             Db::table('note')->where('uid',$uid)->where('dir_id','in',$dir_ids)->update($data);
+            if($group_id > 0) $this->group_log($uid,$group_id,'删除了目录['.$name.']','dir');
             splash('succ','删除目录成功','dir');
         }
         else splash('error','删除目录失败，请刷新重试');
@@ -263,8 +322,12 @@ class Dir extends Controller
         if(empty($group_id)) splash('error','请选择要删除的选项');
 
         $res = Db::table('user_group')->where(['uid'=>$uid,'group_id'=>$group_id])->delete();
-        if($res) splash('succ','删除成功');
-        else splash('error','删除失败，请刷新重试');
+        if($res){
+            $this->group_log($uid,$group_id,'退出了该协作','user');
+            splash('succ','删除成功');
+        }else{
+            splash('error','删除失败，请刷新重试');
+        }
     }
 
     public function dir_trash_delete(){
@@ -288,6 +351,8 @@ class Dir extends Controller
         $uid = $this->uid;
         $request = Request::instance();
         $dir_list = $request->param('id/a');
+        $name = $request->param('name');
+        $group_id = $request->param('group_id');
         if(empty($dir_list)) splash('error','请选择要恢复的目录');
 
         foreach($dir_list as $key=>$item){
@@ -329,31 +394,37 @@ class Dir extends Controller
         }
 
         if($flag){
-            $sort_list = Db::table('dir')->where(['uid'=>$uid,'is_delete'=>0,'parent_id'=>$parent_id])->order('rank desc')->order('dir_id asc')->column('dir_id');
-            splash('succ','目录已恢复',['type'=>'dir','parent_id'=>$parent_id,'sort_list'=>$sort_list]);
+            if($group_id > 0) $this->group_log($uid,$group_id,'恢复了目录['.$name.']','dir');
+            splash('succ','目录已恢复',['type'=>'dir','parent_id'=>$parent_id]);
         }else{
             splash('error','目录恢复失败，请刷新重试','dir');
         }
     }
 
 
-    public function update_name(){
+    public function update_dir_name(){
         $uid = $this->uid;
         $request = Request::instance();
         $dir_id = $request->param('id');
         $name = $request->param('name');
+        $prename = $request->param('prename');
+        $group_id = $request->param('group_id');
         $data = ['dir_name' => $name ,'u_time'=>time()];
         $res = Db::table('dir')->where(['dir_id'=>$dir_id,'uid'=>$uid])->update($data);
-        if($res) splash('succ','重命名成功');
+        if($group_id > 0) $this->group_log($uid,$group_id,'重命名目录['.$prename.']为['.$name.']','dir');
+        if($res) splash('succ','重命名成功','dir');
     }
 
     public function update_group_name(){
+        $uid = $this->uid;
         $request = Request::instance();
         $group_id = $request->param('id');
         $name = $request->param('name');
+        $prename = $request->param('prename');
         $data = ['group_name' => $name ,'u_time'=>time()];
         $res = Db::table('group')->where(['group_id'=>$group_id])->update($data);
-        if($res) splash('succ','重命名成功');
+        $this->group_log($uid,$group_id,'重命名协作['.$prename.']为['.$name.']','dir');
+        if($res) splash('succ','重命名成功','group');
     }
 
     public function note_item(){
@@ -369,10 +440,16 @@ class Dir extends Controller
         $uid = $this->uid;
         $request = Request::instance();
         $rec_id = $request->param('id');
+        $name = $request->param('name');
+        $group_id = $request->param('group_id');
         $data = ['is_delete' => 1 , 'u_time'=>time()];
         $res = Db::table('note')->where(['rec_id'=>$rec_id,'uid'=>$uid])->update($data);
-        if($res) splash('succ','删除笔记成功');
-        else splash('error','删除笔记失败，请刷新重试');
+        if($res){
+            if($group_id > 0) $this->group_log($uid,$group_id,'删除笔记['.$name.']','note');
+            splash('succ','删除笔记成功');
+        }else{
+            splash('error','删除笔记失败，请刷新重试');
+        }
     }
 
     public function note_trash_delete(){
@@ -407,14 +484,20 @@ class Dir extends Controller
         $uid = $this->uid;
         $request = Request::instance();
         $rec_id = $request->param('id');
+        $name = $request->param('name');
+        $group_id = $request->param('group_id');
         $data = ['is_delete' => 0 , 'u_time'=>time()];
 
         //笔记隶属的目录
         $parent_id = Db::table('note')->alias('n')->join('dir d','n.dir_id = d.dir_id')->where(['n.rec_id'=>$rec_id,'n.uid'=>$uid,'d.is_delete'=>0])->value('n.dir_id');
         if(empty($parent_id)) $data['dir_id'] = 0;
         $res = Db::table('note')->where(['rec_id'=>$rec_id,'uid'=>$uid])->update($data);
-        if($res) splash('succ','恢复笔记成功',['type'=>'note','parent_id'=>$parent_id]);
-        else splash('error','恢复笔记失败，请刷新重试');
+        if($res){
+            if($group_id > 0) $this->group_log($uid,$group_id,'恢复笔记['.$name.']','note');
+            splash('succ','恢复笔记成功',['type'=>'note','parent_id'=>$parent_id]);
+        }else{
+            splash('error','恢复笔记失败，请刷新重试');
+        }
     }
 
     public function note_update(){
@@ -422,16 +505,25 @@ class Dir extends Controller
         $uid = $this->uid;
         $request = Request::instance();
         $rec_id = $request->param('rec_id');
-        $title = trim($request->param('title'));
+        $name = trim($request->param('name'));
+        $group_id = $request->param('group_id');
         $precont = $request->param('precont');
         $content = $request->param('content');
         $md5cont = md5($content);
 
-        if(empty($title)) splash('error','标题不能为空');
+        if(empty($name)) splash('error','标题不能为空');
+
+        if($group_id > 0){
+            $pre_note = Db::table('note')->where('rec_id',$rec_id)->field('group_id,md5')->find();
+            if($group_id != $pre_note['group_id']) splash('error','笔记已经不在该协作内');
+            if($precont != $pre_note['md5']) splash('error','笔记内容已经被改变，请刷新后修改');
+        }
+
         if($md5cont == $precont) splash('succ','保存成功');
 
-        $data = ['uid'=>$uid,'title'=>$title,'content'=>$content,'md5'=>$md5cont,'u_time'=>$time,'c_time'=>$time];
+        $data = ['uid'=>$uid,'name'=>$name,'content'=>$content,'md5'=>$md5cont,'u_time'=>$time,'c_time'=>$time];
         $res = Db::table('note')->where(['rec_id'=>$rec_id,'uid'=>$uid])->update($data);
+        if($group_id > 0) $this->group_log($uid,$group_id,'修改了笔记['.$name.']','note');
         splash('succ','保存成功',$md5cont);
     }
 
@@ -442,7 +534,7 @@ class Dir extends Controller
         $rec_id = $request->param('rec_id');
         $dir_id = $request->param('dir_id');
         $group_id = $request->param('group_id');
-        $data = ['dir_id'=>$dir_id,'group_id'=>$group_id,'u_time'=>$time,'is_delete'=>0];
+        $data = ['dir_id'=>$dir_id,'group_id'=>$group_id,'rank'=>-1,'u_time'=>$time,'is_delete'=>0];
         Db::table('note')->where('rec_id', $rec_id)->update($data);
         splash('succ','拖放笔记成功');
     }
@@ -451,10 +543,13 @@ class Dir extends Controller
         $uid = $this->uid;
         $request = Request::instance();
         $rec_id = $request->param('id');
-        $title = $request->param('name');
-        $data = ['title' => $title ,'u_time'=>time()];
+        $group_id = $request->param('group_id');
+        $prename = $request->param('prename');
+        $name = $request->param('name');
+        $data = ['name' => $name ,'u_time'=>time()];
         $res = Db::table('note')->where(['rec_id'=>$rec_id,'uid'=>$uid])->update($data);
-        splash('succ','重命名成功');
+        if($group_id > 0) $this->group_log($uid,$group_id,'重命名笔记['.$prename.']为['.$name.']','note');
+        splash('succ','重命名成功','note');
     }
 
     public function update_note_sort(){
@@ -462,34 +557,41 @@ class Dir extends Controller
         $uid = $this->uid;
         $request = Request::instance();
         $list = $request->param('list/a');
+        $group_id = $request->param('group_id');
         foreach($list as $item){
             $data = ['rank' => $item[1] , 'u_time'=>time()];
             $res = Db::table('note')->where('rec_id', $item[0])->update($data);
         }
-        splash('succ','排序成功');
+        if($group_id > 0) $this->group_log($uid,$group_id,'拖放笔记','note');
+        splash('succ','排序成功','note');
     }
 
     public function note_create(){
         $time = time();
         $uid = $this->uid;
         $request = Request::instance();
-        $title = '新建笔记';
+        $group_id = $request->param('group_id');
+        $name = '新建笔记';
         $content = '';
         $dir_id = $request->param('dir_id');
         $group_id = $request->param('group_id');
 
-        $data = ['dir_id' => $dir_id,'group_id'=>$group_id, 'uid'=>$uid,'title'=>$title,'content'=>$content,'md5'=>md5($content),'u_time'=>$time,'c_time'=>$time];
+        $data = ['dir_id' => $dir_id,'group_id'=>$group_id, 'uid'=>$uid,'name'=>$name,'content'=>$content,'md5'=>md5($content),'u_time'=>$time,'c_time'=>$time];
         $rec_id = Db::name('note')->insertGetId($data);
 
-        if($rec_id) splash('succ','新建笔记成功',['rec_id'=>$rec_id,'title'=>$title,'time'=>date('Y-m-d',$time)]);
-        else splash('error','新建笔记失败，请刷新重试');
+        if($rec_id){
+            if($group_id > 0) $this->group_log($uid,$group_id,'新建笔记','note');
+            splash('succ','新建笔记成功',['rec_id'=>$rec_id,'group_id'=>$group_id,'name'=>$name,'time'=>date('Y-m-d',$time)]);
+        }else{
+            splash('error','新建笔记失败，请刷新重试');
+        }
     }
 
     public function note_search(){
         $uid = $this->uid;
         $request = Request::instance();
         $search = trim($request->param('search'));
-        $list = Db::table('note')->where(['uid'=>$uid,'is_delete'=>0])->where('title','like','%'.$search.'%')->order('rec_id desc')->field('rec_id,dir_id,group_id,title,c_time')->select();
+        $list = Db::table('note')->where(['uid'=>$uid,'is_delete'=>0])->where('name','like','%'.$search.'%')->order('rec_id desc')->field('rec_id,dir_id,group_id,name,c_time')->select();
         foreach($list as &$item){
             $item['time'] = date('Y-m-d',$item['c_time']);
         }
@@ -497,8 +599,7 @@ class Dir extends Controller
     }
 
 
-    public function nesting($res,$type = 0){
-        //type=0时按第一级展示,不等于0时按外层展示，外层不一定是第一级
+    public function nesting($res){
         $max_class = 1;
         $list = $data = [];
         foreach($res as $item){
@@ -509,12 +610,8 @@ class Dir extends Controller
         for($i=$max_class ; $i>1 ; $i--){
             foreach($list as $key=>$row){
                 if($row['class_id'] != $i) continue;
-                if(!empty($list[$row['parent_id']])){
-                    $list[$row['parent_id']]['child'][] = $row;
-                    unset($list[$key]);
-                    continue;
-                }
-                if($type == 1) continue;
+                if(empty($list[$row['parent_id']])) continue;
+                $list[$row['parent_id']]['child'][] = $row;
                 unset($list[$key]);
             }
         }
@@ -541,5 +638,10 @@ class Dir extends Controller
                 $this->change_group_list($item['child'],$item['class_id']+1);
             }
         }
+    }
+
+    function group_log($uid,$group_id,$msg='',$type = ''){
+        Db::table('group_log')->insert(['uid' =>$uid, 'group_id' =>$group_id,'msg'=>$msg,'c_time'=>time()]);
+        if($type == 'group' || $type == 'dir') Db::table('group')->where('group_id',$group_id)->setInc('version');
     }
 }

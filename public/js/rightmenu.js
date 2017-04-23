@@ -118,6 +118,7 @@ function move_up_down(upDown){
     hide_dropdown_menu();
     if(type == 'dir'){
         var obj = $(".dir-list .li-dir[data-id="+objId+"]");
+        var parentName = obj.parent('li').parent('ul').prev('div').children('.name').text();
         var url = '/dir/update_dir_sort';
         var itemobj = $(".item-list .li-dir[data-id="+objId+"]");
         if(upDown == 'down'){
@@ -132,6 +133,7 @@ function move_up_down(upDown){
     }else if(type == 'note'){
         var url = '/dir/update_note_sort';
         var obj = $(".li-note[data-id="+objId+"]");
+        var parentName = $('.dir-warp .curr').children('.name').text();
         if(upDown == 'down'){
             if(obj.parent('li').next('li').length == 0) return false;
             obj.parent('li').next('li').insertBefore(obj.parent('li'));
@@ -142,6 +144,7 @@ function move_up_down(upDown){
     }else if(type == 'group'){
         var url = '/dir/update_group_sort';
         var obj = $(".group-list .li-group[group-id="+groupId+"]");
+        var parentName = obj.parent('li').parent('ul').prev('div').children('.name').text();
         var itemobj = $(".item-list .li-group[group-id="+groupId+"]");
         if(upDown == 'down'){
             if(obj.parent('li').next('li').length == 0) return false;
@@ -155,32 +158,24 @@ function move_up_down(upDown){
     }else{
         return false;
     }
-    update_sort(obj,url);
+    update_sort(obj,url,parentName);
 }
 
 //移动后的排序
-function update_sort(obj,url){
+function update_sort(obj,url,parent_name){
+    var group_id = obj.attr('group-id');
     var parent_ul = obj.parent('li').parent('ul');
     var list = new Array();
     var length = parent_ul.children('li').length;
     parent_ul.children('li').each(function(v){
         if($(this).children('div').hasClass('li-group')){
+            group_id = 0;
             list.push([$(this).children('div').attr('group-id'),length-v]);
         }else{
             list.push([$(this).children('.rightbtn').data('id'),length-v]);
         }
     });
-    ajax_update_sort(url,list);
-}
-//协作排序
-function group_update_sort(obj,url){
-    var parent_ul = obj.parent('li').parent('ul');
-    var list = new Array();
-    var length = parent_ul.children('li').length;
-    parent_ul.children('li').each(function(v){
-        list.push([$(this).children('.rightbtn').attr('group-id'),length-v]);
-    });
-    ajax_update_sort(url,list);
+    ajax_update_sort(url,list,group_id,parent_name);
 }
 //右键目录和笔记的删除
 $("body").on("click", '.delete', function(){
@@ -191,22 +186,21 @@ $("body").on("click", '.delete', function(){
     if(type == 'dir'){
         var url = '/dir/delete_dir';
         var resObj = $(".li-dir[data-id="+id+"]").parent('li');
-        var delObj = $(".dir-list .li-dir[data-id="+id+"]");
+        var delObj = $(".dir-warp .li-dir[data-id="+id+"]");
         var list = get_dir_list(delObj);
         list.push(id);
-        ajax_delete_btn(url,list,resObj);
+        ajax_delete_btn(url,list,resObj,groupId);
     }else if(type == 'note'){
         var url = '/dir/delete_note';
         var resObj = $(".li-note[data-id="+id+"]").parent('li');
-        ajax_delete_btn(url,id,resObj);
-    }else if(type == 'group'){
-        ajax_delete_group(groupId);
+        ajax_delete_btn(url,id,resObj,groupId);
     }
 });
 //垃圾箱恢复
 $("body").on("click", '.right-trash-recover', function(){
     var type = $('.dir-right-menu').attr('dirNote');
     var id = $('.dir-right-menu').data('id');
+    var group_id = $('.dir-right-menu').attr('group-id');
     hide_dropdown_menu();
     if(type == 'dir'){
         var url = '/dir/dir_recover';
@@ -215,11 +209,11 @@ $("body").on("click", '.right-trash-recover', function(){
         var cur_item = [delObj.data('id'),delObj.attr('class-id'),'',delObj.children('.name').text()];
         var list = get_dir_attr(delObj);
         list.push(cur_item);
-        ajax_trash_btn(url,list,resObj);
+        ajax_trash_btn(url,list,resObj,group_id);
     }else if(type == 'note'){
         var url = '/dir/note_recover';
         var resObj = $(".li-note[data-id="+id+"]").parent('li');
-        ajax_trash_btn(url,id,resObj);
+        ajax_trash_btn(url,id,resObj,group_id);
     }
 });
 //清空回收站
@@ -285,7 +279,7 @@ $("body").on("click", '.rename-input', function(e){
 })
 // 重命名的回车键事件
 $("body").on("keydown", '.rename-input', function(e){
-    if(e.which == 13) change_name();
+    if(e.which == 13) $('.rename-input').trigger('blur');
 });
 $("body").on("blur", '.rename-input', function(e){
     change_name();
@@ -297,6 +291,7 @@ function change_name(){
     var name = obj.val();
     var itemObj = obj.parent('.name').parent('div');
     var id = itemObj.data('id');
+    var group_id = itemObj.attr('group-id');
     if(itemObj.hasClass('li-group')) var type = 'group';
     else if(itemObj.hasClass('li-dir')) var type = 'dir';
     else if(itemObj.hasClass('li-note')) var type = 'note';
@@ -304,23 +299,24 @@ function change_name(){
     if(type == 'note'){
         var url = '/dir/update_note_name';
         var resObj = $(".li-note[data-id="+id+"] .name");
-        if(itemObj.hasClass('curr')) $('.note-detail .title').val(name);
+        if(itemObj.hasClass('curr')) $('.note-detail .note-name').val(name);
     }else if(type == 'dir'){
-        var url = '/dir/update_name';
+        var url = '/dir/update_dir_name';
         var resObj = $(".li-dir[data-id="+id+"] .name");
     }else if(type == 'group'){
         id = itemObj.attr('group-id');
         var url = '/dir/update_group_name';
         var resObj = $(".li-group[group-id="+id+"] .name");
     }
-    if(obj.attr('prevalue') == name){
+    var pre_name = obj.attr('prevalue');
+    if(pre_name == name){
         obj.parent('.name').html(name);
         rename_regain();
         return false;
     }
     resObj.html(name);
     rename_regain();
-    ajax_update_name(url,name,id);
+    ajax_update_name(url,name,id,pre_name,group_id);
 }
 
 function rename_regain(){
@@ -357,12 +353,12 @@ function get_menu_html(obj,e){
         type = 'trash';
     }else if(obj.hasClass('li-search')){
         type = 'search';
+    }else if(obj.hasClass('li-group')){
+        type = 'group';
     }else if(obj.hasClass('li-dir')){
         type = 'dir';
     }else if(obj.hasClass('li-note')){
         type = 'note';
-    }else if(obj.hasClass('li-group')){
-        type = 'group';
     }else{
         return false;
     }
