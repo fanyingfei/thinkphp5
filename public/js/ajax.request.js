@@ -783,10 +783,11 @@ function get_group_log(group_id){
                 '<h4>历史记录</h4><span class="dialog-close" title="关闭">×</span></div><div class="dialog-body"><div class="log-list">' ;
 
             $.each(res.result , function(k,list){
-                html += '<p>'+k+'</p>';
+                html += '<p class="date-log">'+k+'</p><div class="log-content">';
                     $.each(list , function(k,v){
-                        html += '<p>'+v.time+ v.user_name + v.msg+'</p>';
+                        html += '<p><span>'+v.time+'</span><span>'+ v.user_name +'</span>'+ v.msg+'</p>';
                     })
+                html += '</div>';
             })
 
             html += '</div></div></div>';
