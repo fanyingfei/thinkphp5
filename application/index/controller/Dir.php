@@ -649,11 +649,30 @@ class Dir extends Controller
         $uid = $this->uid;
         $request = Request::instance();
         $search = trim($request->param('search'));
-        $list = Db::table('note')->where(['uid'=>$uid,'is_delete'=>0])->where('name','like','%'.$search.'%')->order('rec_id desc')->field('rec_id,dir_id,group_id,name,c_time')->select();
+        $list = Db::table('note')->where(['uid'=>$uid,'is_delete'=>0])->where('name','like','%'.$search.'%')->order('rec_id desc')->field('rec_id,dir_id,group_id,name,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
         foreach($list as &$item){
             $item['time'] = date('Y-m-d',$item['c_time']);
         }
         splash('succ','搜索结果',$list);
+    }
+
+    public function  get_group_log(){
+        $uid = $this->uid;
+        $request = Request::instance();
+        $group_id = $request->param('group_id');
+        $res_list = Db::table('group_log')->where(['group_id'=>$group_id])->order('rec_id desc')->field('uid,msg,c_time')->limit(1000)->select();
+        $uid_list = array_column($res_list,'uid');
+        $user_list = Db::table('user')->where('uid','in',$uid_list)->column('user_name','uid');
+
+        $log_list = [];
+        foreach($res_list as &$item){
+            if(empty($user_list[$item['uid']])) continue;
+            $date = date('Y-m-d',$item['c_time']);
+            $time = date('H:i:s',$item['c_time']);
+            $log_list[$date][] = ['time'=>$time,'user_name'=>$user_list[$item['uid']],'msg'=>$item['msg']];
+        }
+
+        splash('succ','历史记录',$log_list);
     }
 
 

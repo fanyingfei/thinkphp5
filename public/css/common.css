@@ -719,7 +719,6 @@ li .li-group:hover .item-time{
     padding: 6px 12px;
     color: #fff;
     font-size: 15px;
-    margin-left: 20px;
     cursor: pointer;
     border: 1px solid #357ebd;
     background-color: #428bca;
@@ -744,17 +743,36 @@ li .li-group:hover .item-time{
     zoom: 1;
     transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
 }
-.invite-group-warp{
+.dialog-warp{
     position: absolute;
-    top:30%;
-    left:50%;
-    margin-left:-200px;
     background-color: #fff;
     z-index: 2001;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
     border-radius: 3px;
+    left:50%;
+    top:10px;
+    overflow: hidden;
+}
+.invite-group-warp{
+    margin-left:-200px;
     width:400px;
     height:200px;
+    top:30%;
+}
+.history-list{
+    top:20%;
+    bottom:20%;
+    width: 500px;
+    margin-left:-250px;
+}
+.history-list .dialog-body{
+    position: absolute;
+    top: 50px;
+    bottom: 20px;
+    overflow: auto;
+}
+.log-list{
+    overflow: auto;
 }
 .dialog-header{
     border: 0;
@@ -765,6 +783,7 @@ li .li-group:hover .item-time{
     color: #222;
     cursor: move;
     overflow: auto;
+    position: relative;
 }
 .dialog-header h4 {
     margin: 0;
@@ -774,21 +793,22 @@ li .li-group:hover .item-time{
 }
 .dialog-close {
     display: block;
-    width: 16px;
-    height: 16px;
-    float: right;
+    width: 40px;
+    height: 40px;
+    position: absolute;
     cursor: pointer;
+    top: 0;
+    right: 0;
+    text-align: center;
     opacity: 0.6;
-    line-height: 16px;
-    font-size: 18px;
+    line-height: 40px;
+    font-size: 20px;
 }
 .dialog-body {
     padding:20px;
     font-size: 14px;
     text-align: left;
-    overflow: hidden;
     width: 100%;
-    min-height: 120px;
 }
 .dialog-prompt{
     color: #999;

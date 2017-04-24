@@ -69,8 +69,8 @@ function ele_draggable(){
         }
     });
 
-    //邀请协作可拖动位置
-    $('.invite-group-warp').draggable({
+    //弹框可拖动位置
+    $('.dialog-warp').draggable({
         accept: ".dialog-header",
         containment:'.dialog-mask',
         scroll: false

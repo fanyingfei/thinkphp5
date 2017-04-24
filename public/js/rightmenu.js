@@ -75,16 +75,21 @@ $("body").on("click", '.invite-group', function(){
     var groupId = $('.dir-right-menu').attr('group-id');
     hide_dropdown_menu();
     if(!(type == 'group' && groupId > 0)) return false;
-    var html = '<div class="dialog-mask"></div><div class="invite-group-warp" again="0" group-id="'+groupId+'">' +
+    var html = '<div class="dialog-mask"></div><div class="invite-group-warp dialog-warp" group-id="'+groupId+'">' +
         '<div class="dialog-header"><h4>邀请协作</h4><span class="dialog-close" title="关闭">×</span></div>' +
         '<div class="dialog-body"><p class="dialog-prompt">请输入要邀请的账号，暂仅支持手机号邀请（请慎重邀请）</p><input class="invite-input" placeholder="">' +
         '<button class="invite-btn">邀请</button><div class="invite-prompt"><span class="icon-hint"></span><span class="invite-msg"></span></div></div></div>';
     $('body').append(html);
     ele_draggable();
 });
+$("body").on("click", '.history-log', function(){
+    var group_id = $('.dir-right-menu').attr('group-id');
+    hide_dropdown_menu();
+    get_group_log(group_id);
+});
 $("body").on("click", '.dialog-close', function(){
     $('.dialog-mask').slideUp('fast').remove();
-    $('.invite-group-warp').slideUp('fast').remove();
+    $('.dialog-warp').slideUp('fast').remove();
 });
 $("body").on("click", '.zoom-out', function(){
     if($('.invite-item').is(":hidden")) $('.invite-item').slideDown('fast');
@@ -390,7 +395,10 @@ function get_menu_html(obj,e){
         html += '<li class="create-group">添加协作</li>';
     }
     if(type == 'dir' || type == 'group' || type == 'sidebar-dir'){
-        if(type == 'group') html += '<li class="invite-group">邀请协作</li>';
+        if(type == 'group'){
+            html += '<li class="invite-group">邀请协作</li>';
+            html += '<li class="history-log">历史记录</li>';
+        }
         html += '<li class="right-create-note">新建笔记</li>';
         html += '<li class="right-create-dir">新建文件夹</li>';
     }

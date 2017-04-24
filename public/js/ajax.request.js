@@ -151,6 +151,14 @@ function auto_update_group(group_id){
             var groupObj = $('.group-list .li-group[group-id='+groupId+']');
             var itemObj = $('.item-wrap .li-group[group-id='+groupId+']');
 
+            var curr_group = 0, curr_dir = 0, pshow = 0, cshow = 0;
+            if($('.group-list li .curr').length > 0){
+                curr_dir = $('.group-list .curr').data('id');
+                curr_group = $('.group-list .curr').attr('group-id');
+                if(!$('.group-list li .curr').parent('li').parent('ul').is(":hidden")) pshow = 1;
+                if(!$('.group-list li .curr').next('ul').is(":hidden")) cshow = 1;
+            }
+
             var html = create_group_html(obj);
 
             //如果右侧也在的话，把右侧替换掉
@@ -159,6 +167,14 @@ function auto_update_group(group_id){
             if(obj.dir_list.length > 0) html += create_list(obj.dir_list);
 
             groupObj.parent('li').replaceWith('<li>'+html+'</li>');
+
+            if(curr_dir > 0 || curr_group > 0){
+                var afterObj = $('.group-list .li-dir[data-id='+curr_dir+'][group-id='+curr_group+']');
+                afterObj.addClass('curr');
+                if(pshow == 1) afterObj.parents('ul').slideDown('fast').prev('div').children('.down-btn').addClass('drop-down pack-up');
+                if(cshow == 1) afterObj.children('.down-btn').addClass('drop-down pack-up').end().next('ul').slideDown('fast');
+                get_item_list();
+            }
 
             ele_draggable();
         },
@@ -756,7 +772,30 @@ function invite_agree_refuse(group_id,invite){
         error:function(e){}
     });
 }
+function get_group_log(group_id){
+    $.ajax({
+        url:  '/dir/get_group_log',
+        data:{'group_id':group_id},
+        type: "POST",
+        dataType:'json',
+        success:function(res){
+            var html = '<div class="dialog-mask"></div><div class="history-list dialog-warp"><div class="dialog-header">' +
+                '<h4>历史记录</h4><span class="dialog-close" title="关闭">×</span></div><div class="dialog-body"><div class="log-list">' ;
 
+            $.each(res.result , function(k,list){
+                html += '<p>'+k+'</p>';
+                    $.each(list , function(k,v){
+                        html += '<p>'+v.time+ v.user_name + v.msg+'</p>';
+                    })
+            })
+
+            html += '</div></div></div>';
+            $('body').append(html);
+            ele_draggable();
+        },
+        error:function(e){}
+    });
+}
 //展示笔记
 function show_note(){
     //没有任何笔记时
