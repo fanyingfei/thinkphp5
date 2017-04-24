@@ -1,7 +1,7 @@
 //创建目录
 function create_dir(parent_id,class_id,group_id){
     if(parent_id == -1){
-        prompt_msg('error','不能在我的协作直接新建目录');
+        prompt_msg('error','不能在我的协作组直接新建目录');
         return false;
     }else if(parent_id == -2){
         prompt_msg('error','不能在回收站新建目录');
@@ -38,7 +38,7 @@ function create_dir(parent_id,class_id,group_id){
 //创建笔记
 function create_note(dir_id,group_id){
     if(dir_id == -1){
-        prompt_msg('error','不能在我的协作直接新建笔记');
+        prompt_msg('error','不能在我的协作组直接新建笔记');
         return false;
     }else if(dir_id == -2){
         prompt_msg('error','不能在回收站新建笔记');
@@ -122,7 +122,7 @@ function group_list(){
             var html = '<div class="li-dir li-group sidebar-title my-group-list" group-id="0" data-id="-1">';
             html += '<span class="down-btn';
             if(obj.length > 0) html+= ' drop-down';
-            html += '"></span><i class="icon"></i><div class="name">我的协作</div></div><ul class="sortable">';
+            html += '"></span><i class="icon"></i><div class="name">我的协作组</div></div><ul class="sortable">';
             $.each(obj, function(key, v){
                 html += '<li>'+create_group_html(v);
                 if(v.dir_list != '') html += create_list(v.dir_list);
@@ -204,7 +204,7 @@ function item_group(dir_id,group_id,col,sort){
             $.each(obj, function(key, v){
                 html += '<li>'+create_group_html(v)+'</li>';
             })
-            html += '</ul>';
+            html += '</ul><ul class="item-note"></ul>';
         },
         error:function(e){}
     });
@@ -222,9 +222,11 @@ function dir_list(){
         success:function(res){
             var obj = res.result;
             var html = '<div class="li-dir sidebar-title my-dir-list" group-id="0" class-id="0" data-id="0">';
-            html += '<span class="down-btn drop-down"></span><i class="icon"></i><div class="name">我的文件夹</div></div>';
+            html += '<span class="down-btn"></span><i class="icon"></i><div class="name">我的文件夹</div></div>';
             html += create_list(obj);
             $('.dir-list').html(html);
+
+            if($('.my-dir-list').next('ul').children('li').length > 0) $('.my-dir-list').children('.down-btn').addClass('drop-down');
 
             if($.cookie('currDir') && $.cookie('currGroup')){
                 var dir_id = $.cookie('currDir');
@@ -378,7 +380,8 @@ function ajax_show_note(rec_id){
         success:function(res){
             var obj = res.result;
             if(!obj) return false;
-            $('.note-detail .note-name').val(obj.name).attr('prevalue',obj.name).attr('group-id',obj.group_id).attr('data-id',obj.rec_id);
+            $('.note-detail .note-name').val(obj.name);
+            $('.title-wrap').attr('prevalue',obj.name).attr('group-id',obj.group_id).attr('data-id',obj.rec_id);
             $('.note-detail .note-view').html(obj.content).attr('precontent',obj.md5);
             $('.detail-container').removeClass('loading').children().fadeIn('fast');
         },
@@ -388,8 +391,8 @@ function ajax_show_note(rec_id){
 //保存笔记
 function save_note(flag){
     var name = $('.note-name').val();
-    var rec_id = $('.note-name').data('id');
-    var group_id = $('.note-name').attr('group-id');
+    var rec_id = $('.title-wrap').attr('data-id');
+    var group_id = $('.title-wrap').attr('group-id');
     var content = $('#wangDemo').html();
     var precont = $('#wangDemo').attr('precontent');
     if(name == '') return false;
@@ -401,7 +404,7 @@ function save_note(flag){
         success:function(obj){
             if(!flag && obj.status == 'succ') prompt_msg('success','自动保存成功');
             if(flag && obj.status == 'succ') prompt_msg('success',obj.msg);
-            if(flag && obj.status == 'error'){
+            if(obj.status == 'error'){
                 prompt_msg('error',obj.msg);
                 return false;
             }
@@ -415,6 +418,7 @@ function save_note(flag){
 //拖放笔记
 function drap_note(curObj,ui){
     var dragId = ui.draggable.data('id');
+    var cur_group = ui.draggable.attr('group-id');
     var parent_id = $('.item-list').attr('parent-id');
     var curr_dir_id = curObj.data('id');
     var groupId = curObj.attr('group-id');
@@ -425,7 +429,7 @@ function drap_note(curObj,ui){
     no_item_html();
     $.ajax({
         url:  '/dir/update_drap_note',
-        data:{'rec_id':dragId , 'dir_id':curr_dir_id,'group_id':groupId},
+        data:{'rec_id':dragId , 'dir_id':curr_dir_id,'group_id':groupId,'cur_group':cur_group},
         type: "POST",
         dataType:'json',
         success:function(res){
@@ -446,12 +450,13 @@ function update_dir_list(curObj,parObj,cur_group){
     var class_id = parseInt(parObj.attr('class-id'))+1;
     var parentName = parObj.children('.name').eq(0).text();
     curObj.attr('class-id',class_id).attr('group-id',group_id);
-    var cur_item = [curObj.data('id'),class_id,parent_id,curObj.children('.name').eq(0).text(),group_id];
+    var cur_dir = curObj.data('id');
+    var cur_item = [cur_dir,class_id,parent_id,curObj.children('.name').eq(0).text(),group_id];
     var list = get_dir_attr(curObj);
     list.push(cur_item);
     $.ajax({
         url:  '/dir/update_drap_dir',
-        data:{'list':list,'parent_id':parent_id,'group_id':group_id,'cur_group':cur_group,'parent_name':parentName,'cur_name':objName},
+        data:{'list':list,'cur_dir':cur_dir,'parent_id':parent_id,'group_id':group_id,'cur_group':cur_group,'parent_name':parentName,'cur_name':objName},
         type: "POST",
         dataType:'json',
         success:function(res){
@@ -498,10 +503,7 @@ function ajax_delete_btn(url,ids,delObj,groupId){
                 }
                 change_version(groupId);
             }
-            if($('.my-trash').hasClass('curr')){
-                $('.item-wrap .item-dir').append(delObj.prop("outerHTML"));
-                $('.item-wrap .rightbtn').addClass('li-trash');
-            }
+            if($('.my-trash').hasClass('curr')) get_item_list();
             delObj.remove();
             set_item_num();
             ele_draggable();
@@ -537,9 +539,10 @@ function ajax_delete_group(group_id){
 //恢复回收站
 function ajax_trash_btn(url,ids,delObj,group_id){
     var name = delObj.children('div').children('.name').eq(0).text();
+    var cur_dir = delObj.children('div').data('id');
     $.ajax({
         url:  url,
-        data:{'id':ids,'group_id':group_id,'name':name},
+        data:{'id':ids,'group_id':group_id,'name':name,'cur_dir':cur_dir},
         type: "POST",
         dataType:'json',
         success:function(res){
@@ -568,15 +571,17 @@ function ajax_trash_btn(url,ids,delObj,group_id){
                 change_version(group_id);
             }
             trash_change(delObj,ids,data.type);
+            ele_draggable();
         },
         error:function(e){}
     });
 }
 //回收站彻底删除
 function ajax_trash_delete(url,ids,delObj){
+    var group_id = delObj.children('div').attr('group-id');
     $.ajax({
         url:  url,
-        data:{'id':ids},
+        data:{'id':ids,'group_id':group_id},
         type: "POST",
         dataType:'json',
         success:function(res){
@@ -601,7 +606,7 @@ function ajax_trash_all(){
                 ajax_error(res);
                 return false;
             }
-            if($('.sidebar-trash').hasClass('curr')){
+            if($('.my-trash').hasClass('curr')){
                 $('.item-wrap .scroller-container ul').html('');
                 set_item_num();
                 no_item_html();
@@ -743,7 +748,7 @@ function invite_agree_refuse(group_id,invite){
             if(invite == 1){
                 prompt_msg('success','你已经拒绝了该邀请');
             }else if(invite == 2){
-                prompt_msg('success','同意邀请，可在我的协作里查看');
+                prompt_msg('success','同意邀请，可在我的协作组里查看');
                 group_list();
             }
             if($('.invite-item').length == 0) $('.my-invite-list').html('');

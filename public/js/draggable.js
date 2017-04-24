@@ -4,13 +4,12 @@ function ele_draggable(){
         scroll: false,
         appendTo: "body",
         distance:10,
-        cancel: "i.right-menu,.li-group,.sidebar-title,.rename-input",
+        cancel: "i.right-menu,.li-group,.sidebar-title,.rename-input,.li-trash",
         cursorAt: { top: 10, left: 10},
         helper: function( e ) {
             return $( "<img class='ui-widget-header' src='/img/drap_dir.png' />" );
         },
         start: function() {
-            if($(this).hasClass('my-dir-list li-group')) return false;
             $(this).addClass('obj-drap');
         },
         stop: function() {
@@ -79,13 +78,22 @@ function ele_draggable(){
 
     //目录drop
     $( "li .li-dir , .my-dir-list" ).droppable({
-        accept: ".rightbtn",
+        accept: function(e) {
+            if(e.hasClass("rightbtn") && !e.hasClass("li-trash")){
+                return true;
+            }
+        },
+    //    accept: ".rightbtn",
         hoverClass: "cur-drap",
         drop: function( event, ui ) {
             if($(this).hasClass('li-trash')) return false;
+            var obj = ui.draggable;
+            if(obj.attr('group-id') > 0 && obj.attr('group-id') != $(this).attr('group-id')){
+                prompt_msg('error','协作内的文件只能在协作组内拖动');
+                return false;
+            }
             $('.ui-widget-header').remove();
             $('.obj-drap').removeClass('obj-drap');
-            var obj = ui.draggable;
             if(obj.hasClass('li-dir')){
                 drap_dir($(this),ui);
             }else if(obj.hasClass('li-note')){
@@ -194,6 +202,7 @@ function get_dir_attr(obj){
     var parent_id = obj.data('id');
     var group_id = obj.attr('group-id');
     var class_id = parseInt(obj.attr('class-id'))+1;
+
     obj.next('ul').children('li').each(function(){
         $(this).attr('class-id',class_id);
         item.push([$(this).children('.li-dir').data('id'),class_id,parent_id,$(this).children('.li-dir').children('.name').text(),group_id]);

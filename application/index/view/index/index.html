@@ -77,7 +77,7 @@
             <div class="detail-container">
                 <div class="note-detail">
                     <div class="title-wrap">
-                        <input type="text" prevalue="" group-id="0" data-id="0" class="note-name" />
+                        <input type="text" class="note-name" />
                         <button class="save btn btn-primary">保存</button>
                     </div>
                     <div class="note-scroller-wrap note-view" id="wangDemo"></div>
@@ -340,9 +340,9 @@
 
     $("body").on("blur", '.title-wrap .note-name', function(e){
         var name = $.trim($('.title-wrap .note-name').val());
-        var rec_id = $('.title-wrap .note-name').data('id');
-        var group_id = $('.title-wrap .note-name').attr('group-id');
-        var prename = $('.title-wrap .note-name').attr('prevalue');
+        var rec_id = $('.title-wrap').attr('data-id');
+        var group_id = $('.title-wrap').attr('group-id');
+        var prename = $('.title-wrap').attr('prevalue');
         if(name == prename) return false;
         ajax_update_name('/dir/update_note_name',name,rec_id,prename,group_id);
     })
