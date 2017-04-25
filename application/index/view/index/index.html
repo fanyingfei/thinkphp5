@@ -2,11 +2,11 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <link rel="stylesheet" type="text/css" href="/wangEditor/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="/wangEditor/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/wangEditor/common.css">
-    <link rel="stylesheet" type="text/css" href="/wangEditor/index.css">
-    <link rel="stylesheet" type="text/css" href="/wangEditor/wangEditor.min.css">
+    <link rel="stylesheet" type="text/css" href="/editor/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/editor/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/editor/common.css">
+    <link rel="stylesheet" type="text/css" href="/editor/wangCommon.css">
+    <link rel="stylesheet" type="text/css" href="/editor/wangEditor.min.css">
     <link rel="stylesheet" href="/css/common.css"/>
     <title>私人笔记本</title>
 </head>
@@ -92,16 +92,17 @@
     <img id="drop-note" src="/img/drap_note.png" />
 </div>
 </body>
-<script type="text/javascript" src="/wangEditor/jquery-1.10.2.min.js"></script>
-<script type="text/javascript" src='/wangEditor/bootstrap.min.js'></script>
-<script type="text/javascript" src='/wangEditor/wangEditor.min.js'></script>
-<script type="text/javascript" src="/wangEditor/index.js"></script>
+<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src='/editor/bootstrap.min.js'></script>
+<script type="text/javascript" src='/editor/wangEditor.min.js'></script>
+<script type="text/javascript" src="/editor/highlight.min.js"></script>
+<script type="text/javascript" src="/editor/wangStart.js"></script>
 <script type="text/javascript" src="/js/jquery.cookie.js"></script>
 <script type="text/javascript" src="/js/jquery.ui.js"></script>
 <script type="text/javascript" src="/js/mouseevent.js"></script>
 <script type="text/javascript" src="/js/rightmenu.js"></script>
 <script type="text/javascript" src="/js/draggable.js"></script>
-<script type="text/javascript" src="/js/ajax.request.js"></script>
+<script type="text/javascript" src="/js/ajax.transfer.js"></script>
 <script type="text/javascript" src="/js/jquery.md5.js"></script>
 <script type="text/javascript">
 
@@ -412,7 +413,6 @@
         get_item_list();
         show_note();
     })
-
 
 </script>
 </html>

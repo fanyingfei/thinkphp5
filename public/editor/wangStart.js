@@ -2,13 +2,13 @@ $(function (){
    // wangEditor.config.mapAk = 'TVhjYjq1ICT2qqL5LdS8mwas';
     var editor = new wangEditor('wangDemo');
 
-    editor.config.uploadImgUrl = '/upload.php';
+    editor.config.uploadImgUrl = '/dir/note_save_img';
 
     // 表情
     editor.config.emotions = {
         'default': {
             title: '默认',
-            data: '/wangEditor/emotions.data'
+            data: '/editor/emotions.data'
         },
         'weibo': {
             title: '微博表情',

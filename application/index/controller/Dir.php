@@ -6,6 +6,7 @@ use think\Request;
 use think\Controller;
 use think\View;
 use think\Session;
+use upload\MyUpload;
 
 class Dir extends Controller
 {
@@ -654,6 +655,26 @@ class Dir extends Controller
             $item['time'] = date('Y-m-d',$item['c_time']);
         }
         splash('succ','搜索结果',$list);
+    }
+
+    public function note_save_img(){
+        $uid = $this->uid;
+        if(!empty($_FILES["wangEditorH5File"])) $file= "wangEditorH5File";
+        if(!empty($_FILES["wangEditorDragFile"])) $file= "wangEditorDragFile";
+        if(!empty($_FILES["wangEditorPasteFile"])) $file= "wangEditorPasteFile";
+
+        $type = array('jpg', 'jpeg', 'png', 'gif');
+        $path = sprintf('%s/%s/%s/', date('Y'), date('m'), date('d'));
+
+        $upload = new MyUpload($file, 0, $type);
+        //获取上传信息
+        $info = $upload->getUploadFileInfo();
+        $fileName = $uid . time() . rand(1000, 9999) . '.' . $info['suffix'];
+        $fullName = $path . $fileName;
+        $path = rtrim('upload', DIRECTORY_SEPARATOR) . '/' . $fullName;
+        $success = $upload->save($path);
+        if($success) echo '/'.$path;
+        else echo '/img/img_error.jpg';
     }
 
     public function  get_group_log(){

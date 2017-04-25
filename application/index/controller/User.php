@@ -7,9 +7,18 @@ use think\Controller;
 use think\View;
 use think\Session;
 use think\Cookie;
+use upload\MyUpload;
+use upload\MyCrop;
 
 class User extends Controller
 {
+    private $uid;
+
+    public function __construct() {
+        parent::__construct();
+        $this->uid = Session::get('uid');
+    }
+
     public function register(){
         $time = time();
         $request = Request::instance();
@@ -89,6 +98,50 @@ class User extends Controller
         if(empty($uid)) splash('error','nologin');
         $res = Db::table('user')->where('uid',$uid)->find();
         splash('succ','获取用户信息功能',$res);
+    }
+
+    public function avatar_upload(){
+        $uid = $this->uid;
+        $type = array('jpg', 'jpeg', 'png', 'gif');
+        $path = sprintf('%s/%s/%s/', date('Y'), date('m'), date('d'));
+
+        $upload = new MyUpload('avatar', 0, $type);
+        //获取上传信息
+        $info = $upload->getUploadFileInfo();
+        $fileName = $uid . time() . rand(1000, 9999) . '.' . $info['suffix'];
+        $fullName = $path . $fileName;
+        $path = rtrim('upload', DIRECTORY_SEPARATOR) . '/' . $fullName;
+        $success = $upload->save($path);
+        $width = 0;
+        $height = 0;
+        if($success) {
+            $path = '/'.$path;
+            $attr = getimagesize($path);
+            $width = $attr[0];
+            $height = $attr[1];
+        }
+        $msg = $success ? '上传成功' : '上传失败';
+        echo json_encode(array('result' => $success, 'msg' => $msg, 'src' => $path, 'width' => $width, 'height' => $height, 'path' => $path));
+    }
+
+    public function avatar_crop(){
+        $uid = $this->uid;
+        $src = $_GET['src'];
+        $rs = explode(".",$src);
+        $ext = strtolower($rs[count($rs)-1]);
+        $type = array('jpg', 'jpeg', 'png');
+        $path = sprintf('%s/%s/%s/', date('Y'), date('m'), date('d'));
+
+        $fileName = $uid . time() . rand(1000, 9999) . '.' . $ext;
+        $fullName = $path . $fileName;
+        $path = rtrim('upload', DIRECTORY_SEPARATOR) . '/' . $fullName;
+
+        $crop = new MyCrop();
+        $crop->initialize($src, $path, $_GET['x'], $_GET['y'], 200, 200, $_GET['w'], $_GET['h']);
+        $success = $crop->generate_shot();
+
+        $msg = $success ? '裁剪成功' : '裁剪失败';
+        echo json_encode(array('result' => $success, 'msg' => $msg));
     }
 
 }
