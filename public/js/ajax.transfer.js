@@ -698,19 +698,44 @@ function search_note(){
 }
 
 function get_user_info(){
+    var data = '';
     $.ajax({
-        url:  '/user/user_info',
+        url:  '/user/get_user_info',
         data:{},
+        type: "POST",
+        async: false,
+        dataType:'json',
+        success:function(res){
+            if(res.status == 'error') data = '';
+           else data = res.result;
+        },
+        error:function(e){}
+    });
+    return data;
+}
+
+function update_user_info(){
+    var user_name = $.trim($('.f-user-name').val());
+    var sex = $('.f-sex:checked').val();
+    var year = $('.user-year option:selected').val();
+    var moon = $('.user-moon option:selected').val();
+    var sign = $('.f-sign').val();
+    $.ajax({
+        url:  '/user/update_user_info',
+        data:{'user_name':user_name,'sex':sex,'year':year,'moon':moon,'sign':sign},
         type: "POST",
         dataType:'json',
         success:function(res){
-            if(res.status == 'error') return false;
-            var obj = res.result;
-            $('.user-name').text(obj.user_name);
+            prompt_msg(res.status,res.msg);
+            if(res.status == 'succ'){
+                $(".dialog-close").trigger("click");
+                if(user_name != $('.user-warp .user-name').text()) $('.user-warp .user-name').text(user_name);
+            }
         },
         error:function(e){}
     });
 }
+
 //轮询
 function ajax_polling(){
     $.ajax({
@@ -876,6 +901,7 @@ function prompt_msg(status,msg,$flag){
     if($('.hint-container').length > 0){
         $('.hint-container').remove();
     }
+    if(status == 'succ') status = 'success';
     var html = '<div class="hint-container"><div class="widget-hint"><p class="'+status+'">' +
         '<span class="icon-hint"></span><span class="hint-msg">'+msg+'</span></p></div></div>';
 

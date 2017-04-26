@@ -65,6 +65,7 @@ class User extends Controller
         }else{
             Cookie::delete('user');
         }
+        Db::table('user')->where(['uid'=>$res['uid']])->update(['last_time'=>time()]);
         splash('succ','登录成功');
     }
 
@@ -93,11 +94,24 @@ class User extends Controller
         }
     }
 
-    public function user_info(){
+    public function get_user_info(){
         $uid = Session::get('uid');
         if(empty($uid)) splash('error','nologin');
-        $res = Db::table('user')->where('uid',$uid)->find();
+        $res = Db::table('user')->where('uid',$uid)->field('user_name,avatar,sex,year,moon,sign')->find();
+        if(empty($res['avatar'])) $res['avatar'] = '/img/avatar_default.jpg';
         splash('succ','获取用户信息功能',$res);
+    }
+
+    public function update_user_info(){
+        $uid = $this->uid;
+        $request = Request::instance();
+        $data['user_name'] = $request->param('user_name');
+        $data['sex'] = $request->param('sex');
+        $data['year'] = $request->param('year');
+        $data['moon'] = $request->param('moon');
+        $data['sign'] = $request->param('sign');
+        Db::table('user')->where(['uid'=>$uid])->update($data);
+        splash('succ','用户信息修改成功');
     }
 
     public function avatar_upload(){
@@ -110,38 +124,49 @@ class User extends Controller
         $info = $upload->getUploadFileInfo();
         $fileName = $uid . time() . rand(1000, 9999) . '.' . $info['suffix'];
         $fullName = $path . $fileName;
-        $path = rtrim('upload', DIRECTORY_SEPARATOR) . '/' . $fullName;
+        $path = rtrim('/upload', DIRECTORY_SEPARATOR) . '/' . $fullName;
         $success = $upload->save($path);
-        $width = 0;
-        $height = 0;
-        if($success) {
-            $path = '/'.$path;
-            $attr = getimagesize($path);
-            $width = $attr[0];
-            $height = $attr[1];
+        if($success) $attr = getimagesize(PUBLIC_PATH . $path);
+
+        $width = empty($attr[0]) ? 0 : $attr[0];
+        $height = empty($attr[1]) ? 0 : $attr[1];
+        if($success){
+            $data = ['src' => $path, 'width' => $width, 'height' => $height, 'path' => $path];
+            splash('succ','上传成功',$data);
+        }else{
+            splash('error','上传失败');
         }
         $msg = $success ? '上传成功' : '上传失败';
-        echo json_encode(array('result' => $success, 'msg' => $msg, 'src' => $path, 'width' => $width, 'height' => $height, 'path' => $path));
     }
 
     public function avatar_crop(){
         $uid = $this->uid;
-        $src = $_GET['src'];
+        $src = PUBLIC_PATH . $_REQUEST['src'];
         $rs = explode(".",$src);
         $ext = strtolower($rs[count($rs)-1]);
         $type = array('jpg', 'jpeg', 'png');
         $path = sprintf('%s/%s/%s/', date('Y'), date('m'), date('d'));
 
+        $attr = getimagesize($src);
+        $width = $attr[0];
+        $height = $attr[1];
+        $max_size = $width > $height ? $width : $height;
+        $rate = $max_size / 200; //算比例
+
         $fileName = $uid . time() . rand(1000, 9999) . '.' . $ext;
         $fullName = $path . $fileName;
-        $path = rtrim('upload', DIRECTORY_SEPARATOR) . '/' . $fullName;
+        $path = rtrim('/upload', DIRECTORY_SEPARATOR) . '/' . $fullName;
 
         $crop = new MyCrop();
-        $crop->initialize($src, $path, $_GET['x'], $_GET['y'], 200, 200, $_GET['w'], $_GET['h']);
+        $crop->initialize($src, PUBLIC_PATH . $path, $_GET['x']*$rate, $_GET['y']*$rate, 120, 120, $_GET['w']*$rate, $_GET['h']*$rate);
         $success = $crop->generate_shot();
-
-        $msg = $success ? '裁剪成功' : '裁剪失败';
-        echo json_encode(array('result' => $success, 'msg' => $msg));
+        if($success){
+            Db::table('user')->where(['uid'=>$uid])->update(['avatar'=>$path]);
+            @unlink($src);
+            splash('succ','裁剪成功',$path);
+        }else{
+            splash('error','裁剪失败');
+        }
     }
 
 }

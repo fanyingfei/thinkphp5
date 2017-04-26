@@ -199,6 +199,10 @@ $("body").on("click", '.delete', function(){
         var url = '/dir/delete_note';
         var resObj = $(".li-note[data-id="+id+"]").parent('li');
         ajax_delete_btn(url,id,resObj,groupId);
+    }else if(type == 'group'){
+        var url = '/dir/delete_group';
+        var resObj = $("li .li-group[group-id="+groupId+"]").parent('li');
+        ajax_delete_btn(url,id,resObj,groupId);
     }
 });
 //垃圾箱恢复
@@ -378,7 +382,7 @@ function get_menu_html(obj,e){
 
     var html = '<ul class="dropdown-menu dir-right-menu" role="menu" dirNote = "'+dirNote+'" ' +
         'type="'+type+'" data-id="'+dir_id+'" group-id="'+group_id+'" class-id="'+class_id+'">';
-    if(type == 'dir' || type == 'note' || type == 'group'){
+    if(type == 'dir' || type == 'note'){
         html += '<li class="move-up">上移</li>';
         html += '<li class="move-down">下移</li>';
         html += '<li class="delete">删除</li>';
@@ -396,8 +400,10 @@ function get_menu_html(obj,e){
     }
     if(type == 'dir' || type == 'group' || type == 'sidebar-dir'){
         if(type == 'group'){
+            html += '<li class="rename">重命名</li>';
+            html += '<li class="delete">退出协作</li>';
             html += '<li class="invite-group">邀请协作</li>';
-            html += '<li class="history-log">历史记录</li>';
+            html += '<li class="li-divider history-log">历史记录</li>';
         }
         html += '<li class="right-create-note">新建笔记</li>';
         html += '<li class="right-create-dir">新建文件夹</li>';

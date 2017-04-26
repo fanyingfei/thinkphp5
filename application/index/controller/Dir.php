@@ -671,9 +671,9 @@ class Dir extends Controller
         $info = $upload->getUploadFileInfo();
         $fileName = $uid . time() . rand(1000, 9999) . '.' . $info['suffix'];
         $fullName = $path . $fileName;
-        $path = rtrim('upload', DIRECTORY_SEPARATOR) . '/' . $fullName;
+        $path = rtrim('/upload', DIRECTORY_SEPARATOR) . '/' . $fullName;
         $success = $upload->save($path);
-        if($success) echo '/'.$path;
+        if($success) echo $path;
         else echo '/img/img_error.jpg';
     }
 

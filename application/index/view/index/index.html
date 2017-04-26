@@ -7,7 +7,8 @@
     <link rel="stylesheet" type="text/css" href="/editor/common.css">
     <link rel="stylesheet" type="text/css" href="/editor/wangCommon.css">
     <link rel="stylesheet" type="text/css" href="/editor/wangEditor.min.css">
-    <link rel="stylesheet" href="/css/common.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/upload.jcrop.css">
+    <link rel="stylesheet" type="text/css" href="/css/common.css">
     <title>私人笔记本</title>
 </head>
 <body>
@@ -16,13 +17,16 @@
     <div class="top-banner">
         <div class="top-left"></div>
         <div class="top-right">
-            <span class="user-name"></span>
+            <div class="user-warp">
+                <img class="user-avatar" src="" onerror="javascript:this.src='/img/avatar_default.jpg';" />
+                <span class="user-name"></span>
+            </div>
         </div>
     </div>
     <div class="main-container">
         <div class="sidebar">
             <div class="dir-hd">
-                <div class="create-dir">新建目录</div>
+                <div class="create-dir">新建文件夹</div>
                 <div class="create-note">新建笔记</div>
             </div>
             <div class="dir-warp">
@@ -77,7 +81,7 @@
             <div class="detail-container">
                 <div class="note-detail">
                     <div class="title-wrap">
-                        <input type="text" class="note-name" />
+                        <div><input type="text" class="note-name" /></div>
                         <button class="save btn btn-primary">保存</button>
                     </div>
                     <div class="note-scroller-wrap note-view" id="wangDemo"></div>
@@ -104,6 +108,11 @@
 <script type="text/javascript" src="/js/draggable.js"></script>
 <script type="text/javascript" src="/js/ajax.transfer.js"></script>
 <script type="text/javascript" src="/js/jquery.md5.js"></script>
+<script type="text/javascript" src="/js/ajaxfileupload.js"></script>
+<script type="text/javascript" src="/js/jquery.jcrop.js"></script>
+<script type="text/javascript" src="/js/avatarCutter.js"></script>
+<script type="text/javascript" src="/js/avatar.jcrop.js"></script>
+<script type="text/javascript" src="/js/jquery.listen.js"></script>
 <script type="text/javascript">
 
     $(document).ready(function(){
@@ -113,7 +122,7 @@
     });
 
     function start_init(){
-        get_user_info();
+        init_user_info();
         //初始得到目录列表
         var sel_col = $.cookie('setting_col');
         var sel_sort = $.cookie('setting_sort');
@@ -132,6 +141,13 @@
             $('.main').removeClass('none');
             $('.loading-open').remove();
         }
+    }
+
+    function init_user_info(){
+        var data = get_user_info();
+        if(data== '') return false;
+        $('.user-warp .user-name').text(data.user_name);
+        $('.user-warp .user-avatar').attr('src',data.avatar);
     }
     //监听创建目录
     $("body").on("click", '.create-dir', function(){
@@ -174,17 +190,6 @@
         return html;
     }
 
-    //监听创建笔记
-    $("body").on("click", '.create-note', function(){
-        if($(".dir-warp .curr").length > 0){
-            var dir_id = $('.curr').data('id');
-            var group_id = $('.curr').attr('group-id');
-        }else{
-            var dir_id = $('.dir-warp .li-dir:first-child').data('id');
-        }
-        create_note(dir_id,group_id);
-    })
-
     //得到富文本编辑器的高度
     function get_wangDemo_height(){
         var height = $('.note-detail').height() - $(".title-wrap").outerHeight() - 40;
@@ -222,53 +227,6 @@
         }
         $.cookie('currNote', rec_id , { path : '/' });
     }
-
-    //监听打开笔记
-    $("body").on("click", '.li-note', function(){
-        $('.li-note.curr').removeClass('curr');
-        var rec_id = $(this).data('id');
-        $(".li-note[data-id="+rec_id+"]").addClass('curr');
-        show_note();
-    })
-
-    var clickTime ; //取消双击时触发单机事件
-    //监听打开目录
-    $("body").on("click", '.li-dir', function(){
-        $('.search-input').val('');
-        var clickObj = $(this);
-        var dir_id = clickObj.data('id');
-        var group_id = clickObj.attr('group-id');
-        if(clickObj.hasClass('li-trash')) return false;
-        if(clickObj.parent().hasClass('ui-sortable-helper')) return false;//拖放排序时取消单击事件
-        clearTimeout(clickTime);
-        clickTime = setTimeout(function() {
-            $('.dir-warp .curr').removeClass('curr');
-            if(dir_id < 0){
-                clickObj.addClass('curr');
-            }else{
-                var curObj = $(".dir-warp .li-dir[data-id="+dir_id+"][group-id="+group_id+"]");
-                var downBtn = curObj.parent('li').parent('ul').prev('div').children('.down-btn');
-                curObj.addClass('curr');
-                curObj.parents('ul').slideDown('fast');
-                if(!downBtn.hasClass('pack-up')) downBtn.addClass('pack-up');
-            }
-            get_item_list();
-            show_note();
-        },10);
-    })
-
-    //双击目录同样触发下单事件
-    $("body").on("dblclick", '.li-dir', function(){
-        clearTimeout(clickTime);
-        open_dir($(this).children('.down-btn'));
-        return false;
-    })
-
-    //监听目录下拉事件
-    $("body").on("click", '.drop-down', function(){
-        open_dir($(this));
-        return false;
-    })
 
     //打开下拉目录的方法
     function open_dir(obj){
@@ -319,100 +277,6 @@
         $('.title-wrap input').val('');
         $('.note-detail .note-view').html('');
     }
-
-    //焦点离开笔记时触发，调用保存方法
-    $("body").on("blur", '.note-detail', function(e){
-        var content = $('#wangDemo').html();
-        if($.md5(content) == $('#wangDemo').attr('precontent')) return false;
-        save_note(false); //false自动保存，不要弹框提示
-    })
-
-    //保存笔记，调用保存方法
-    $("body").on("click", '.save', function(){
-        var name = $('.note-name').val();
-        if(name == '') alert('标题不能为空');
-        save_note(true);//true手动保存，需弹框提示
-    })
-
-    //笔记标题改变时同步中间的笔记名
-    $('.title-wrap .note-name').bind('input propertychange', function() {
-        $('.li-note.curr .name').text($(this).val());
-    });
-
-    $("body").on("blur", '.title-wrap .note-name', function(e){
-        var name = $.trim($('.title-wrap .note-name').val());
-        var rec_id = $('.title-wrap').attr('data-id');
-        var group_id = $('.title-wrap').attr('group-id');
-        var prename = $('.title-wrap').attr('prevalue');
-        if(name == prename) return false;
-        ajax_update_name('/dir/update_note_name',name,rec_id,prename,group_id);
-    })
-
-    //点击搜索图标
-    $("body").on("click", '.search-icon', function(){
-        search_note();
-    })
-    //回车搜索
-    $("body").on("keydown", '.search-input', function(e){
-        if(e.which == 13) search_note();
-    });
-
-    //回到上一级
-    $("body").on("click", '.item-back', function(){
-        if($(this).hasClass('disabled')) return false;
-        var curObj = $('.dir-warp .curr');
-        var parObj = curObj.parent('li').parent('ul').prev('div');
-        var dir_id = curObj.data('id');
-        var group_id = curObj.attr('group-id');
-
-        curObj.removeClass('curr');
-        parObj.addClass('curr');
-
-        curObj.parents('ul').slideDown('fast').prev('div').children('.down-btn').addClass('pack-up');
-        get_item_list();
-        show_note();
-    })
-
-    //item设置
-    $("body").on("click", '.setting-icon', function(){
-        hide_dropdown_menu('setting');
-        if($('.item-setting').hasClass('disabled')) return false;
-        if($('.setting-menu').is(":hidden")){
-            $('.setting-menu').show();
-        }else{
-            $('.setting-menu').hide();
-        }
-        return false;
-    })
-
-    $("body").on("click", '.setting-sel', function(){
-        $('.setting-sel').removeClass('selected');
-        $('.item-note .no-item').remove();
-        $(this).addClass('selected');
-        $.cookie('setting_value',$(this).data('value'));
-        get_item_list();
-        show_note();
-    })
-
-    $("body").on("click", '.setting-sort', function(){
-        if($(this).hasClass('desc')){
-            var order_by = 'asc';
-            $('.setting-sort').removeClass('selected desc asc');
-            $(this).addClass(order_by+' selected');
-        }else if($(this).hasClass('asc')){
-            var order_by = 'desc';
-            $('.setting-sort').removeClass('selected desc asc');
-            $(this).addClass(order_by+' selected');
-        }else{
-            var order_by = 'desc';
-            $('.setting-sort').removeClass('selected desc asc');
-            $(this).addClass(order_by+' selected');
-        }
-        $.cookie('setting_col',$(this).data('col'));
-        $.cookie('setting_sort',order_by);
-        get_item_list();
-        show_note();
-    })
 
 </script>
 </html>

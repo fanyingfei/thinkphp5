@@ -39,7 +39,7 @@ function ele_draggable(){
                 var parentName = $('.my-group-list').children('.name').text();
             }else if(obj.hasClass('li-dir')){
                 var url = '/dir/update_dir_sort';
-                var comObj = $(".dir-list .li-dir[data-id="+objId+"]");
+                var comObj = $(".dir-list .li-dir[data-id="+dirId+"]");
                 var parentName = comObj.parent('li').parent('ul').prev('div').children('.name').text();
             }else if(obj.hasClass('li-note')){
                 var url = '/dir/update_note_sort';
@@ -72,6 +72,7 @@ function ele_draggable(){
     //弹框可拖动位置
     $('.dialog-warp').draggable({
         accept: ".dialog-header",
+        cancel: ".dialog-body",
         containment:'.dialog-mask',
         scroll: false
     });
