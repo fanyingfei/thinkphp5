@@ -81,5 +81,5 @@ $(function (){
          });
    // editor.config.mapAk = 'TVhjYjq1ICT2qqL5LdS8mwas';
     editor.create();
-	
+
 });

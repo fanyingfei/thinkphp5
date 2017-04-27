@@ -281,6 +281,7 @@ function create_update_name(obj){
         obj.children('.name').addClass('dir-rename');
     }
     obj.find('.right-menu').addClass('none');
+    obj.find('.item-time').addClass('none');
 }
 //阻击右键菜单的冒泡
 $("body").on("click", '.rename-input', function(e){
@@ -332,6 +333,7 @@ function rename_regain(){
     $('.item-rename').removeClass('item-rename');
     $('.dir-rename').removeClass('dir-rename');
     $('.right-menu').removeClass('none');
+    $('.item-time').removeClass('none');
 }
 
 function hide_dropdown_menu(menu){

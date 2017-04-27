@@ -16,7 +16,11 @@ class User extends Controller
 
     public function __construct() {
         parent::__construct();
+        $request = Request::instance();
+        $action = $request->action();
+        if(in_array($action,['register','login','sendHuYiSms'])) return false;
         $this->uid = Session::get('uid');
+        if(empty($this->uid )) splash('error','你还没有登陆');
     }
 
     public function register(){

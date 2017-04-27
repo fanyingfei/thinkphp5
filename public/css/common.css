@@ -15,7 +15,7 @@ ul{
     margin:0;
 }
 .none{
-    display: none;
+    display: none !important;
 }
 .detail-container .hint-container{
     top: 120px;
@@ -939,7 +939,7 @@ li .li-group:hover .item-time{
     text-align: center;
 }
 .user-info-dialog{
-    top:50%;
+    top:40%;
     left:50%;
     width:390px;
     height:380px;

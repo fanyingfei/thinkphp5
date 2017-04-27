@@ -7,6 +7,21 @@ $("body").on("click", '.create-note', function(){
         var dir_id = $('.dir-warp .li-dir:first-child').data('id');
     }
     create_note(dir_id,group_id);
+});
+
+//监听创建目录
+$("body").on("click", '.create-dir', function(){
+    if($(".dir-warp .curr").length > 0){
+        var parent_id = $('.dir-warp .curr').data('id');
+        var group_id = $('.dir-warp .curr').attr('group-id');
+        var class_id = parseInt($('.dir-warp .curr').attr('class-id')) + 1;
+    }else{
+        var parent_id = 0;
+        var class_id = 1;
+        var group_id = 0;
+    }
+
+    create_dir(parent_id,class_id,group_id);
 })
 
 //监听打开笔记
@@ -15,7 +30,7 @@ $("body").on("click", '.li-note', function(){
     var rec_id = $(this).data('id');
     $(".li-note[data-id="+rec_id+"]").addClass('curr');
     show_note();
-})
+});
 
 var clickTime ; //取消双击时触发单机事件
 //监听打开目录
@@ -24,6 +39,7 @@ $("body").on("click", '.li-dir', function(){
     var clickObj = $(this);
     var dir_id = clickObj.data('id');
     var group_id = clickObj.attr('group-id');
+    if(clickObj.hasClass('curr')) return false;
     if(clickObj.hasClass('li-trash')) return false;
     if(clickObj.parent().hasClass('ui-sortable-helper')) return false;//拖放排序时取消单击事件
     clearTimeout(clickTime);
@@ -41,35 +57,33 @@ $("body").on("click", '.li-dir', function(){
         get_item_list();
         show_note();
     },10);
-})
+});
 
 //双击目录同样触发下单事件
 $("body").on("dblclick", '.li-dir', function(){
     clearTimeout(clickTime);
-    open_dir($(this).children('.down-btn'));
+  //  open_dir($(this).children('.down-btn'));
     return false;
-})
+});
 
 //监听目录下拉事件
 $("body").on("click", '.drop-down', function(){
     open_dir($(this));
     return false;
-})
+});
 
-
-//焦点离开笔记时触发，调用保存方法
 $("body").on("blur", '.note-detail', function(e){
     var content = $('#wangDemo').html();
     if($.md5(content) == $('#wangDemo').attr('precontent')) return false;
     save_note(false); //false自动保存，不要弹框提示
-})
+});
 
 //保存笔记，调用保存方法
 $("body").on("click", '.save', function(){
     var name = $('.note-name').val();
     if(name == '') alert('标题不能为空');
     save_note(true);//true手动保存，需弹框提示
-})
+});
 
 //笔记标题改变时同步中间的笔记名
 $('.title-wrap .note-name').bind('input propertychange', function() {
@@ -83,17 +97,20 @@ $("body").on("blur", '.title-wrap .note-name', function(e){
     var prename = $('.title-wrap').attr('prevalue');
     if(name == prename) return false;
     ajax_update_name('/dir/update_note_name',name,rec_id,prename,group_id);
-})
+});
 
 //点击搜索图标
 $("body").on("click", '.search-icon', function(){
     search_note();
-})
+});
 //回车搜索
 $("body").on("keydown", '.search-input', function(e){
     if(e.which == 13) search_note();
 });
-
+//点击弹出的消息时
+$("body").on("click", '.hint-container', function(){
+    $(this).slideUp('fast').remove();
+});
 //回到上一级
 $("body").on("click", '.item-back', function(){
     if($(this).hasClass('disabled')) return false;
@@ -108,7 +125,7 @@ $("body").on("click", '.item-back', function(){
     curObj.parents('ul').slideDown('fast').prev('div').children('.down-btn').addClass('pack-up');
     get_item_list();
     show_note();
-})
+});
 
 //item设置
 $("body").on("click", '.setting-icon', function(){
@@ -120,7 +137,7 @@ $("body").on("click", '.setting-icon', function(){
         $('.setting-menu').hide();
     }
     return false;
-})
+});
 
 $("body").on("click", '.setting-sel', function(){
     $('.setting-sel').removeClass('selected');
@@ -129,7 +146,7 @@ $("body").on("click", '.setting-sel', function(){
     $.cookie('setting_value',$(this).data('value'));
     get_item_list();
     show_note();
-})
+});
 
 $("body").on("click", '.setting-sort', function(){
     if($(this).hasClass('desc')){
@@ -149,7 +166,7 @@ $("body").on("click", '.setting-sort', function(){
     $.cookie('setting_sort',order_by);
     get_item_list();
     show_note();
-})
+});
 
 $("body").on("click", '.update-user-info', function(){
     var user_name = $.trim($('.f-user-name').val());
@@ -158,7 +175,36 @@ $("body").on("click", '.update-user-info', function(){
         return false;
     }
     update_user_info();
-})
+});
+
+
+//浏览器大小改变的同时改变编辑器的高度
+window.onresize = function(){
+    get_wangDemo_height();
+    change_scroller_height($('.dir-warp .scroller-container'));
+    change_scroller_height($('.item-wrap .scroller-container'));
+}
+
+
+//关闭或者刷新浏览器时触发
+window.onbeforeunload = function(){
+    if($('.dir-warp .li-dir.curr').length > 0){
+        var dir_id = $('.dir-warp .li-dir.curr').data('id');
+        var group_id = $('.dir-warp .li-dir.curr').attr('group-id');
+    }else{
+        var dir_id = 0;
+        var group_id = 0;
+    }
+    $.cookie('currDir', dir_id , { path : '/' });
+    $.cookie('currGroup', group_id , { path : '/' });
+
+    if($('.item-note .li-note.curr').length > 0){
+        var rec_id = $('.item-note .li-note.curr').data('id');
+    }else{
+        var rec_id = 0;
+    }
+    $.cookie('currNote', rec_id , { path : '/' });
+}
 
 $("body").on("click", '.user-avatar', function(){
     var html ='<div class="dialog-mask"></div>'+
@@ -178,7 +224,7 @@ $("body").on("click", '.user-avatar', function(){
         '</div></div></div>';
     $('body').append(html);
     ele_draggable();
-})
+});
 
 $("body").on("click", '.user-name', function(){
     var mydate = new Date();
@@ -211,4 +257,4 @@ $("body").on("click", '.user-name', function(){
     $('.user-year option[value='+data.year+']').attr("selected",true);
     $('.user-moon option[value='+data.moon+']').attr("selected",true);
     ele_draggable();
-})
+});

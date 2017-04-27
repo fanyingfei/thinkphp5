@@ -21,7 +21,7 @@ function ele_draggable(){
     $( ".sortable").sortable({
         axis: "y",
         revert: true,
-        containment:'parent',
+        containment:'.scroller-container',
         sort:function(){
             $(this).find('ul').hide().end().find('.pack-up').removeClass('pack-up');
             var sortableHeight = $(this).children('li').eq(0).children('div').outerHeight();
@@ -35,7 +35,6 @@ function ele_draggable(){
 
             if(obj.hasClass('li-group')){
                 var url = '/dir/update_group_sort';
-                var comObj = obj;
                 var parentName = $('.my-group-list').children('.name').text();
             }else if(obj.hasClass('li-dir')){
                 var url = '/dir/update_dir_sort';
@@ -43,12 +42,11 @@ function ele_draggable(){
                 var parentName = comObj.parent('li').parent('ul').prev('div').children('.name').text();
             }else if(obj.hasClass('li-note')){
                 var url = '/dir/update_note_sort';
-                var comObj = obj;
                 var parentName = $('.dir-warp .curr').children('.name').text();
             }else{
                 return false;
             }
-            update_sort(comObj,url,parentName);
+            update_sort(obj,url,parentName);
         }
     });
 
