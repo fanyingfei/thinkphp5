@@ -36,6 +36,7 @@ var clickTime ; //取消双击时触发单机事件
 //监听打开目录
 $("body").on("click", '.li-dir', function(){
     $('.search-input').val('');
+    hide_dropdown_menu();
     var clickObj = $(this);
     var dir_id = clickObj.data('id');
     var group_id = clickObj.attr('group-id');

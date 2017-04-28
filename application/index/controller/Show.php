@@ -67,19 +67,20 @@ class Show extends Controller
 
     public function note_item($rec_id){
         $request = Request::instance();
-        $res = Db::table('note')->where(['rec_id'=>$rec_id])->field('uid,name,content,view,comment,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->find();
-        if(empty($res)) $this->error('页面找不到了');
-        $user_info = Db::table('user')->where('uid',$res['uid'])->field('uid,user_name,avatar,sex,year,moon,sign')->find();
+        $detail = Db::table('note')->where(['rec_id'=>$rec_id])->field('uid,name,content,view,comment,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->find();
+        if(empty($detail)) $this->error('页面找不到了');
+
+        $user_info = Db::table('user')->where('uid',$detail['uid'])->field('uid,user_name,avatar,sex,year,moon,sign')->find();
         Db::table('note')->where('rec_id',$rec_id)->setInc('view');
 
         $uid = $user_info['uid'];
         $user_info['uid'] = $uid + USER_UID ;
 
         $res = Db::table('dir')->where(['uid'=>$uid,'group_id'=>0,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y/%m/%d") as time')->select();
-        $dir_list = $this->nesting($res);
+        $dir_list = nesting($res);
         $html = $this->create_list($dir_list,$user_info['uid']);
 
-        return $this->fetch('user/detail',['user'=>$user_info,'detail'=>$res,'dir_list'=>$html]);
+        return $this->fetch('user/detail',['user'=>$user_info,'detail'=>$detail,'dir_list'=>$html]);
     }
 
     public function note_search(){
