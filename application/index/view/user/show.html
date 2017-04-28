@@ -19,13 +19,13 @@
                 <p class="user-name">{$user.user_name}</p>
             </div>
             <div class="panel-head">文章分类</div>
-            <div class="dir-list"></div>
+            <div class="dir-list">{$dir_list}</div>
         </div>
     </div>
     <div class="main-right">
         <div class="list-note">
-            {if count($list) > 0}
-            {foreach name="list" item="one"}
+            {if count($note_list) > 0}
+            {foreach name="note_list" item="one"}
             <div class="list-item">
                 <div class="note-title">
                     <div class="title-warp"><a href="/details/{$one.rec_id}">{$one.name}</a></div>
@@ -42,7 +42,7 @@
             <div class="empty"><p>没有内容，去看看别的吧</p><p><img src="/img/sorry.jpg" /></p></div>
             {/if}
         </div>
-        <div class="page-pagination">{$list->render()}</div>
+        <div class="page-pagination">{$note_list->render()}</div>
     </div>
 </div>
 </body>

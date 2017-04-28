@@ -132,3 +132,27 @@ function random($length = 4) {
     }
     return $hash;
 }
+
+function nesting($res){
+    $max_class = 1;
+    $list = $data = [];
+    foreach($res as $item){
+        if($item['class_id'] > $max_class) $max_class = $item['class_id'];
+        $list[$item['dir_id']] = $item;
+    }
+
+    for($i=$max_class ; $i>1 ; $i--){
+        foreach($list as $key=>$row){
+            if($row['class_id'] != $i) continue;
+            if(empty($list[$row['parent_id']])) continue;
+            $list[$row['parent_id']]['child'][] = $row;
+            unset($list[$key]);
+        }
+    }
+
+    foreach($list as $one){
+        $data[] = $one;
+    }
+
+    return $data;
+}

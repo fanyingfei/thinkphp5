@@ -30,7 +30,7 @@ class Dir extends Controller
     {
         $uid = $this->uid;
         $res = Db::table('dir')->where(['uid'=>$uid,'group_id'=>0,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
-        $data = $this->nesting($res);
+        $data = nesting($res);
         $this->change_group_list($data);
         splash('succ','',$data);
     }
@@ -51,7 +51,7 @@ class Dir extends Controller
                 $group['dir_list'][] = $dir;
             }
             if(empty($group['dir_list'])) continue;
-            $group['dir_list'] = $this->nesting($group['dir_list']);
+            $group['dir_list'] = nesting($group['dir_list']);
             $this->change_group_list($group['dir_list']);
         }
 
@@ -67,7 +67,7 @@ class Dir extends Controller
 
         $dir_res = Db::table('dir')->where('group_id', $group_id)->where('is_delete',0)->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
 
-        $group_list['dir_list'] = $this->nesting($dir_res);
+        $group_list['dir_list'] = nesting($dir_res);
         splash('succ','',$group_list);
     }
 
@@ -145,7 +145,7 @@ class Dir extends Controller
         $group_id = $request->param('group_id');
 
         $dir_res = Db::table('dir')->where(['group_id'=>$group_id,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,group_id,class_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
-        $dir_res = $this->nesting($dir_res);
+        $dir_res = nesting($dir_res);
         $note_res = Db::table('note')->where(['group_id'=>$group_id,'dir_id'=>0,'is_delete'=>0])->order('rank desc')->order('rec_id desc')->field('rec_id,name,dir_id,group_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
         splash('succ','',['dir'=>$dir_res,'note'=>$note_res]);
     }
@@ -176,7 +176,7 @@ class Dir extends Controller
     public function trash_list(){
         $uid = $this->uid;
         $res = Db::table('dir')->where(['del_uid'=>$uid,'is_delete'=>1])->order('u_time asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(u_time, "%Y-%m-%d") as time')->select();
-        $dir_res = $this->nesting($res);
+        $dir_res = nesting($res);
         $note_res = Db::table('note')->where(['del_uid'=>$uid,'is_delete'=>1])->order('u_time desc')->field('rec_id,name,dir_id,group_id,FROM_UNIXTIME(u_time, "%Y-%m-%d") as time')->select();
 
         splash('succ','',['dir'=>$dir_res,'note'=>$note_res]);
@@ -689,31 +689,6 @@ class Dir extends Controller
         }
 
         splash('succ','历史记录',$log_list);
-    }
-
-
-    public function nesting($res){
-        $max_class = 1;
-        $list = $data = [];
-        foreach($res as $item){
-            if($item['class_id'] > $max_class) $max_class = $item['class_id'];
-            $list[$item['dir_id']] = $item;
-        }
-
-        for($i=$max_class ; $i>1 ; $i--){
-            foreach($list as $key=>$row){
-                if($row['class_id'] != $i) continue;
-                if(empty($list[$row['parent_id']])) continue;
-                $list[$row['parent_id']]['child'][] = $row;
-                unset($list[$key]);
-            }
-        }
-
-        foreach($list as $one){
-            $data[] = $one;
-        }
-
-        return $data;
     }
 
     //把parent_id,class_id不对的重置
