@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="/editor/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/editor/wangEditor.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/show.css">
+    <title>{$detail.name}</title>
+</head>
+<body>
+<div class="header">
+
+</div>
+<div class="main">
+    <div class="main-left">
+        <div class="panel-profile" data-id="{$user.uid}" dir-id="0">
+            <div class="panel-head">人个资料</div>
+            <div class="panel-body">
+                <img class="user-avatar" src="{$user.avatar}" onerror="javascript:this.src='/img/avatar_default.jpg';"/>
+                <p class="user-name">{$user.user_name}</p>
+            </div>
+            <div class="panel-head">文章分类</div>
+            <div class="dir-list"></div>
+        </div>
+    </div>
+    <div class="main-right">
+        <div class="note-detail">
+            <div class="note-title">
+                <div class="title-warp">
+                    <p class="note-name">{$detail.name}</p>
+                    <p class="note-manage">
+                        <span class="link-postdate">{$detail.time}</span>
+                        <span class="link-view" title="阅读次数">阅读({$detail.view})</span>
+                        <span class="link-comments" title="评论次数">评论({$detail.comment})</span>
+                    </p>
+                </div>
+            </div>
+            <div class="wangEditor-container">
+                <div class="note-content wangEditor-txt">{$detail.content}</div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/js/show.js"></script>
+</html>

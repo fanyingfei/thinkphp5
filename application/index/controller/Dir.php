@@ -463,7 +463,6 @@ class Dir extends Controller
     }
 
     public function note_item(){
-        $uid = $this->uid;
         $request = Request::instance();
         $rec_id = $request->param('rec_id');
         $res = Db::table('note')->where(['rec_id'=>$rec_id])->find();
@@ -556,7 +555,7 @@ class Dir extends Controller
         $name = trim($request->param('name'));
         $group_id = $request->param('group_id');
         $precont = $request->param('precont');
-        $content = $request->param('content');
+        $content = trim($request->param('content'));
         $md5cont = md5($content);
 
         if(empty($name)) splash('error','标题不能为空');
@@ -649,9 +648,7 @@ class Dir extends Controller
         $request = Request::instance();
         $search = trim($request->param('search'));
         $list = Db::table('note')->where(['uid'=>$uid,'is_delete'=>0])->where('name','like','%'.$search.'%')->order('rec_id desc')->field('rec_id,dir_id,group_id,name,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
-        foreach($list as &$item){
-            $item['time'] = date('Y-m-d',$item['c_time']);
-        }
+
         splash('succ','搜索结果',$list);
     }
 

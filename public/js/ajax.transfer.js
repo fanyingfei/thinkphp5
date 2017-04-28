@@ -18,7 +18,7 @@ function create_dir(parent_id,class_id,group_id){
                 ajax_error(res);
                 return false;
             }
-            var html = '<li>'+create_dir_html(res.result, 0)+'</li>';
+            var html = '<li>'+create_dir_html(res.result)+'</li>';
             var obj = $(".dir-warp .li-dir[data-id="+parent_id+"][group-id="+group_id+"]");
             if(obj.next('ul').length > 0) obj.next('ul').append(html);
             else obj.after('<ul>'+html+'</ul>');
@@ -321,7 +321,7 @@ function item_list_group(dir_id,group_id,col,sort){
             html = '<ul class="item-dir sortable">';
             if(setting == 'all') {
                 $.each(obj.dir, function (key, v) {
-                    html += '<li>' + create_dir_html(v, 0) + '</li>';
+                    html += '<li>' + create_dir_html(v) + '</li>';
                 })
             }
             html += '</ul><ul class="item-note sortable">';
@@ -349,7 +349,7 @@ function item_list_dir(dir_id,group_id,col,sort){
             html = '<ul class="item-dir sortable">';
             if(setting == 'all'){
                 $.each(obj.dir, function(key, v){
-                    html += '<li>'+create_dir_html(v,0)+'</li>';
+                    html += '<li>'+create_dir_html(v)+'</li>';
                 })
             }
             html += '</ul><ul class="item-note sortable">';

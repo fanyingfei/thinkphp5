@@ -34,9 +34,9 @@ function init_user_info(){
 
 
 //创建目录的HTML
-function create_dir_html(obj,is_parent){
+function create_dir_html(obj){
     var html = '<div class="li-dir rightbtn" group-id="'+obj.group_id+'" class-id="'+ obj.class_id+'" data-id="'+ obj.dir_id+'" >';
-    if(is_parent == 1) html += '<span class="down-btn drop-down"></span>';
+    if(obj.child) html += '<span class="down-btn drop-down"></span>';
     else html += '<span class="down-btn"></span>';
     html += '<i class="icon"></i><div class="name">'+obj.dir_name+'</div>';
     html += '<div class="item-time">'+obj.time+'</div><i class="right-menu"></i></div>';
@@ -89,11 +89,11 @@ function create_list(obj , type){
     var html = '';
     $.each(obj, function(key, v){
         if(v.child){
-            html += '<li>'+create_dir_html(v,1);
+            html += '<li>'+create_dir_html(v);
             html += create_list(v.child);
             html += '</li>';
         }else{
-            html += '<li>'+create_dir_html(v,0)+'</li>';
+            html += '<li>'+create_dir_html(v)+'</li>';
         }
     })
     if(type == 'item')  return '<ul class="item-dir">'+html+'</ul>';

@@ -7,19 +7,35 @@ use think\Controller;
 use think\View;
 use think\Session;
 
-class HomePage extends Controller
+class Show extends Controller
 {
     private $uid;
 
     public function __construct() {
         parent::__construct();
-        $this->uid = 1;
     }
 
-    public function dir_list()
-    {
-        $uid = $this->uid;
-        $res = Db::table('dir')->where(['uid'=>$uid,'group_id'=>0,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
+    public function index($uid){
+        $uid = $uid - USER_UID ;
+        $request = Request::instance();
+        $dir_id = $request->param('d');
+        $user_info = Db::table('user')->where('uid',$uid)->field('uid,user_name,avatar,sex,year,moon,sign')->find();
+        if(empty($user_info)) $this->error('页面找不到了');
+
+        $where = ['uid'=>$uid,'is_delete'=>0];
+        if(!empty($dir_id)) $where['dir_id'] = $dir_id;
+        $count = Db::table('note')->where($where)->count('rec_id');
+        $list = Db::table('note')->where($where)->order('rec_id desc')->field('rec_id,view,comment,name,dir_id,content,c_time')->paginate(10,$count,['var_page'=>'p']);
+
+        $user_info['uid'] = $user_info['uid'] + USER_UID ;
+        $data = ['user'=>$user_info,'count'=>$count,'list'=>$list,'dir_id'=>$dir_id];
+        return $this->fetch('user/show',$data);
+    }
+
+    public function dir_list(){
+        $request = Request::instance();
+        $uid = $request->param('uid') - USER_UID ;
+        $res = Db::table('dir')->where(['uid'=>$uid,'group_id'=>0,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y/%m/%d") as time')->select();
         $data = $this->nesting($res);
         splash('succ','',$data);
     }
@@ -75,12 +91,14 @@ class HomePage extends Controller
         splash('succ','',$note_res);
     }
 
-    public function note_item(){
-        $uid = $this->uid;
+    public function note_item($rec_id){
         $request = Request::instance();
-        $rec_id = $request->param('rec_id');
-        $res = Db::table('note')->where(['rec_id'=>$rec_id])->find();
-        splash('succ','',$res);
+        $res = Db::table('note')->where(['rec_id'=>$rec_id])->field('uid,name,content,view,comment,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->find();
+        if(empty($res)) $this->error('页面找不到了');
+        $user_info = Db::table('user')->where('uid',$res['uid'])->field('uid,user_name,avatar,sex,year,moon,sign')->find();
+        Db::table('note')->where('rec_id',$rec_id)->setInc('view');
+        $user_info['uid'] = $user_info['uid'] + USER_UID ;
+        return $this->fetch('user/detail',['user'=>$user_info,'detail'=>$res]);
     }
 
     public function note_search(){

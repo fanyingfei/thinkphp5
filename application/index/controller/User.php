@@ -99,8 +99,7 @@ class User extends Controller
     }
 
     public function get_user_info(){
-        $uid = Session::get('uid');
-        if(empty($uid)) splash('error','nologin');
+        $uid = $this->uid;
         $res = Db::table('user')->where('uid',$uid)->field('user_name,avatar,sex,year,moon,sign')->find();
         if(empty($res['avatar'])) $res['avatar'] = '/img/avatar_default.jpg';
         splash('succ','获取用户信息功能',$res);

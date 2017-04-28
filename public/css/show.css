@@ -1,0 +1,206 @@
+*{
+    box-sizing: border-box;
+}
+html,.main,body{
+    height: 100%;
+}
+body{
+    margin:0;
+    font-size:13px;
+    font-family: "Century Gothic", "Microsoft yahei";
+}
+ul{
+    list-style: none;
+    margin:0;
+    padding:0;
+}
+a,a:hover{
+    text-decoration: none;
+}
+.none{
+    display: none !important;
+}
+.header{
+    width:100%;
+    height:80px;
+    background-color: #48525e;
+}
+.main{
+    width: 1260px;
+    margin: 20px auto 0;
+}
+.main-left{
+    float: left;
+    width: 250px;
+}
+.main-right{
+    float: right;
+    width: 995px;
+}
+.list-note{
+    padding: 0 10px;
+    border:1px solid #ccc;
+}
+.list-note .empty{
+    padding: 80px 40px;
+    text-align: center;
+}
+.page-pagination{
+    text-align: center;
+    margin-top: 20px;
+}
+.list-item {
+    border-bottom: 1px dashed #ddd;
+    margin: 0 10px;
+    padding: 20px 0 15px 0;
+}
+.list-item:last-child{
+    border-bottom:0;
+}
+.list-item .note-title {
+    margin-bottom: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.note-title .title-warp a {
+    color: #000;
+    font-size: 18px;
+}
+.note-description{
+    color: #666;
+    text-indent: 2em;
+    font-size:14px;
+    line-height: 24px;
+    margin-bottom: 10px;
+}
+.note-manage {
+    margin-bottom: 10px;
+    text-align: right;
+    color: #999;
+}
+.note-manage span {
+    margin-right: 16px;
+}
+.note-manage a {
+    color: #33a5ba;
+}
+.note-manage .link-view {
+    background-image: url("/img/skin_icon.png");
+    background-repeat: no-repeat;
+    background-position: 0 -25px;
+    padding-left: 24px;
+}
+.note-manage .link-comments {
+    background-image: url("/img/skin_icon.png");
+    background-repeat: no-repeat;
+    background-position: 0 -43px;
+    padding-left: 17px;
+}
+.panel-profile{
+    border: 1px solid #ccc;
+    margin-bottom: 9px;
+}
+.panel-head{
+    background: #f5f5f5;
+    height: 29px;
+    line-height: 29px;
+    padding-left: 11px;
+    color: #333;
+    font-weight: bold;
+}
+.panel-body{
+    text-align: center;
+    padding: 15px 16px 10px;
+    word-break: break-all;
+}
+.panel-body .user-avatar{
+    width:120px;
+    height:120px;
+}
+.panel-body .user-name{
+    color: #666;
+    font-size:16px;
+    margin:10px 0;
+    border-bottom: dashed 1px #ccc;
+    padding-bottom: 20px;
+}
+.dir-list >ul ul{
+    display: none;
+}
+.li-dir{
+    position: relative;
+    padding: 10px 15px 10px 8px;
+}
+.li-dir.curr .name a{
+    color:#3d84b0;
+}
+.li-dir .name{
+    margin-right: 80px;
+    overflow: hidden;
+    white-space:nowrap;
+    text-overflow: ellipsis;
+}
+.li-dir .name a{
+    color: #333;
+}
+.li-dir .name a:hover{
+    color: #3d84b0;
+}
+.li-dir .item-time {
+    position: absolute;
+    right: 15px;
+    color: #c2c2c2;
+    font-size: 12px;
+    top: 6px;
+}
+.dir-list{
+    margin-bottom: 10px;
+}
+.dir-list ul ul .li-dir{
+    padding-left:18px;
+}
+.dir-list ul ul ul .li-dir{
+    padding-left:36px;
+}
+.dir-list ul ul ul ul .li-dir{
+    padding-left:54px;
+}
+.dir-list ul ul ul ul ul .li-dir{
+    padding-left:72px;
+}
+.down-btn {
+    width: 16px;
+    height: 16px;
+    display: block;
+    float: left;
+    opacity:0.6;
+    cursor: pointer;
+}
+.drop-down {
+    background: url("/img/sprite.svg") no-repeat;
+    background-position: 72.83582089552239% 61.492537313432834%;
+}
+.pack-up {
+    background: url("/img/sprite.svg") no-repeat;
+    background-position: 12.537313432835822% 100%;
+}
+.note-detail{
+    border:1px solid #ccc;
+    min-height: 600px;
+}
+.title-warp .note-name{
+    color:#000;
+    font-size: 18px;
+    font-weight: bold;
+}
+.note-detail .note-title{
+    padding:40px 20px 10px;
+    border-bottom: 1px solid #ccc;
+}
+.note-content{
+    padding: 20px;
+}
+.wangEditor-container{
+    border:0;
+}

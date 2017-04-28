@@ -173,7 +173,8 @@
     text-align:left;
     padding:0 15px 15px;
     margin-top:5px;
-    overflow-y:auto
+    overflow-y:auto;
+    font-size: 14px;
 }
 .wangEditor-container .wangEditor-txt h1,.wangEditor-container .wangEditor-txt h2,.wangEditor-container .wangEditor-txt h3,.wangEditor-container .wangEditor-txt h4,.wangEditor-container .wangEditor-txt h5,.wangEditor-container .wangEditor-txt p {
     margin:10px 0;

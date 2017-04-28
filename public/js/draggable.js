@@ -138,7 +138,10 @@ function drap_dir(drapObj , ui){
     var dragId = ui.draggable.data('id');
     var drapGroupId = drapObj.attr('group-id');
     var dragGroupId = ui.draggable.attr('group-id');
-
+    if(drapObj.attr('class-id') >= 5){
+        prompt_msg('error','最多拥有五层目录');
+        return false;
+    }
     if(draptId == dragId && drapGroupId == dragGroupId) return false;
 
     var parObj = $(".dir-warp .li-dir[data-id="+dragId+"][group-id="+dragGroupId+"]").parent('li').parent('ul').prev('div');//被拖动元素的父元素

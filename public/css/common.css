@@ -14,6 +14,9 @@ ul{
     list-style: none;
     margin:0;
 }
+a{
+    text-decoration: none;
+}
 .none{
     display: none !important;
 }
@@ -44,6 +47,29 @@ body .hint-container{
     top: 0;
     right: 0;
 }
+.top-banner .user-warp{
+    margin-right: 10px;
+}
+.top-banner .pagehome{
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 50px;
+    cursor: pointer;
+    text-decoration: none !important;
+}
+.user-warp .user-name:hover,
+.top-banner .pagehome:hover{
+    color: rgba(255, 255, 255, 1);
+}
+.top-banner .top-line {
+    display: inline-block;
+    margin: 0 20px;
+    background-color: rgba(0, 0, 0, 0.13);
+    box-shadow: 1px 0 rgba(255, 255, 255, 0.22);
+    width: 1px;
+    height: 14px;
+    position: relative;
+    top: 2px;
+}
 .user-warp img.user-avatar{
     width:38px;
     height:38px;
@@ -55,10 +81,12 @@ body .hint-container{
 }
 .user-warp .user-name{
     line-height: 50px;
-    max-width: 100px;
+    max-width: 80px;
     overflow: hidden;
     display: block;
     float: left;
+    white-space:nowrap;
+    text-overflow: ellipsis;
     cursor: pointer;
     color:rgba(255, 255, 255, 0.8)
 }
