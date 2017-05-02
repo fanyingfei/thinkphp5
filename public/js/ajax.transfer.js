@@ -277,30 +277,41 @@ function dir_list(){
 }
 
 function get_item_list(){
-    $('.item-wrap .widget-scroller-wrap').addClass('loading').children('.scroller-container').hide();
-    var group_id = $('.dir-warp .li-dir.curr').attr('group-id');
-    var dir_id = $('.dir-warp .li-dir.curr').data('id');
     set_item_search();
+    $('.search-input').attr('search',0);
+
+    $('.item-wrap .widget-scroller-wrap').addClass('loading').children('.scroller-container').hide();
+
+    var dir_id = $('.dir-warp .li-dir.curr').data('id');
+    var group_id = $('.dir-warp .li-dir.curr').attr('group-id');
 
     //去除滚动条的影响
-    $('.item-list .scroller-container').css("margin-top", 0);
+    $('.item-list .widget-scroller-bar').css('top',0);
+    $('.item-list .scroller-container').css("marginTop", 0);
+
     //得到选择的排序
     var col = $('.setting-sort.selected').data('col');
     var sort = 'desc';
     if($('.setting-sort.selected').hasClass('asc')) sort = 'asc';
 
+    if($('.search-input').attr('search') == 1 && $('.search-input').val() != '') dir_id = -3;
+
     var html = '';
-    if(dir_id == -1){
+    if(dir_id == -1){ //协作组时
         html = item_group(dir_id,group_id,col,sort);
-    }else if(dir_id == -2){
+    }else if(dir_id == -2){ //垃圾箱时
         html = ajax_trash_list();
-    }else if(dir_id == 0 && group_id > 0){
+    }else if(dir_id == -3){ //搜索时
+        html = search_note();
+    }else if(dir_id == 0 && group_id > 0){ //协作组的列表
         html = item_list_group(dir_id,group_id,col,sort);
-    }else{
+    }else{ //我的文件夹的列表
         html = item_list_dir(dir_id,group_id,col,sort);
     }
     $('.item-wrap .scroller-container').html(html);
     if(dir_id == -2) $('.item-wrap .scroller-container li .rightbtn').addClass('li-trash');
+    else if(dir_id == -3) $('.item-note .li-note').addClass('li-search');
+
     $('.item-wrap .widget-scroller-wrap').removeClass('loading').children('.scroller-container').slideDown('fast');
     set_item_num();
     no_item_html();
@@ -668,33 +679,24 @@ function ajax_update_name(url,name,id,prename,group_id){
 //搜索文章方法
 function search_note(){
     var search = $('.search-input').val();
-    set_item_search();
-    if($.trim(search) == ''){
-        get_item_list();
-        show_note();
-        return false;
-    }
+    var html = '';
     $.ajax({
         url:  '/dir/note_search',
         data:{'search':search},
         type: "POST",
+        async: false,
         dataType:'json',
         success:function(obj){
-            var html = '<ul class="item-note sortable">';
-            if(obj.result.length == 0){
-                html += '<div class="no-item">搜索结果为空</div>';
-            }else{
+            html = '<ul class="item-note sortable">';
+            if(obj.result.length > 0){
                 $.each(obj.result, function(key, v){
                     html += create_note_html(v);
                 })
             }
-            $('.item-wrap .scroller-container').html(html+'</ul>');
-            $('.item-note .li-note').addClass('li-search');
-            set_item_num();
-            show_note();
         },
         error:function(e){}
     });
+    return html;
 }
 
 function get_user_info(){
@@ -767,7 +769,7 @@ function ajax_polling(){
                     }
                 })
             }
-            setTimeout("ajax_polling()",30000);
+            setTimeout("ajax_polling()",300000);
         },
         error:function(e){}
     });
@@ -819,6 +821,17 @@ function get_group_log(group_id){
             $('body').append(html);
             ele_draggable();
         },
+        error:function(e){}
+    });
+}
+
+function set_dir_manage(list,group_id,pri){
+    $.ajax({
+        url:  '/dir/set_dir_manage',
+        data:{'list':list, 'group_id':group_id, 'private':pri},
+        type: "POST",
+        dataType:'json',
+        success:function(res){},
         error:function(e){}
     });
 }

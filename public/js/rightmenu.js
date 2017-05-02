@@ -45,6 +45,21 @@ $("body").on("click", '.right-create-note', function(){
     hide_dropdown_menu();
     create_note(parent_id , group_id)
 })
+
+$("body").on("click", '.set-manage', function(){
+    var dir_id = $('.dir-right-menu').data('id');
+    var group_id = $('.dir-right-menu').attr('group-id');
+    var manage = $(this).attr('manage');
+    var curObj = $(".dir-warp .li-dir[data-id="+dir_id+"][group-id="+group_id+"]");
+    var list = get_dir_list(curObj);
+    list.push(dir_id);
+    $.each(list, function(key, v){
+        $(".dir-warp .li-dir[data-id="+v+"][group-id="+group_id+"]").attr('private',manage);
+    })
+    set_dir_manage(list,group_id,manage);
+    hide_dropdown_menu();
+});
+
 //右键的创建协作
 $("body").on("click", '.create-group', function(){
     hide_dropdown_menu();
@@ -389,6 +404,14 @@ function get_menu_html(obj,e){
         html += '<li class="move-down">下移</li>';
         html += '<li class="delete">删除</li>';
         html += '<li class="li-divider rename">重命名</li>';
+        if(type == 'dir'){
+            var obj = $('.dir-warp .li-dir[data-id='+dir_id+'][group-id='+group_id+']');
+            if(obj.parent('li').parent('ul').prev('div[private=1]').length == 0){
+                var manage = 0,manage_msg = '设为公开';
+                if(obj.attr('private') == 0) manage = 1,manage_msg = '设为私密';
+                html += '<li class="li-divider set-manage" manage="'+manage+'">'+manage_msg+'</li>';
+            }
+        }
     }else if(type == 'trash'){
         html += '<li class="right-trash-recover">恢复</li>';
         html += '<li class="right-trash-delete">永久删除</li>';

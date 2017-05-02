@@ -102,11 +102,15 @@ $("body").on("blur", '.title-wrap .note-name', function(e){
 
 //点击搜索图标
 $("body").on("click", '.search-icon', function(){
-    search_note();
+    $('.search-input').attr('search',1);
+    get_item_list();
 });
 //回车搜索
 $("body").on("keydown", '.search-input', function(e){
-    if(e.which == 13) search_note();
+    if(e.which == 13){
+        $('.search-input').attr('search',1);
+        get_item_list();
+    }
 });
 //点击弹出的消息时
 $("body").on("click", '.hint-container', function(){

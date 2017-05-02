@@ -20,6 +20,10 @@ class Index extends Controller
         return $this->fetch('index',['uid'=>$uid + USER_UID ]);
     }
 
+    public function canvas(){
+        return $this->fetch('canvas');
+    }
+
     public function login($name = 'login'){
         $user = Cookie::get('user');
         if(empty($user)){

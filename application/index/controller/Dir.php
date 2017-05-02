@@ -29,10 +29,22 @@ class Dir extends Controller
     public function dir_list()
     {
         $uid = $this->uid;
-        $res = Db::table('dir')->where(['uid'=>$uid,'group_id'=>0,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
+        $res = Db::table('dir')->where(['uid'=>$uid,'group_id'=>0,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,private,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
         $data = nesting($res);
         $this->change_group_list($data);
         splash('succ','',$data);
+    }
+
+    public function set_dir_manage(){
+        $uid = $this->uid;
+        $request = Request::instance();
+        $private = $request->param('private');
+        $dir_list = $request->param('list/a');
+        $group_id = $request->param('group_id');
+
+        Db::table('dir')->whereIn('dir_id', $dir_list)->update(['private'=>$private]);
+        Db::table('note')->whereIn('dir_id', $dir_list)->update(['private'=>$private]);
+        splash('succ','');
     }
 
     public function group_list(){
@@ -42,7 +54,7 @@ class Dir extends Controller
         $group_list = Db::table('group')->where('group_id','in',$group_ids)->
         order('rank desc')->order('group_id asc')->field('group_id,version,group_name,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
 
-        $dir_res = Db::table('dir')->where('group_id', 'in' , $group_ids)->where('is_delete',0)->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
+        $dir_res = Db::table('dir')->where('group_id', 'in' , $group_ids)->where('is_delete',0)->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,private,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
 
         foreach($group_list as &$group){
             $group['dir_list'] = [];
@@ -65,7 +77,7 @@ class Dir extends Controller
 
         $group_list = Db::table('group')->where('group_id',$group_id)->field('group_id,version,group_name,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->find();
 
-        $dir_res = Db::table('dir')->where('group_id', $group_id)->where('is_delete',0)->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
+        $dir_res = Db::table('dir')->where('group_id', $group_id)->where('is_delete',0)->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,private,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
 
         $group_list['dir_list'] = nesting($dir_res);
         splash('succ','',$group_list);
@@ -144,7 +156,7 @@ class Dir extends Controller
         $request = Request::instance();
         $group_id = $request->param('group_id');
 
-        $dir_res = Db::table('dir')->where(['group_id'=>$group_id,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,group_id,class_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
+        $dir_res = Db::table('dir')->where(['group_id'=>$group_id,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,private,group_id,class_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
         $dir_res = nesting($dir_res);
         $note_res = Db::table('note')->where(['group_id'=>$group_id,'dir_id'=>0,'is_delete'=>0])->order('rank desc')->order('rec_id desc')->field('rec_id,name,dir_id,group_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
         splash('succ','',['dir'=>$dir_res,'note'=>$note_res]);
@@ -164,10 +176,10 @@ class Dir extends Controller
         $group_id = $request->param('group_id');
 
         if($group_id > 0){
-            $dir_res = Db::table('dir')->where(['group_id'=>$group_id,'parent_id'=>$dir_id,'is_delete'=>0])->order($col.' '.$sort)->order('dir_id asc')->field('dir_id,dir_name,group_id,class_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
+            $dir_res = Db::table('dir')->where(['group_id'=>$group_id,'parent_id'=>$dir_id,'is_delete'=>0])->order($col.' '.$sort)->order('dir_id asc')->field('dir_id,dir_name,group_id,private,class_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
             $note_res = Db::table('note')->where(['group_id'=>$group_id,'dir_id'=>$dir_id,'is_delete'=>0])->order($col.' '.$sort)->order('rec_id desc')->field('rec_id,name,dir_id,group_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
         }else{
-            $dir_res = Db::table('dir')->where(['uid'=>$uid,'group_id'=>$group_id,'parent_id'=>$dir_id,'is_delete'=>0])->order($col.' '.$sort)->order('dir_id asc')->field('dir_id,dir_name,group_id,class_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
+            $dir_res = Db::table('dir')->where(['uid'=>$uid,'group_id'=>$group_id,'parent_id'=>$dir_id,'is_delete'=>0])->order($col.' '.$sort)->order('dir_id asc')->field('dir_id,dir_name,private,group_id,class_id,parent_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
             $note_res = Db::table('note')->where(['uid'=>$uid,'group_id'=>$group_id,'dir_id'=>$dir_id,'is_delete'=>0])->order($col.' '.$sort)->order('rec_id desc')->field('rec_id,name,dir_id,group_id,FROM_UNIXTIME(c_time, "%Y-%m-%d") as time')->select();
         }
         splash('succ','',['dir'=>$dir_res,'note'=>$note_res]);
@@ -175,9 +187,9 @@ class Dir extends Controller
 
     public function trash_list(){
         $uid = $this->uid;
-        $res = Db::table('dir')->where(['del_uid'=>$uid,'is_delete'=>1])->order('u_time asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(u_time, "%Y-%m-%d") as time')->select();
+        $res = Db::table('dir')->where(['del_uid'=>$uid,'is_delete'=>1])->order('u_time asc')->field('dir_id,dir_name,class_id,private,group_id,parent_id,FROM_UNIXTIME(u_time, "%Y-%m-%d") as time')->select();
         $dir_res = nesting($res);
-        $note_res = Db::table('note')->where(['del_uid'=>$uid,'is_delete'=>1])->order('u_time desc')->field('rec_id,name,dir_id,group_id,FROM_UNIXTIME(u_time, "%Y-%m-%d") as time')->select();
+        $note_res = Db::table('note')->where(['del_uid'=>$uid,'is_delete'=>1])->order('u_time desc')->field('rec_id,name,dir_id,private,group_id,FROM_UNIXTIME(u_time, "%Y-%m-%d") as time')->select();
 
         splash('succ','',['dir'=>$dir_res,'note'=>$note_res]);
     }

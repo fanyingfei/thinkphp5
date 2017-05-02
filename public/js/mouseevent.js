@@ -278,7 +278,7 @@
         // 滚动距离 = 滑块移动距离 ÷ 窗口高度 x 页面长度
         var scroll_distance = parseInt(distance / box_height * cont_height);
         scroll_distance = scroll_distance > 0 ? scroll_distance+1 : 0; //加上1是border的值
-        contObj.css("margin-top", -scroll_distance)
+        contObj.css("marginTop", -scroll_distance)
     }
 
     //最左侧缩放的宽度，拉伸宽度的时候还会用

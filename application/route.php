@@ -11,6 +11,7 @@
 use think\Route;
 // 注册路由到index模块的News控制器的read操作
 Route::rule('/','index/test');
+Route::rule('yuzhou','index/canvas');
 Route::rule('login','index/login');
 Route::rule('home/:uid/:page','Show/index');
 Route::rule('home/:uid','Show/index');

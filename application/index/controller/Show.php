@@ -23,11 +23,11 @@ class Show extends Controller
         $user_info = Db::table('user')->where('uid',$uid)->field('uid,user_name,avatar,sex,year,moon,sign')->find();
         if(empty($user_info)) $this->error('页面找不到了');
 
-        $res = Db::table('dir')->where(['uid'=>$uid,'group_id'=>0,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y/%m/%d") as time')->select();
+        $res = Db::table('dir')->where(['uid'=>$uid,'group_id'=>0,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,private,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y/%m/%d") as time')->select();
         $dir_list = nesting($res);
         $html = $this->create_list($dir_list,$puid);
 
-        $where = ['uid'=>$uid,'is_delete'=>0];
+        $where = ['uid'=>$uid,'is_delete'=>0,'private'=>0];
         if(!empty($dir_id)) $where['dir_id'] = $dir_id;
         $count = Db::table('note')->where($where)->count('rec_id');
         $note_list = Db::table('note')->where($where)->order('rec_id desc')->field('rec_id,view,comment,name,dir_id,content,c_time')->paginate(10,$count,['var_page'=>'p']);
@@ -48,6 +48,7 @@ class Show extends Controller
     public function create_list($list,$uid){
         $html = '<ul>';
         foreach($list as $item){
+            if($item['private'] == 1) continue;
             if(!empty($item['child']) && count($item['child']) > 0) $html .= '<li>';
 
             $html .= '<div class="li-dir" data-id="'.$item['dir_id'].'">';

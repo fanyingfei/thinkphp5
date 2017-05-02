@@ -35,7 +35,7 @@ function init_user_info(){
 
 //创建目录的HTML
 function create_dir_html(obj){
-    var html = '<div class="li-dir rightbtn" group-id="'+obj.group_id+'" class-id="'+ obj.class_id+'" data-id="'+ obj.dir_id+'" >';
+    var html = '<div class="li-dir rightbtn" group-id="'+obj.group_id+'" class-id="'+ obj.class_id+'" data-id="'+ obj.dir_id+'" private="'+obj.private+'">';
     if(obj.child) html += '<span class="down-btn drop-down"></span>';
     else html += '<span class="down-btn"></span>';
     html += '<i class="icon"></i><div class="name">'+obj.dir_name+'</div>';
@@ -103,8 +103,10 @@ function create_list(obj , type){
 //没有任何目录和笔记时调用此方法
 function no_item_html(){
     empty_note();
+    var msg = '列表空空如也~';
+    if($('.search-input').val() != '') msg = '搜索结果为空';
     if($('.item-wrap .scroller-container > ul > li').length == 0){
-        var html = '<div class="no-item"><p>列表空空如也~</p></div>';
+        var html = '<div class="no-item"><p>'+msg+'</p></div>';
         $('.item-note').html(html);
     }else{
         $('.no-item').remove();
