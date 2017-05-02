@@ -3,7 +3,7 @@ function ele_draggable(){
     $('.li-dir').draggable({
         scroll: false,
         appendTo: "body",
-        distance:10,
+        distance:15,
         cancel: "i.right-menu,.li-group,.sidebar-title,.rename-input,.li-trash",
         cursorAt: { top: 10, left: 10},
         helper: function( e ) {
