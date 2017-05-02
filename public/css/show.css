@@ -1,7 +1,7 @@
 *{
     box-sizing: border-box;
 }
-html,.main,body{
+html,body{
     height: 100%;
 }
 body{
@@ -28,13 +28,16 @@ a,a:hover{
 .main{
     width: 1260px;
     margin: 20px auto 0;
+    position: relative;
 }
 .main-left{
-    float: left;
+    position: absolute;
+    left:0;
     width: 250px;
 }
 .main-right{
-    float: right;
+    position: absolute;
+    right:0;
     width: 995px;
 }
 .list-note{
