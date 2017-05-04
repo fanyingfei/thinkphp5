@@ -72,7 +72,12 @@ $("body").on("click", '.drop-down', function(){
     open_dir($(this));
     return false;
 });
-
+$("body").on("click", '.loginout', function(){
+    $.cookie('user', '', { expires: -1 });
+    $.cookie('sid', '', { expires: -1 });
+    $.cookie('PHPSESSID', '', { expires: -1 });
+    window.location.reload();
+});
 $("body").on("blur", '.note-detail', function(e){
     var content = $('#wangDemo').html();
     if($.md5(content) == $('#wangDemo').attr('precontent')) return false;

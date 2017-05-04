@@ -85,7 +85,7 @@ $(function () {
         $.getJSON('/user/avatar_crop', {x: $('#x1').val(), y: $('#y1').val(), w: $('#cw').val(), h: $('#ch').val(), src: $('#imgsrc').val()}, function(data) {
             prompt_msg(data.status,data.msg);
             if(data.status == 'succ'){
-                $('.user-warp .user-avatar').attr('src',data.result);
+                $('.top-right .user-avatar').attr('src',data.result);
                 $(".dialog-close").trigger("click");
             }
         });

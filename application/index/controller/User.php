@@ -18,7 +18,7 @@ class User extends Controller
         parent::__construct();
         $request = Request::instance();
         $action = $request->action();
-        if(in_array($action,['register','login','sendHuYiSms'])) return false;
+        if(in_array($action,['register','login','sendhuyisms'])) return false;
         $this->uid = Session::get('uid');
         if(empty($this->uid )) splash('error','你还没有登陆');
     }
@@ -73,7 +73,7 @@ class User extends Controller
         splash('succ','登录成功');
     }
 
-    public function sendHuYiSms(){
+    public function sendhuyisms(){
         $account = 'C47550525';
         $password='8d4d9a02a10a89d72467811edfff59ce';
         $verification_code = random(4);
@@ -92,7 +92,7 @@ class User extends Controller
         if(isset($result['code']) && $result['code'] == 2){
             Session::set('verification_code',$verification_code);
             Session::set('verification_time',time()+600);
-            splash('succ','短信发送成功',$verification_code);
+            splash('succ','短信发送成功');
         }else{
             splash('error',$result['msg']);
         }
@@ -100,7 +100,8 @@ class User extends Controller
 
     public function get_user_info(){
         $uid = $this->uid;
-        $res = Db::table('user')->where('uid',$uid)->field('user_name,avatar,sex,year,moon,sign')->find();
+        $res = Db::table('user')->where('uid',$uid)->field('uid,user_name,avatar,sex,year,moon,sign')->find();
+        $res['uid'] = $res['uid'] + USER_UID ;
         if(empty($res['avatar'])) $res['avatar'] = '/img/avatar_default.jpg';
         splash('succ','获取用户信息功能',$res);
     }

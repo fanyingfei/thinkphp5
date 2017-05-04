@@ -27,8 +27,9 @@ function start_init(){
 function init_user_info(){
     var data = get_user_info();
     if(data== '') return false;
-    $('.user-warp .user-name').text(data.user_name);
-    $('.user-warp .user-avatar').attr('src',data.avatar);
+    $('.top-right .user-name').text(data.user_name);
+    $('.top-right .user-avatar').attr('src',data.avatar);
+    $('.top-right .pagehome').attr('href','/home/'+data.uid);
 }
 
 

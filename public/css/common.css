@@ -41,22 +41,26 @@ body .hint-container{
     line-height: 50px;
 }
 .top-banner .top-right {
-    width: 330px;
+    width: 360px;
     height: 100%;
     position: absolute;
     top: 0;
-    right: 0;
+    right: 20px;
+    text-align: right;
 }
-.top-banner .user-warp{
-    margin-right: 10px;
+.top-right .user-warp,
+.top-right .right-btn{
+    float:right;
 }
+.top-banner .loginout,
 .top-banner .pagehome{
     color: rgba(255, 255, 255, 0.8);
     line-height: 50px;
     cursor: pointer;
     text-decoration: none !important;
 }
-.user-warp .user-name:hover,
+.top-banner .loginout:hover,
+.top-right .user-name:hover,
 .top-banner .pagehome:hover{
     color: rgba(255, 255, 255, 1);
 }
@@ -70,7 +74,7 @@ body .hint-container{
     position: relative;
     top: 2px;
 }
-.user-warp img.user-avatar{
+.top-right img.user-avatar{
     width:38px;
     height:38px;
     margin: 6px 8px;
@@ -79,7 +83,7 @@ body .hint-container{
     cursor: pointer;
     float: left;
 }
-.user-warp .user-name{
+.top-right .user-name{
     line-height: 50px;
     max-width: 80px;
     overflow: hidden;

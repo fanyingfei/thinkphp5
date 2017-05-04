@@ -731,7 +731,7 @@ function update_user_info(){
             prompt_msg(res.status,res.msg);
             if(res.status == 'succ'){
                 $(".dialog-close").trigger("click");
-                if(user_name != $('.user-warp .user-name').text()) $('.user-warp .user-name').text(user_name);
+                if(user_name != $('.top-right .user-name').text()) $('.top-right .user-name').text(user_name);
             }
         },
         error:function(e){}

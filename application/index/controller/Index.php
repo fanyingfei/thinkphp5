@@ -17,7 +17,7 @@ class Index extends Controller
     public function test(){
         $uid = Session::get('uid');
         if(empty($uid)) $this->redirect('/login',302);
-        return $this->fetch('index',['uid'=>$uid + USER_UID ]);
+        return $this->fetch('index');
     }
 
     public function canvas(){
