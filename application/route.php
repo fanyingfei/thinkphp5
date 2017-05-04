@@ -13,7 +13,6 @@ use think\Route;
 Route::rule('/','index/test');
 Route::rule('yuzhou','index/canvas');
 Route::rule('login','index/login');
-Route::rule('home/:uid/:page','Show/index');
 Route::rule('home/:uid','Show/index');
-Route::rule('home','index/login');
+Route::rule('home','Show/index');
 Route::rule('details/:rec_id','Show/note_item');

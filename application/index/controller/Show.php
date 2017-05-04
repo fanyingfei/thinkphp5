@@ -15,9 +15,14 @@ class Show extends Controller
         parent::__construct();
     }
 
-    public function index($uid){
-        $puid = $uid; // 传进来处理过的uid
-        $uid = $uid - USER_UID ;
+    public function index($uid = 0){
+        if(empty($uid)){
+            $uid = Session::get('uid');
+            $puid = $uid + USER_UID ;
+        }else{
+            $puid = $uid; // 传进来处理过的uid
+            $uid = $uid - USER_UID ;
+        }
         $request = Request::instance();
         $dir_id = $request->param('d');
         $user_info = Db::table('user')->where('uid',$uid)->field('uid,user_name,avatar,sex,year,moon,sign')->find();
@@ -77,7 +82,7 @@ class Show extends Controller
         $uid = $user_info['uid'];
         $user_info['uid'] = $uid + USER_UID ;
 
-        $res = Db::table('dir')->where(['uid'=>$uid,'group_id'=>0,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y/%m/%d") as time')->select();
+        $res = Db::table('dir')->where(['uid'=>$uid,'group_id'=>0,'is_delete'=>0])->order('rank desc')->order('dir_id asc')->field('dir_id,private,dir_name,class_id,group_id,parent_id,FROM_UNIXTIME(c_time, "%Y/%m/%d") as time')->select();
         $dir_list = nesting($res);
         $html = $this->create_list($dir_list,$user_info['uid']);
 
