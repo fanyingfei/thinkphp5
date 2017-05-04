@@ -644,7 +644,7 @@ class Dir extends Controller
         $dir_id = $request->param('dir_id');
         $group_id = $request->param('group_id');
 
-        $data = ['dir_id' => $dir_id,'group_id'=>$group_id, 'uid'=>$uid,'name'=>$name,'content'=>$content,'md5'=>md5($content),'u_time'=>$time,'c_time'=>$time];
+        $data = ['dir_id' => $dir_id,'group_id'=>$group_id,'rank'=>999, 'uid'=>$uid,'name'=>$name,'content'=>$content,'md5'=>md5($content),'u_time'=>$time,'c_time'=>$time];
         $rec_id = Db::name('note')->insertGetId($data);
 
         if($rec_id){

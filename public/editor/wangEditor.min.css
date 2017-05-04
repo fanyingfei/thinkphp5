@@ -1,6 +1,24 @@
 .txt-toolbar a,.wangEditor-drop-list a,.wangEditor-drop-panel a,.wangEditor-menu-container a {
     text-decoration:none
 }
+h6{
+    font-size: 12px;
+}
+h5{
+    font-size:15px;
+}
+h4{
+    font-size:18px;
+}
+h3{
+    font-size:21px;
+}
+h2{
+    font-size:24px;
+}
+h1{
+    font-size:32px;
+}
 .wangEditor-container {
     position:relative;
     background-color:#fff;
@@ -18,7 +36,9 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    line-height:20px;
+}
+.wangEditor-container .wangEditor-txt *{
+    line-height: 20px;
 }
 .wangEditor-container .clearfix:after {
     content:'';
@@ -175,6 +195,7 @@
     margin-top:5px;
     overflow-y:auto;
     font-size: 14px;
+    word-break: break-all;
 }
 .wangEditor-container .wangEditor-txt h1,.wangEditor-container .wangEditor-txt h2,.wangEditor-container .wangEditor-txt h3,.wangEditor-container .wangEditor-txt h4,.wangEditor-container .wangEditor-txt h5,.wangEditor-container .wangEditor-txt p {
     margin:10px 0;
