@@ -194,11 +194,11 @@ a,a:hover{
 }
 .title-warp .note-name{
     color:#000;
-    font-size: 18px;
+    font-size: 24px;
     font-weight: bold;
 }
 .note-detail .note-title{
-    padding:40px 20px 10px;
+    padding:30px 20px 10px;
     border-bottom: 1px solid #ccc;
 }
 .note-content{

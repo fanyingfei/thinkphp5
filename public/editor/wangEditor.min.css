@@ -17,7 +17,7 @@ h2{
     font-size:24px;
 }
 h1{
-    font-size:32px;
+    font-size:30px;
 }
 .wangEditor-container {
     position:relative;
@@ -39,6 +39,9 @@ h1{
 }
 .wangEditor-container .wangEditor-txt *{
     line-height: 20px;
+}
+.wangEditor-container .wangEditor-txt tr:nth-child(odd){
+
 }
 .wangEditor-container .clearfix:after {
     content:'';
@@ -244,6 +247,9 @@ h1{
     min-height:20px;
     line-height: 20px;
 }
+.wangEditor-container .wangEditor-txt table td p,.wangEditor-container .wangEditor-txt table th p{
+    margin:0;
+}
 .wangEditor-container .wangEditor-txt pre {
     border:1px solid #ccc;
     background-color:#f8f8f8;
@@ -251,6 +257,9 @@ h1{
     margin:5px 0;
     font-size:.8em;
     border-radius:3px
+}
+.wangEditor-container .wangEditor-txt pre ol{
+    margin-left:5px;
 }
 .txt-toolbar,.wangEditor-drop-list,.wangEditor-drop-panel {
     z-index:10;
