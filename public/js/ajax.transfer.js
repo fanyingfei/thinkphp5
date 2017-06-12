@@ -278,7 +278,6 @@ function dir_list(){
 
 function get_item_list(){
     set_item_search();
-    $('.search-input').attr('search',0);
 
     $('.item-wrap .widget-scroller-wrap').addClass('loading').children('.scroller-container').hide();
 
@@ -303,6 +302,7 @@ function get_item_list(){
         html = ajax_trash_list();
     }else if(dir_id == -3){ //搜索时
         html = search_note();
+        $('.search-input').attr('search',0);
     }else if(dir_id == 0 && group_id > 0){ //协作组的列表
         html = item_list_group(dir_id,group_id,col,sort);
     }else{ //我的文件夹的列表

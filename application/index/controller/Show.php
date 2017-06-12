@@ -15,7 +15,7 @@ class Show extends Controller
         parent::__construct();
     }
 
-    public function index($uid = 0){
+    public function index($uid = 0,$dir_id = 0,$search = ''){
         if(empty($uid)){
             $uid = Session::get('uid');
             $puid = $uid + USER_UID ;
@@ -24,7 +24,6 @@ class Show extends Controller
             $uid = $uid - USER_UID ;
         }
         $request = Request::instance();
-        $dir_id = $request->param('d');
         $user_info = Db::table('user')->where('uid',$uid)->field('uid,user_name,avatar,sex,year,moon,sign')->find();
         if(empty($user_info)) $this->error('页面找不到了');
 
@@ -32,13 +31,14 @@ class Show extends Controller
         $dir_list = nesting($res);
         $html = $this->create_list($dir_list,$puid);
 
-        $where = ['uid'=>$uid,'is_delete'=>0,'private'=>0];
+        $where = ['uid'=>$uid,'group_id'=>0,'is_delete'=>0,'private'=>0];
         if(!empty($dir_id)) $where['dir_id'] = $dir_id;
+        if(!empty($search)) $where['name'] = ['like','%'.$search.'%'];
         $count = Db::table('note')->where($where)->count('rec_id');
-        $note_list = Db::table('note')->where($where)->order('rec_id desc')->field('rec_id,view,comment,name,dir_id,content,c_time')->paginate(10,$count,['var_page'=>'p']);
+        $note_list = Db::table('note')->where($where)->order('dir_id asc')->order('rank desc')->field('rec_id,view,comment,name,dir_id,content,c_time')->paginate(10,$count,['var_page'=>'p']);
 
         $user_info['uid'] = $user_info['uid'] + USER_UID ;
-        $data = ['user'=>$user_info,'count'=>$count,'dir_list'=>$html,'note_list'=>$note_list,'dir_id'=>$dir_id];
+        $data = ['user'=>$user_info,'count'=>$count,'dir_list'=>$html,'note_list'=>$note_list,'dir_id'=>$dir_id,'search'=>$search];
         return $this->fetch('user/show',$data);
     }
 
@@ -62,7 +62,7 @@ class Show extends Controller
             }else{
                 $html .= '<span class="down-btn"></span>';
             }
-            $html .= '<div class="name"><a href="/home/'.$uid.'?d='.$item['dir_id'].'">'.$item['dir_name'].'</a></div>';
+            $html .= '<div class="name"><a href="/home/'.$uid.'/d/'.$item['dir_id'].'">'.$item['dir_name'].'</a></div>';
             $html .= '<div class="item-time">'.$item['time'].'</div><i class="right-menu"></i></div>';
 
             if(!empty($item['child']) && count($item['child']) > 0) $html .= $this->create_list($item['child'],$uid).'</li>';

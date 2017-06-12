@@ -114,7 +114,7 @@ h1{
 }
 .wangEditor-fullscreen {
     position:fixed;
-    top:0;
+    top:50px;
     bottom:0;
     left:0;
     right:0
@@ -692,7 +692,7 @@ h1{
 }
 .diff .hljs-header,.hljs-comment {
     color:#998;
-    font-style:italic
+  /*  font-style:italic */
 }
 .css .rule .hljs-keyword,.hljs-keyword,.hljs-request,.hljs-status,.hljs-subst,.hljs-winutils,.nginx .hljs-title {
     color:#333;

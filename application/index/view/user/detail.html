@@ -11,14 +11,24 @@
 <div class="header">
 
 </div>
+<div class="top-bg"><div><a href="/home/{$user.uid}"><h2>{$user.user_name}的笔记</h2></a></div></div>
 <div class="main">
     <div class="main-left">
-        <div class="panel-profile" data-id="{$user.uid}" dir-id="0">
+        <div class="panel-profile panel-warp" data-id="{$user.uid}">
             <div class="panel-head">人个资料</div>
             <div class="panel-body">
                 <img class="user-avatar" src="{$user.avatar}" onerror="javascript:this.src='/img/avatar_default.jpg';"/>
                 <p class="user-name">{$user.user_name}</p>
             </div>
+        </div>
+        <div class="panel-search panel-warp">
+            <div class="panel-head">文章搜索</div>
+            <div class="search-warp">
+                <input id="inputSearch"/>
+                <span class="search-icon"></span>
+            </div>
+        </div>
+        <div class="panel-dir panel-warp" dir-id="0">
             <div class="panel-head">文章分类</div>
             <div class="dir-list">{$dir_list}</div>
         </div>

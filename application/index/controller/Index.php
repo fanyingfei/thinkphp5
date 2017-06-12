@@ -24,6 +24,10 @@ class Index extends Controller
         return $this->fetch('canvas');
     }
 
+    public function ce(){
+        return $this->fetch('ce');
+    }
+
     public function login($name = 'login'){
         $user = Cookie::get('user');
         if(empty($user)){

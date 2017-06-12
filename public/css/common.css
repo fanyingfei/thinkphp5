@@ -214,10 +214,10 @@ body .hint-container{
     position: absolute;
     z-index: 1;
 }
-.sidebar .list-toggle{
+.list-toggle{
     position: absolute;
     bottom: 0;
-    right: -16px;
+    left: -1px;
     display: inline-block;
     z-index: 50;
     width: 16px;
@@ -229,7 +229,7 @@ body .hint-container{
     background-color: #f5f5f5;
     cursor: pointer;
 }
-.sidebar .list-toggle i{
+.list-toggle i{
     transform: rotate(0.5turn);
     -webkit-transform: rotate(0.5turn);
     position: relative;
@@ -241,7 +241,7 @@ body .hint-container{
     width: 14px;
     height: 14px;
 }
-.sidebar .list-toggle.folded i{
+.list-toggle.folded i{
     transform: none;
     -webkit-transform: none;
 }
@@ -447,6 +447,7 @@ body .hint-container{
 }
 .widget-scroller li > div{
     padding: 15px;
+    height: 54px;
     cursor: pointer;
     clear: both;
     border-bottom: 1px solid #e0e1e5;
