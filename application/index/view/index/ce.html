@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        html {
+            overflow: hidden;
+        }
+    </style>
+    <title></title>
+</head>
+<body>
+
+</body>
+<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+<script>
+    function test(){
+        this.a = 111;
+        var b = 222;
+        test.fan = function(){
+            alert(this.a);
+            alert(b);
+        }
+        test.prototype.fanfan = function(){
+            alert(this.a);
+            alert(b);
+        }
+    }
+  //  var t1 = new test();
+ //   test.fan();
+ //   t1.fanfan();
+
+    function aa(){
+        var a= 111;
+        return function(){
+            return a;
+        }
+    }
+
+    var f = aa();
+    alert(f());
+
+    function box(){
+        var user = 'Lee';
+        return function(){        // 通过匿名函数返回box()的局部变量user;
+            return user;
+        };
+    }
+    console.log(box()());      // =>Lee; 直接调用box()()来获得匿名函数的返回值;
+
+    var b = box();
+    console.log(b());
+</script>
+</html>
